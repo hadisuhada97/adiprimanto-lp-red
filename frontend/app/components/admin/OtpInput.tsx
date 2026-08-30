@@ -126,8 +126,8 @@ export default function OtpInput({
               hasError
                 ? "border-error-500 text-error-500 focus:ring-3 focus:ring-error-500/15"
                 : digit
-                  ? "border-brand-500 text-admin-gray-900 focus:ring-3 focus:ring-brand-500/15 dark:text-white/90"
-                  : "border-admin-gray-300 text-admin-gray-900 focus:border-brand-500 focus:ring-3 focus:ring-brand-500/15 dark:border-admin-gray-700 dark:text-white/90"
+                  ? "border-brand-500 text-admin-gray-900 focus:ring-3 focus:ring-brand-500/15 dark:text-admin-white/90"
+                  : "border-admin-gray-300 text-admin-gray-900 focus:border-brand-500 focus:ring-3 focus:ring-brand-500/15 dark:border-admin-gray-700 dark:text-admin-white/90"
             }`}
           />
         );

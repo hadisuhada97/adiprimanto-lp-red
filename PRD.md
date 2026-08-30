@@ -676,3 +676,42 @@ server tetap wajib (sudah tercatat di rekomendasi R-09).
 **Hasil pengujian**: 14/14 skenario Playwright lolos, termasuk alur end-to-end nyata
 (login → OTP dari mail log → dashboard → logout) dan regresi landing page
 (`/app/test_reports/iteration_3.json`).
+
+### Fase F3b — Kerangka Dashboard TailAdmin ✅ SELESAI (2026-06)
+
+**Sidebar lengkap** dengan 6 grup dan 23 entri menu, difilter otomatis berdasarkan permission
+user (`can()`):
+
+| Grup | Menu |
+|---|---|
+| Main | Dashboard |
+| Content | Hero Section, About, Skills & Tech Stack, Pain Points, Services, Portfolio ▸ (Projects / Categories / Technologies), Process Steps, Testimonials, FAQ ▸ (Questions / Categories), Clients & Brands |
+| Engagement | Inbox, Media Library |
+| Appearance | Navigation Menu, Contact Channels, Social Links |
+| Settings | General, SEO, Localization |
+| System | Users, Roles & Permissions, Activity Log, Trash |
+
+**Perilaku shell**:
+- Sidebar dapat dikuncupkan menjadi rail ikon (290px ⇄ 90px), pilihan tersimpan di
+  `localStorage`, dan hover pada rail sementara memunculkan label
+- Submenu collapsible dengan chevron; menu aktif tersorot; drawer off-canvas + backdrop di mobile
+  yang otomatis tertutup saat menu diklik
+- Header: tombol hamburger/collapse, judul halaman otomatis dari `ROUTE_TITLES`, toggle
+  dark/light (memakai `ThemeProvider` yang sama dengan landing page), dropdown user berisi
+  nama/email/role dan Sign out
+- `PageBreadcrumb` (Home › Grup › Halaman) di setiap halaman
+- Semua 25 rute modul dapat diakses melalui satu halaman placeholder dinamis
+  (`app/admin/(panel)/[...module]/page.tsx`) yang menampilkan judul modul dan badge fase
+  pengerjaan; rute admin yang tidak dikenal menghasilkan 404 Next.js
+
+**Bug yang ditemukan & diperbaiki di fase ini**:
+1. Akun dengan 2FA nonaktif tetap dibawa ke langkah OTP dan menampilkan `NaN:NaN` — `login()`
+   sekarang mengembalikan hasil terdiskriminasi (`LoginResult`) dan langsung menyimpan token.
+2. `bg-white` / `text-white` di admin ikut rusak karena `globals.css` landing page menimpa token
+   Tailwind `--color-white` (nilainya menjadi gelap saat light mode) — admin kini memakai token
+   sendiri `--color-admin-white`.
+3. Kontainer toast menutupi tombol theme & user menu di header — dipindah ke `top-20`.
+
+**Hasil pengujian**: 100% lolos — 26 rute admin disapu satu per satu, uji collapse + persistensi
+localStorage, drawer mobile 390×844, toggle dark/light tanpa kontras rusak, logout + route guard,
+regresi login 2FA, dan regresi landing page di kedua tema (`/app/test_reports/iteration_4.json`).

@@ -66,7 +66,15 @@ export default function AdminLoginPage() {
     setIsSubmitting(true);
 
     try {
-      const nextChallenge = await login(email.trim(), password);
+      const result = await login(email.trim(), password);
+
+      if (!result.requiresTwoFactor) {
+        toast.success("Welcome back", `Signed in as ${result.user.name}.`);
+        router.replace("/admin/dashboard");
+        return;
+      }
+
+      const nextChallenge = result.challenge;
 
       applyChallenge(nextChallenge);
       setStep("verification");
@@ -172,7 +180,7 @@ export default function AdminLoginPage() {
       <div className="flex w-full flex-1 items-center justify-center px-5 py-12 sm:px-8 lg:w-1/2">
         <div className="w-full max-w-md">
           <div className="mb-9 flex items-center gap-3 lg:hidden">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-base font-bold text-white">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-base font-bold text-admin-white">
               AP
             </span>
             <span className="text-sm font-medium tracking-tight text-admin-gray-500 dark:text-admin-gray-400">
@@ -182,7 +190,7 @@ export default function AdminLoginPage() {
 
           {step === "credentials" ? (
             <div data-testid="login-step-credentials">
-              <h1 className="mb-2 text-2xl font-semibold text-admin-gray-900 sm:text-3xl dark:text-white/90">
+              <h1 className="mb-2 text-2xl font-semibold text-admin-gray-900 sm:text-3xl dark:text-admin-white/90">
                 Sign in
               </h1>
               <p className="mb-8 text-sm text-admin-gray-500 dark:text-admin-gray-400">
@@ -211,7 +219,7 @@ export default function AdminLoginPage() {
                       onChange={(event) => setEmail(event.target.value)}
                       placeholder="you@example.com"
                       data-testid="login-email-input"
-                      className={`h-12 w-full rounded-lg border bg-transparent pr-4 pl-11 text-sm text-admin-gray-900 placeholder:text-admin-gray-400 transition-colors outline-none focus:ring-3 dark:text-white/90 ${
+                      className={`h-12 w-full rounded-lg border bg-transparent pr-4 pl-11 text-sm text-admin-gray-900 placeholder:text-admin-gray-400 transition-colors outline-none focus:ring-3 dark:text-admin-white/90 ${
                         fieldErrors.email
                           ? "border-error-500 focus:ring-error-500/10"
                           : "border-admin-gray-300 focus:border-brand-500 focus:ring-brand-500/10 dark:border-admin-gray-700"
@@ -246,7 +254,7 @@ export default function AdminLoginPage() {
                       onChange={(event) => setPassword(event.target.value)}
                       placeholder="Enter your password"
                       data-testid="login-password-input"
-                      className={`h-12 w-full rounded-lg border bg-transparent pr-12 pl-11 text-sm text-admin-gray-900 placeholder:text-admin-gray-400 transition-colors outline-none focus:ring-3 dark:text-white/90 ${
+                      className={`h-12 w-full rounded-lg border bg-transparent pr-12 pl-11 text-sm text-admin-gray-900 placeholder:text-admin-gray-400 transition-colors outline-none focus:ring-3 dark:text-admin-white/90 ${
                         fieldErrors.password
                           ? "border-error-500 focus:ring-error-500/10"
                           : "border-admin-gray-300 focus:border-brand-500 focus:ring-brand-500/10 dark:border-admin-gray-700"
@@ -282,7 +290,7 @@ export default function AdminLoginPage() {
                   type="submit"
                   disabled={isSubmitting}
                   data-testid="login-submit-button"
-                  className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-500 text-sm font-medium text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-500 text-sm font-medium text-admin-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : null}
                   {isSubmitting ? "Sending code…" : "Sign in"}
@@ -306,13 +314,13 @@ export default function AdminLoginPage() {
                 Back to sign in
               </button>
 
-              <h1 className="mb-2 text-2xl font-semibold text-admin-gray-900 sm:text-3xl dark:text-white/90">
+              <h1 className="mb-2 text-2xl font-semibold text-admin-gray-900 sm:text-3xl dark:text-admin-white/90">
                 Two-step verification
               </h1>
               <p className="mb-8 text-sm text-admin-gray-500 dark:text-admin-gray-400">
                 We sent a {challenge?.code_length ?? 6}-digit code to{" "}
                 <span
-                  className="font-medium text-admin-gray-800 dark:text-white/90"
+                  className="font-medium text-admin-gray-800 dark:text-admin-white/90"
                   data-testid="otp-masked-email"
                 >
                   {challenge?.masked_email}
@@ -350,7 +358,7 @@ export default function AdminLoginPage() {
                     data-testid="otp-countdown"
                   >
                     Code expires in{" "}
-                    <span className="font-semibold tabular-nums text-admin-gray-800 dark:text-white/90">
+                    <span className="font-semibold tabular-nums text-admin-gray-800 dark:text-admin-white/90">
                       {formatCountdown(expiresIn)}
                     </span>
                   </span>
@@ -380,7 +388,7 @@ export default function AdminLoginPage() {
                 onClick={() => handleVerify(code)}
                 disabled={isSubmitting || isExpired || code.length !== (challenge?.code_length ?? 6)}
                 data-testid="otp-verify-button"
-                className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-500 text-sm font-medium text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-500 text-sm font-medium text-admin-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : null}
                 {isSubmitting ? "Verifying…" : "Verify and sign in"}
@@ -429,11 +437,11 @@ export default function AdminLoginPage() {
         />
 
         <div className="relative z-1 max-w-sm px-8 text-center">
-          <span className="mx-auto mb-7 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-xl font-bold text-white ring-1 ring-white/15 backdrop-blur-sm">
+          <span className="mx-auto mb-7 flex h-16 w-16 items-center justify-center rounded-2xl bg-admin-white/10 text-xl font-bold text-admin-white ring-1 ring-admin-white/15 backdrop-blur-sm">
             AP
           </span>
-          <h2 className="mb-3 text-2xl font-semibold text-white">Adiprimanto CMS</h2>
-          <p className="text-sm leading-relaxed text-white/60">
+          <h2 className="mb-3 text-2xl font-semibold text-admin-white">Adiprimanto CMS</h2>
+          <p className="text-sm leading-relaxed text-admin-white/60">
             Manage every section of your portfolio — projects, testimonials, services and
             settings — from one secure dashboard.
           </p>

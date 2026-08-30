@@ -8,6 +8,10 @@
 @theme {
   --font-admin: "Outfit", sans-serif;
 
+  /* The landing page overrides the global --color-white token, so the admin panel
+     uses its own explicit white to stay theme-safe. */
+  --color-admin-white: #ffffff;
+
   --color-brand-25: #f2f7ff;
   --color-brand-50: #ecf3ff;
   --color-brand-100: #dde9ff;

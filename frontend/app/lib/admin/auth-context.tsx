@@ -43,11 +43,16 @@ type SignedInPayload = {
   permissions: string[];
 };
 
+/** Step 1 either starts a two-factor challenge or signs the user in directly. */
+export type LoginResult =
+  | { requiresTwoFactor: true; challenge: TwoFactorChallenge }
+  | { requiresTwoFactor: false; user: AdminUser };
+
 type AuthContextValue = {
   user: AdminUser | null;
   permissions: string[];
   status: "checking" | "authenticated" | "guest";
-  login: (email: string, password: string) => Promise<TwoFactorChallenge>;
+  login: (email: string, password: string) => Promise<LoginResult>;
   verifyCode: (challengeToken: string, code: string) => Promise<AdminUser>;
   resendCode: (challengeToken: string) => Promise<TwoFactorChallenge>;
   logout: () => Promise<void>;
@@ -79,28 +84,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const { data } = await apiRequest<TwoFactorChallenge>("/auth/login", {
-      method: "POST",
-      body: { email, password, device_name: "admin-panel" },
-    });
-
-    return data;
-  }, []);
-
-  const verifyCode = useCallback(async (challengeToken: string, code: string) => {
-    const { data } = await apiRequest<SignedInPayload>("/auth/two-factor/verify", {
-      method: "POST",
-      body: { challenge_token: challengeToken, code, device_name: "admin-panel" },
-    });
-
+  const applySignedIn = useCallback((data: SignedInPayload) => {
     writeToken(data.access_token, data.expires_at);
     setUser(data.user);
     setPermissions(data.permissions);
     setStatus("authenticated");
-
-    return data.user;
   }, []);
+
+  const login = useCallback(
+    async (email: string, password: string): Promise<LoginResult> => {
+      const { data } = await apiRequest<TwoFactorChallenge & Partial<SignedInPayload>>("/auth/login", {
+        method: "POST",
+        body: { email, password, device_name: "admin-panel" },
+      });
+
+      if (data.requires_two_factor === false && data.access_token !== undefined) {
+        applySignedIn(data as SignedInPayload);
+
+        return { requiresTwoFactor: false, user: data.user as AdminUser };
+      }
+
+      return { requiresTwoFactor: true, challenge: data as TwoFactorChallenge };
+    },
+    [applySignedIn],
+  );
+
+  const verifyCode = useCallback(
+    async (challengeToken: string, code: string) => {
+      const { data } = await apiRequest<SignedInPayload>("/auth/two-factor/verify", {
+        method: "POST",
+        body: { challenge_token: challengeToken, code, device_name: "admin-panel" },
+      });
+
+      applySignedIn(data);
+
+      return data.user;
+    },
+    [applySignedIn],
+  );
 
   const resendCode = useCallback(async (challengeToken: string) => {
     const { data } = await apiRequest<TwoFactorChallenge>("/auth/two-factor/resend", {

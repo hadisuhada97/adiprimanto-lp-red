@@ -1,0 +1,38 @@
+{
+  "summary": "Frontend-only regression on the new TailAdmin dashboard shell. All 14 requested items verified end-to-end with Playwright against the preview URL using shell.test@adiprimanto.com (no 2FA) plus a 2FA regression pass with admin@adiprimanto.com. 26/26 admin routes render the correct placeholder (or dashboard), unknown routes correctly show Next.js 404, sidebar collapse persists via localStorage, mobile drawer + backdrop + close-button + link-tap-navigate all close the drawer, dark<->light theme toggles cleanly with no dark-on-dark / white-on-white regressions, user menu + logout work and clear the admin_access_token cookie, route guards redirect /admin/dashboard and /admin/inbox to /admin/login when signed out and /admin -> /admin/dashboard when signed in, and the 2FA flow renders the 6 OTP boxes with a real countdown (9:57) + masked email, i.e. no 'NaN:NaN'. Landing page still renders in both dark and light themes with 0 console errors. Both previously reported bugs (NaN:NaN OTP for 2FA-disabled accounts, and admin white/text-white clashing with the landing token) are gone.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "verified_flows": [
+    "Login without 2FA: shell.test@adiprimanto.com lands on /admin/dashboard (admin-dashboard visible, header title 'Dashboard', breadcrumb Home > Dashboard, quick-links & session details rendered, permission-count=128, module-count=23)",
+    "Sidebar renders exactly 6 groups: Main, Content, Engagement, Appearance, Settings, System",
+    "sidebar-group-portfolio expands to Projects/Categories/Technologies and collapses again; sidebar-group-faq expands to Questions/Categories and collapses again",
+    "All 26 known admin routes (dashboard + 25 modules) render either admin-dashboard or module-placeholder with the correct page-title, phase badge and back-link; header title + breadcrumb update per route; active menu item is highlighted (brand-* class on sidebar-link-inbox verified)",
+    "/admin/this-does-not-exist renders the Next.js '404 This page could not be found.' page (no broken placeholder)",
+    "header-sidebar-toggle-button collapses admin-sidebar from width 290 to 90 with data-expanded='false', writes 'false' to localStorage under admin-sidebar-expanded, survives a page reload, and toggling again restores it",
+    "Mobile 390x844: sidebar hidden at x=-290; header-mobile-menu-button opens it (x=0) with sidebar-backdrop; tapping the visible backdrop area (x=360) closes it; sidebar-close-button closes it; tapping sidebar-link-testimonials navigates to /admin/testimonials AND closes the drawer",
+    "header-theme-toggle-button switches html[data-theme] between dark and light; in light mode: sidebar bg=rgb(255,255,255) with text rgb(29,41,57), header bg=rgb(255,255,255), body bg=rgb(247,247,251) — no white-on-white / dark-on-dark",
+    "header-user-menu-button opens header-user-menu with 'Shell Tester / shell.test@adiprimanto.com / Super Admin / Sign out'; header-logout-button signs out, clears admin_access_token cookie, redirects to /admin/login, and the 'Welcome back' toast renders BELOW the header (top-right, does not cover theme/user buttons)",
+    "Route guard: /admin/dashboard and /admin/inbox both redirect to /admin/login after logout; /admin redirects to /admin/dashboard when signed in",
+    "2FA regression: admin@adiprimanto.com/AdiPrimanto#2026 shows step 2 with 6 OTP boxes, 'Code expires in 9:57', 'Resend in 0:57 (3 left)', masked email 'ad***@adiprimanto.com' and a 'Verification code sent' toast — no NaN:NaN anywhere",
+    "Landing page /: renders correctly in dark (bg rgb(12,12,14)) and light (bg rgb(247,247,251), text rgb(20,20,26)); h1 'MEMBANGUN WEBSITE BERKUALITAS UNTUK BISNIS ANDA' visible; 0 console errors"
+  ],
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Minor UX: on mobile 390x844 the expanded drawer is 290px wide, leaving only 100px of tappable backdrop — usable but tight; consider making the drawer 260px on small viewports so the backdrop hit area is larger.",
+    "AdminSidebar's `groups` memo has `permissions` in its dependency array but eslint-disabled the exhaustive-deps hint for `can`; safe today because `can` is derived from `permissions`, but worth documenting to prevent future refactors from breaking it.",
+    "PHASE_BY_ROUTE only covers 25 of 26 routes (dashboard is intentionally excluded); the placeholder page must never be reached for /admin/dashboard, which is currently the case — keep this invariant when adding phase F3 CRUD screens."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "not-tested (per request)", "frontend": "100%" },
+  "test_credentials": "shell.test@adiprimanto.com / ShellTester#2026 (no 2FA); admin@adiprimanto.com / AdiPrimanto#2026 (2FA — OTP via /app/backend/storage/logs/laravel.log). Login is throttled 5/min per email+IP; run `cd /app/backend && php artisan cache:clear` between bursts.",
+  "seed_data_creation": "None. Used the existing preview-only shell.test account.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Full TailAdmin shell (sidebar + header + breadcrumb + collapse + mobile drawer + theme + user menu + placeholder pages) is green. When Phase F3 CRUD screens land, re-run the route sweep to confirm the affected placeholders are replaced with real pages and that header-page-title/breadcrumb still update. Mobile backdrop click must be simulated at x>=300 (page.mouse.click(360, 400)) — Playwright's default center-point on an inset-0 element lands on the drawer itself and gets intercepted; this is not a product bug.",
+  "rca of the issue": "N/A — no defects found in this iteration. Both previously reported bugs (NaN:NaN OTP timer for 2FA-disabled accounts, and admin bg-white/text-white resolving to the landing page's overridden --color-white) are confirmed fixed."
+}

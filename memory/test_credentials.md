@@ -73,9 +73,19 @@ be running. Allow ~2 seconds between step 1 and reading the log.
 |---|---|
 | Sign in (2 steps) | `/admin/login` |
 | Dashboard (protected) | `/admin/dashboard` |
+| Any module (placeholder) | `/admin/portfolio/projects`, `/admin/inbox`, `/admin/settings/seo`, … |
 
 The access token is stored in the non-httpOnly cookie `admin_access_token` so the Next.js
 middleware can guard `/admin/*`. Signing in requires the OTP from the mail log (see above).
+
+### UI test account without 2FA
+
+`shell.test@adiprimanto.com` / `ShellTester#2026` — Super Admin with
+`is_two_factor_enabled = false`, so `POST /auth/login` returns an access token immediately and
+browser tests can reach the dashboard without reading the mail log.
+
+> Created manually via tinker for the preview environment only. It is **not** part of any seeder
+> and must never exist in production.
 
 ## Notes
 
