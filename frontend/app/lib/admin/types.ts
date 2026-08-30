@@ -162,6 +162,84 @@ export type SettingsPayload = {
   media: MediaItem[];
 };
 
+export type HeroContent = {
+  badge: string | null;
+  role: string | null;
+  headline_line_1: string | null;
+  headline_highlight: string | null;
+  headline_stroke: string | null;
+  description_prefix: string | null;
+  description_strong: string | null;
+  description_suffix: string | null;
+  primary_cta_label: string | null;
+  secondary_cta_label: string | null;
+  trusted_prefix: string | null;
+  trusted_strong: string | null;
+  trusted_suffix: string | null;
+};
+
+export type HeroSection = {
+  id: string;
+  badge_icon: string | null;
+  primary_cta_url: string | null;
+  secondary_cta_url: string | null;
+  profile_media_id: string | null;
+  profile?: MediaItem | null;
+  cv_media_id: string | null;
+  is_active: boolean;
+  content: HeroContent;
+  translations: Partial<Record<LocaleCode, HeroContent>>;
+};
+
+export type HeroMetric = {
+  id: string;
+  value: string;
+  icon_name: string | null;
+  color_hex: string | null;
+  label: string | null;
+  translations: Partial<Record<LocaleCode, { label: string }>>;
+  is_active: boolean;
+  sort_order: number;
+  deleted_at: string | null;
+};
+
+export type AboutContent = {
+  eyebrow: string | null;
+  location: string | null;
+  headline: string | null;
+  headline_highlight: string | null;
+  bio_paragraph_1: string | null;
+  bio_paragraph_2: string | null;
+  bio_paragraph_3: string | null;
+  primary_cta_label: string | null;
+  secondary_cta_label: string | null;
+};
+
+export type AboutSection = {
+  id: string;
+  location_lat: number | null;
+  location_lng: number | null;
+  primary_cta_url: string | null;
+  secondary_cta_url: string | null;
+  photo_media_id: string | null;
+  photo?: MediaItem | null;
+  is_active: boolean;
+  content: AboutContent;
+  translations: Partial<Record<LocaleCode, AboutContent>>;
+};
+
+export type AboutStat = {
+  id: string;
+  value: string;
+  icon_name: string | null;
+  label: string | null;
+  sublabel: string | null;
+  translations: Partial<Record<LocaleCode, { label: string; sublabel: string | null }>>;
+  is_active: boolean;
+  sort_order: number;
+  deleted_at: string | null;
+};
+
 export type Pagination = {
   current_page: number;
   per_page: number;

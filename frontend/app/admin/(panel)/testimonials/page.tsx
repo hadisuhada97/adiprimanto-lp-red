@@ -467,7 +467,7 @@ export default function TestimonialsPage() {
             <Field
               label="Client name"
               required
-              error={errors[`translations.${locale}.name`]}
+              error={errors[`translations.${locale}.name`] ?? errors.translations}
               testId="testimonial-name-field"
             >
               <TextInput

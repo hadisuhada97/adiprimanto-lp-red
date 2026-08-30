@@ -138,8 +138,6 @@ export const ROUTE_TITLES: Record<string, { title: string; group: string; icon: 
   );
 
 export const PHASE_BY_ROUTE: Record<string, string> = {
-  "/admin/hero": "F4",
-  "/admin/about": "F4",
   "/admin/skills": "F4",
   "/admin/pain-points": "F4",
   "/admin/process-steps": "F4",

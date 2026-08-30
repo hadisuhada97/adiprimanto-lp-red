@@ -1,0 +1,43 @@
+{
+  "summary": "Fase F4 part 1 (Hero + About) tested end-to-end. Backend: new pytest suite /app/backend/tests/pytest/test_phase_f4_hero_about.py — 37/37 passed (hero singleton GET/PUT incl. EN-only save keeping ID copy, media/link/visibility persistence, hero-metric full CRUD + validation + reorder + trash/restore/force, about singleton GET/PUT + lat/lng validation, about-stat full CRUD + reorder + trash cycle, public /public/hero and /public/about with ?locale=id|en and active-only + sort order, 401 for unauthenticated admin routes, Editor can save but gets 403 on both /force endpoints, light F3 endpoint regression). Frontend (Playwright, production build): /admin/hero and /admin/about both load seeded ID copy, EN tab shows English, saves persist after reload without losing the other locale, visibility switches persist, media picker opens, metrics and stats both pass create/edit/toggle/reorder/trash/restore/force-delete with correct toasts, invalid colour and invalid latitude surface inline errors. F3 pages (/admin/testimonials, /services, /faq/questions, /faq/categories, /settings/general) still render. ONE real defect found: default Laravel validation messages are returned as raw translation keys ('validation.required', 'validation.between.numeric') and are displayed to the user inline — caused by APP_LOCALE=id + APP_FALLBACK_LOCALE=id with no lang/id/validation.php. Test data created during the run was cleaned up and HeroAboutSeeder was re-run so hero/about are back at seeded values.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/v1/admin/hero-metrics, POST /api/v1/admin/about-stats, PUT /api/v1/admin/about (and every other validated endpoint)", "issue": "Default framework validation messages are untranslated raw keys: value -> 'validation.required', location_lat -> 'validation.between.numeric'. Root cause: APP_LOCALE=id and APP_FALLBACK_LOCALE=id in /app/backend/.env but the project has no lang/ directory, so Laravel cannot resolve lang/id/validation.php and falls back to the key. Only hand-written messages() strings are readable. Fix: add lang/id/validation.php (or lang/en + APP_FALLBACK_LOCALE=en). Affects all modules, not just F4."},
+      {"endpoint": "POST /api/v1/admin/hero-metrics (empty payload)", "issue": "Top-level error key 'translations' ('At least one language must be filled in.') has no field to attach to in the UI, so the user only sees the generic 'The given data was invalid.' toast; the missing Label field shows no inline error."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Hero metric modal / About stat modal / About latitude field", "issue": "Inline validation text renders the raw backend key ('validation.required', 'validation.between.numeric') instead of a human sentence — user-visible consequence of the missing id validation lang file", "selector": "[data-testid=\"hero-metric-value-field\"] span[class*=text-error], [data-testid=\"about-field-lat\"] span[class*=text-error]", "priority": "HIGH"},
+      {"component": "LocaleTabs", "issue": "data-testid=\"locale-tab-id\"/\"locale-tab-en\" is duplicated between the page-level tabs and the tabs inside the metric/stat modal, so a plain page.click resolves to the hidden page tab and is blocked by the modal backdrop. Tests must scope the selector to the modal. Suggest a testIdPrefix on LocaleTabs (e.g. hero-metric-locale-tab-en).", "selector": "[data-testid=\"locale-tab-en\"]", "priority": "MEDIUM"},
+      {"component": "LocaleTabs", "issue": "Tab buttons expose no role=\"tab\"/aria-selected, so the active locale is not announced to assistive tech (aria-selected returned null).", "selector": "[data-testid=\"locale-tab-id\"]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/admin/hero metric list", "issues": ["The colour chip shows value.slice(0,3), so '↑ 32%' renders as '↑ 3' inside the badge — looks like truncated data (the full value is repeated in the sub-line, so cosmetic only)."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/pytest/test_phase_f4_hero_about.py",
+    "/app/test_reports/pytest/f4_results.xml"
+  ],
+  "action_items": [
+    "Add Indonesian validation translations (lang/id/validation.php) or set APP_FALLBACK_LOCALE=en so default validation messages are human-readable instead of 'validation.required' / 'validation.between.numeric'. This is user-visible in the hero-metric, about-stat and about latitude/longitude forms and affects every module.",
+    "Surface the top-level 'translations' validation error in the metric/stat modals (currently only a generic toast; the empty Label field shows no inline error).",
+    "Give LocaleTabs an optional testId prefix so the page tabs and the modal tabs do not share data-testid values."
+  ],
+  "critical_code_review_comments": [
+    "HeroMetricController::update / AboutStatController::update use $request->has('translations') to decide whether to sync — fine, but the update rules make 'value' 'sometimes', so a PATCH with only translations silently leaves value unchanged (intended, just noting).",
+    "Public hero()/about() return null when the singleton row is missing while the admin endpoints auto-create it via singleton(); consider using singleton() consistently or documenting the nullable contract for the landing page.",
+    "hero/page.tsx (692 lines) and about/page.tsx (710 lines) are close to the 700-line guideline — the metric/stat list + modal blocks are near-duplicates and could be extracted into a shared 'TranslatedChildList' component."
+  ],
+  "updated_files": ["/app/backend/tests/pytest/test_phase_f4_hero_about.py", "/app/test_reports/iteration_7.json"],
+  "success_rate": {"backend": "100% (37/37 pytest assertions)", "frontend": "~95% (all flows pass; validation messages render raw i18n keys)"},
+  "seed_data_creation": "Temporary rows only: one hero metric ('UI Metric Edited') and one about stat ('UI Stat Edited') created through the UI and force-deleted at the end; TEST_ prefixed API rows force-deleted by the pytest suite. Hero/About singleton fields were edited during the run and restored by re-running `php artisan db:seed --class=HeroAboutSeeder` (verified via /api/v1/public/hero and /public/about).",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "shell.test@adiprimanto.com / ShellTester#2026 (super admin, no 2FA); editor.test@adiprimanto.com / EditorTest#2026 (editor, no 2FA)",
+  "context_for_next_testing_agent": "F4 part 1 is functionally complete: run `pytest /app/backend/tests/pytest/test_phase_f4_hero_about.py` for regression (it is self-cleaning). Playwright notes: log in at /admin/login (2 fields + login-submit-button, no OTP for the shell/editor accounts); inside the metric/stat modals you MUST scope locale tab clicks to the modal ('[data-testid=\"hero-metric-form-modal\"] [data-testid=\"locale-tab-en\"]') otherwise the click is intercepted by the modal backdrop. Confirm dialogs use <prefix>-delete-dialog-confirm-button. Reorder is verified by comparing the row data-testid order before/after reload. The Editor account does not render the metric delete buttons (permission-gated UI) and gets 403 on the /force endpoints.",
+  "rca_of_the_issue": "Validation message regression: /app/backend/.env sets APP_LOCALE=id and APP_FALLBACK_LOCALE=id (changed in the previous phase to make 'id' the default content locale), but the Laravel app has no lang/ directory, so the translator cannot resolve validation.* for either the active or the fallback locale and returns the key itself. Reproduce: `curl -X POST .../api/v1/admin/hero-metrics -d '{}'` -> {\"errors\":{\"value\":[\"validation.required\"]}}. Mitigation: publish lang files (`php artisan lang:publish`) and add an Indonesian lang/id/validation.php, or keep APP_FALLBACK_LOCALE=en for framework strings while APP_LOCALE stays id."
+}

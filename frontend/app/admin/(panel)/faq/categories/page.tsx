@@ -342,7 +342,7 @@ export default function FaqCategoriesPage() {
           <Field
             label="Name"
             required
-            error={errors[`translations.${locale}.name`]}
+            error={errors[`translations.${locale}.name`] ?? errors.translations}
             testId="faq-category-name-field"
           >
             <TextInput

@@ -1,7 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Admin\AboutSectionController;
+use App\Http\Controllers\Api\V1\Admin\AboutStatController;
 use App\Http\Controllers\Api\V1\Admin\FaqCategoryController;
 use App\Http\Controllers\Api\V1\Admin\FaqController;
+use App\Http\Controllers\Api\V1\Admin\HeroMetricController;
+use App\Http\Controllers\Api\V1\Admin\HeroSectionController;
 use App\Http\Controllers\Api\V1\Admin\MediaController;
 use App\Http\Controllers\Api\V1\Admin\ProjectCategoryController;
 use App\Http\Controllers\Api\V1\Admin\ProjectController;
@@ -51,6 +55,8 @@ Route::prefix('v1')->group(function (): void {
         Route::get('services', [PublicContentController::class, 'services'])->name('services.index');
         Route::get('faqs', [PublicContentController::class, 'faqs'])->name('faqs.index');
         Route::get('settings', [PublicContentController::class, 'settings'])->name('settings.index');
+        Route::get('hero', [PublicContentController::class, 'hero'])->name('hero.show');
+        Route::get('about', [PublicContentController::class, 'about'])->name('about.show');
     });
 
     Route::prefix('admin')->name('api.v1.admin.')->middleware('auth:sanctum')->group(function (): void {
@@ -223,5 +229,49 @@ Route::prefix('v1')->group(function (): void {
             ->middleware('permission:settings.view')->name('settings.index');
         Route::match(['put', 'patch'], 'settings', [SettingController::class, 'update'])
             ->middleware('permission:settings.update')->name('settings.update');
+
+        Route::get('hero', [HeroSectionController::class, 'show'])
+            ->middleware('permission:hero_sections.view')->name('hero.show');
+        Route::match(['put', 'patch'], 'hero', [HeroSectionController::class, 'update'])
+            ->middleware('permission:hero_sections.update')->name('hero.update');
+
+        Route::get('hero-metrics', [HeroMetricController::class, 'index'])
+            ->middleware('permission:hero_sections.view')->name('hero-metrics.index');
+        Route::post('hero-metrics', [HeroMetricController::class, 'store'])
+            ->middleware('permission:hero_sections.create')->name('hero-metrics.store');
+        Route::post('hero-metrics/reorder', [HeroMetricController::class, 'reorder'])
+            ->middleware('permission:hero_sections.update')->name('hero-metrics.reorder');
+        Route::match(['put', 'patch'], 'hero-metrics/{metric}', [HeroMetricController::class, 'update'])
+            ->middleware('permission:hero_sections.update')->name('hero-metrics.update');
+        Route::patch('hero-metrics/{metric}/toggle-active', [HeroMetricController::class, 'toggleActive'])
+            ->middleware('permission:hero_sections.update')->name('hero-metrics.toggle-active');
+        Route::delete('hero-metrics/{metric}', [HeroMetricController::class, 'destroy'])
+            ->middleware('permission:hero_sections.delete')->name('hero-metrics.destroy');
+        Route::post('hero-metrics/{metric}/restore', [HeroMetricController::class, 'restore'])
+            ->middleware('permission:hero_sections.restore')->name('hero-metrics.restore');
+        Route::delete('hero-metrics/{metric}/force', [HeroMetricController::class, 'forceDestroy'])
+            ->middleware('permission:hero_sections.force_delete')->name('hero-metrics.force-destroy');
+
+        Route::get('about', [AboutSectionController::class, 'show'])
+            ->middleware('permission:about_sections.view')->name('about.show');
+        Route::match(['put', 'patch'], 'about', [AboutSectionController::class, 'update'])
+            ->middleware('permission:about_sections.update')->name('about.update');
+
+        Route::get('about-stats', [AboutStatController::class, 'index'])
+            ->middleware('permission:about_sections.view')->name('about-stats.index');
+        Route::post('about-stats', [AboutStatController::class, 'store'])
+            ->middleware('permission:about_sections.create')->name('about-stats.store');
+        Route::post('about-stats/reorder', [AboutStatController::class, 'reorder'])
+            ->middleware('permission:about_sections.update')->name('about-stats.reorder');
+        Route::match(['put', 'patch'], 'about-stats/{stat}', [AboutStatController::class, 'update'])
+            ->middleware('permission:about_sections.update')->name('about-stats.update');
+        Route::patch('about-stats/{stat}/toggle-active', [AboutStatController::class, 'toggleActive'])
+            ->middleware('permission:about_sections.update')->name('about-stats.toggle-active');
+        Route::delete('about-stats/{stat}', [AboutStatController::class, 'destroy'])
+            ->middleware('permission:about_sections.delete')->name('about-stats.destroy');
+        Route::post('about-stats/{stat}/restore', [AboutStatController::class, 'restore'])
+            ->middleware('permission:about_sections.restore')->name('about-stats.restore');
+        Route::delete('about-stats/{stat}/force', [AboutStatController::class, 'forceDestroy'])
+            ->middleware('permission:about_sections.force_delete')->name('about-stats.force-destroy');
     });
 });

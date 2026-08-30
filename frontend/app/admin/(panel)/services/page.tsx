@@ -600,6 +600,7 @@ export default function ServicesPage() {
         <LocaleTabs
           active={locale}
           onChange={setLocale}
+          testIdPrefix="service-"
           completeness={{
             id: serviceTranslations.id.title.trim() !== "",
             en: serviceTranslations.en.title.trim() !== "",
@@ -610,7 +611,7 @@ export default function ServicesPage() {
           <Field
             label="Title"
             required
-            error={errors[`translations.${locale}.title`]}
+            error={errors[`translations.${locale}.title`] ?? errors.translations}
             testId="service-title-field"
           >
             <TextInput
@@ -724,6 +725,7 @@ export default function ServicesPage() {
         <LocaleTabs
           active={locale}
           onChange={setLocale}
+          testIdPrefix="stat-"
           completeness={{
             id: statTranslations.id.label.trim() !== "",
             en: statTranslations.en.label.trim() !== "",
@@ -752,7 +754,7 @@ export default function ServicesPage() {
             </Field>
           </div>
 
-          <Field label="Unit" testId="stat-unit-field">
+          <Field label="Unit" error={errors.translations} testId="stat-unit-field">
             <TextInput
               value={activeStat.unit}
               onChange={(event) =>

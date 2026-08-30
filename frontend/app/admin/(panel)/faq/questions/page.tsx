@@ -396,7 +396,7 @@ export default function FaqQuestionsPage() {
           <Field
             label="Question"
             required
-            error={errors[`translations.${locale}.question`]}
+            error={errors[`translations.${locale}.question`] ?? errors.translations}
             testId="faq-question-field"
           >
             <TextInput

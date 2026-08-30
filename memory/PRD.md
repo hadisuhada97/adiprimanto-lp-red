@@ -823,3 +823,45 @@ Komponen baru: `ui/SortButtons` (reorder naik/turun, dipakai semua modul F3d).
 
 **Berikutnya (F4)**: modul konten Hero, About + Stats, Skills/Tech Stack, Pain Points, Process Steps,
 Clients & Brands, Navigation Menu, Contact Channels, Social Links, SEO Settings.
+
+---
+
+## Fase F4a — Hero & About + Stats (SELESAI, 30 Jun 2026)
+
+**Backend baru**:
+- Migration `2026_06_04_000001_create_hero_and_about_tables.php` → `hero_sections`,
+  `hero_section_translations` (13 field copy), `hero_metrics`(+translations),
+  `about_sections`, `about_section_translations` (eyebrow, lokasi, headline, 3 paragraf bio, CTA),
+  `about_stats`(+translations label & sublabel)
+- Model `HeroSection`/`AboutSection` memakai pola **singleton** (`::singleton()` membuat baris bila belum ada)
+  serta `HeroMetric`, `AboutStat` (sortable + soft delete)
+- Controller: `HeroSectionController` & `AboutSectionController` (GET + PATCH/PUT),
+  `HeroMetricController` & `AboutStatController` (CRUD penuh + toggle + reorder + trash/restore/force)
+- Request: `HeroSectionRequest`, `HeroMetricRequest` (hex colour), `AboutSectionRequest`
+  (validasi lat/lng), `AboutStatRequest`
+- Public API: `GET /api/v1/public/hero` & `/public/about` (section + child aktif terurut, `?locale=id|en`)
+- `HeroAboutSeeder`: seluruh copy Hero & About dari landing page statis (ID + EN), 3 hero metric
+  (98+ Page Speed, ↑32% Conversion, A SEO Score) dan 3 about stat (5+, 30+, 100%)
+
+**Admin panel baru**:
+- `/admin/hero` — kartu *Hero copy* (tab ID/EN, 5 grup field: badge & role, headline, deskripsi, CTA,
+  trusted line), kartu *Media & links* (badge icon, foto profil via Media Picker, URL tombol, switch
+  tampil/sembunyi), kartu *Floating metrics* (CRUD + toggle + reorder + trash/restore/force)
+- `/admin/about` — kartu *About copy* (tab ID/EN, 6 field pendek + 3 paragraf bio), kartu
+  *Photo, map & links* (foto, latitude/longitude, URL CTA, switch tampil), kartu *About stats* (CRUD lengkap)
+
+**Perbaikan pasca-QA (iteration_7)**:
+- `APP_FALLBACK_LOCALE=en` agar pesan validasi bawaan Laravel terbaca ("The value field is required.")
+  alih-alih key mentah `validation.required`; `APP_LOCALE` tetap `id` untuk konten
+- Error tingkat atas `translations` kini muncul inline di bawah field utama pada semua modal
+  (hero metric, about stat, service, service stat, testimonial, FAQ, kategori FAQ)
+- `LocaleTabs` mendapat prop `testIdPrefix` (+ `role="tab"`/`aria-selected`) sehingga tab di halaman
+  dan di dalam modal tidak lagi bertabrakan
+- Badge nilai metric menampilkan nilai penuh (sebelumnya terpotong 3 karakter)
+
+**Hasil pengujian**: `pytest tests/pytest/test_phase_f4_hero_about.py` 37/37 lolos,
+`test_phase_f3_content.py` 28/28 lolos (regresi), seluruh alur Playwright halaman Hero & About lolos.
+Catatan: jalankan `php artisan cache:clear` bila login pytest terkena rate limit 429.
+
+**Berikutnya (F4 lanjutan)**: Skills/Tech Stack, Pain Points, Process Steps, Clients & Brands,
+Navigation Menu, Contact Channels, Social Links, SEO Settings.

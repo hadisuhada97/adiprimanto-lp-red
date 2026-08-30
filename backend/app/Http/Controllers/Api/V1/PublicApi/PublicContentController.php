@@ -3,13 +3,21 @@
 namespace App\Http\Controllers\Api\V1\PublicApi;
 
 use App\Http\Controllers\Api\V1\BaseApiController;
+use App\Http\Resources\AboutSectionResource;
+use App\Http\Resources\AboutStatResource;
 use App\Http\Resources\FaqCategoryResource;
 use App\Http\Resources\FaqResource;
+use App\Http\Resources\HeroMetricResource;
+use App\Http\Resources\HeroSectionResource;
 use App\Http\Resources\ServiceResource;
 use App\Http\Resources\ServiceStatResource;
 use App\Http\Resources\TestimonialResource;
+use App\Models\AboutSection;
+use App\Models\AboutStat;
 use App\Models\Faq;
 use App\Models\FaqCategory;
+use App\Models\HeroMetric;
+use App\Models\HeroSection;
 use App\Models\Locale;
 use App\Models\Media;
 use App\Models\Service;
@@ -48,6 +56,32 @@ class PublicContentController extends BaseApiController
             'services' => ServiceResource::collection($services),
             'stats' => ServiceStatResource::collection($stats),
         ], 'Services retrieved successfully.');
+    }
+
+    public function hero(Request $request): JsonResponse
+    {
+        app()->setLocale($this->resolveLocale($request));
+
+        $hero = HeroSection::query()->with(['translations', 'profile', 'cv'])->first();
+        $metrics = HeroMetric::query()->active()->with('translations')->ordered()->get();
+
+        return $this->respondSuccess([
+            'hero' => $hero === null ? null : new HeroSectionResource($hero),
+            'metrics' => HeroMetricResource::collection($metrics),
+        ], 'Hero section retrieved successfully.');
+    }
+
+    public function about(Request $request): JsonResponse
+    {
+        app()->setLocale($this->resolveLocale($request));
+
+        $about = AboutSection::query()->with(['translations', 'photo'])->first();
+        $stats = AboutStat::query()->active()->with('translations')->ordered()->get();
+
+        return $this->respondSuccess([
+            'about' => $about === null ? null : new AboutSectionResource($about),
+            'stats' => AboutStatResource::collection($stats),
+        ], 'About section retrieved successfully.');
     }
 
     public function faqs(Request $request): JsonResponse
