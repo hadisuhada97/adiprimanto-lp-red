@@ -2,11 +2,20 @@
 
 use App\Http\Controllers\Api\V1\Admin\AboutSectionController;
 use App\Http\Controllers\Api\V1\Admin\AboutStatController;
+use App\Http\Controllers\Api\V1\Admin\ClientController;
+use App\Http\Controllers\Api\V1\Admin\ContactChannelController;
 use App\Http\Controllers\Api\V1\Admin\FaqCategoryController;
 use App\Http\Controllers\Api\V1\Admin\FaqController;
 use App\Http\Controllers\Api\V1\Admin\HeroMetricController;
 use App\Http\Controllers\Api\V1\Admin\HeroSectionController;
 use App\Http\Controllers\Api\V1\Admin\MediaController;
+use App\Http\Controllers\Api\V1\Admin\NavigationMenuController;
+use App\Http\Controllers\Api\V1\Admin\PainPointController;
+use App\Http\Controllers\Api\V1\Admin\ProcessStepController;
+use App\Http\Controllers\Api\V1\Admin\SeoSettingController;
+use App\Http\Controllers\Api\V1\Admin\SkillCategoryController;
+use App\Http\Controllers\Api\V1\Admin\SkillController;
+use App\Http\Controllers\Api\V1\Admin\SocialLinkController;
 use App\Http\Controllers\Api\V1\Admin\ProjectCategoryController;
 use App\Http\Controllers\Api\V1\Admin\ProjectController;
 use App\Http\Controllers\Api\V1\Admin\ServiceController;
@@ -57,6 +66,13 @@ Route::prefix('v1')->group(function (): void {
         Route::get('settings', [PublicContentController::class, 'settings'])->name('settings.index');
         Route::get('hero', [PublicContentController::class, 'hero'])->name('hero.show');
         Route::get('about', [PublicContentController::class, 'about'])->name('about.show');
+        Route::get('skills', [PublicContentController::class, 'skills'])->name('skills.index');
+        Route::get('pain-points', [PublicContentController::class, 'painPoints'])->name('pain-points.index');
+        Route::get('process-steps', [PublicContentController::class, 'processSteps'])->name('process-steps.index');
+        Route::get('clients', [PublicContentController::class, 'clients'])->name('clients.index');
+        Route::get('navigation', [PublicContentController::class, 'navigation'])->name('navigation.index');
+        Route::get('contact', [PublicContentController::class, 'contact'])->name('contact.index');
+        Route::get('seo', [PublicContentController::class, 'seo'])->name('seo.index');
     });
 
     Route::prefix('admin')->name('api.v1.admin.')->middleware('auth:sanctum')->group(function (): void {
@@ -273,5 +289,38 @@ Route::prefix('v1')->group(function (): void {
             ->middleware('permission:about_sections.restore')->name('about-stats.restore');
         Route::delete('about-stats/{stat}/force', [AboutStatController::class, 'forceDestroy'])
             ->middleware('permission:about_sections.force_delete')->name('about-stats.force-destroy');
+
+        $contentModules = [
+            ['skill-categories', SkillCategoryController::class, 'skills'],
+            ['skills', SkillController::class, 'skills'],
+            ['pain-points', PainPointController::class, 'pain_points'],
+            ['process-steps', ProcessStepController::class, 'process_steps'],
+            ['clients', ClientController::class, 'clients'],
+            ['navigation-menus', NavigationMenuController::class, 'navigation_menus'],
+            ['contact-channels', ContactChannelController::class, 'contact_channels'],
+            ['social-links', SocialLinkController::class, 'contact_channels'],
+            ['seo-settings', SeoSettingController::class, 'seo_settings'],
+        ];
+
+        foreach ($contentModules as [$uri, $controller, $module]) {
+            Route::get($uri, [$controller, 'index'])
+                ->middleware("permission:{$module}.view")->name("{$uri}.index");
+            Route::post($uri, [$controller, 'store'])
+                ->middleware("permission:{$module}.create")->name("{$uri}.store");
+            Route::post("{$uri}/reorder", [$controller, 'reorder'])
+                ->middleware("permission:{$module}.update")->name("{$uri}.reorder");
+            Route::get("{$uri}/{id}", [$controller, 'show'])
+                ->middleware("permission:{$module}.view")->name("{$uri}.show");
+            Route::match(['put', 'patch'], "{$uri}/{id}", [$controller, 'update'])
+                ->middleware("permission:{$module}.update")->name("{$uri}.update");
+            Route::patch("{$uri}/{id}/toggle-active", [$controller, 'toggleActive'])
+                ->middleware("permission:{$module}.update")->name("{$uri}.toggle-active");
+            Route::delete("{$uri}/{id}", [$controller, 'destroy'])
+                ->middleware("permission:{$module}.delete")->name("{$uri}.destroy");
+            Route::post("{$uri}/{id}/restore", [$controller, 'restore'])
+                ->middleware("permission:{$module}.restore")->name("{$uri}.restore");
+            Route::delete("{$uri}/{id}/force", [$controller, 'forceDestroy'])
+                ->middleware("permission:{$module}.force_delete")->name("{$uri}.force-destroy");
+        }
     });
 });

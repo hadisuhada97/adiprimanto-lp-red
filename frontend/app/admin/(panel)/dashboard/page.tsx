@@ -129,9 +129,10 @@ export default function AdminDashboardPage() {
             {[
               ["F1 — Foundation", "Done"],
               ["F2 — Authentication & 2FA", "Done"],
-              ["F3 — Portfolio & media modules", "In progress"],
-              ["F4 — Remaining content modules", "Planned"],
+              ["F3 — Portfolio, media & content modules", "Done"],
+              ["F4 — Hero, about & site-wide modules", "Done"],
               ["F5 — Inbox, audit log, users", "Planned"],
+              ["F6 — Public landing page integration", "Planned"],
             ].map(([label, state]) => (
               <li key={label} className="flex items-center justify-between gap-3">
                 <span className="text-admin-gray-700 dark:text-admin-gray-300">{label}</span>

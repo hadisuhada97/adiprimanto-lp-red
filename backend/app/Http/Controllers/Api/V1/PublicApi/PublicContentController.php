@@ -5,21 +5,37 @@ namespace App\Http\Controllers\Api\V1\PublicApi;
 use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Http\Resources\AboutSectionResource;
 use App\Http\Resources\AboutStatResource;
+use App\Http\Resources\ClientResource;
+use App\Http\Resources\ContactChannelResource;
 use App\Http\Resources\FaqCategoryResource;
 use App\Http\Resources\FaqResource;
 use App\Http\Resources\HeroMetricResource;
 use App\Http\Resources\HeroSectionResource;
+use App\Http\Resources\NavigationMenuResource;
+use App\Http\Resources\PainPointResource;
+use App\Http\Resources\ProcessStepResource;
+use App\Http\Resources\SeoSettingResource;
 use App\Http\Resources\ServiceResource;
 use App\Http\Resources\ServiceStatResource;
+use App\Http\Resources\SkillCategoryResource;
+use App\Http\Resources\SocialLinkResource;
 use App\Http\Resources\TestimonialResource;
 use App\Models\AboutSection;
 use App\Models\AboutStat;
+use App\Models\Client;
+use App\Models\ContactChannel;
 use App\Models\Faq;
 use App\Models\FaqCategory;
 use App\Models\HeroMetric;
 use App\Models\HeroSection;
 use App\Models\Locale;
 use App\Models\Media;
+use App\Models\NavigationMenu;
+use App\Models\PainPoint;
+use App\Models\ProcessStep;
+use App\Models\SeoSetting;
+use App\Models\SkillCategory;
+use App\Models\SocialLink;
 use App\Models\Service;
 use App\Models\ServiceStat;
 use App\Models\Setting;
@@ -56,6 +72,110 @@ class PublicContentController extends BaseApiController
             'services' => ServiceResource::collection($services),
             'stats' => ServiceStatResource::collection($stats),
         ], 'Services retrieved successfully.');
+    }
+
+    public function skills(Request $request): JsonResponse
+    {
+        app()->setLocale($this->resolveLocale($request));
+
+        $categories = SkillCategory::query()
+            ->active()
+            ->with(['translations', 'skills' => fn ($query) => $query->active()->ordered()])
+            ->ordered()
+            ->get();
+
+        return $this->respondSuccess(
+            SkillCategoryResource::collection($categories),
+            'Skills retrieved successfully.'
+        );
+    }
+
+    public function painPoints(Request $request): JsonResponse
+    {
+        app()->setLocale($this->resolveLocale($request));
+
+        return $this->respondSuccess(
+            PainPointResource::collection(
+                PainPoint::query()->active()->with('translations')->ordered()->get()
+            ),
+            'Pain points retrieved successfully.'
+        );
+    }
+
+    public function processSteps(Request $request): JsonResponse
+    {
+        app()->setLocale($this->resolveLocale($request));
+
+        return $this->respondSuccess(
+            ProcessStepResource::collection(
+                ProcessStep::query()->active()->with('translations')->ordered()->get()
+            ),
+            'Process steps retrieved successfully.'
+        );
+    }
+
+    public function clients(Request $request): JsonResponse
+    {
+        app()->setLocale($this->resolveLocale($request));
+
+        return $this->respondSuccess(
+            ClientResource::collection(
+                Client::query()->active()->with(['translations', 'logo'])->ordered()->get()
+            ),
+            'Clients retrieved successfully.'
+        );
+    }
+
+    public function navigation(Request $request): JsonResponse
+    {
+        app()->setLocale($this->resolveLocale($request));
+
+        $items = NavigationMenu::query()
+            ->active()
+            ->whereNull('parent_id')
+            ->with(['translations', 'children' => fn ($query) => $query->active()->with('translations')->ordered()])
+            ->ordered()
+            ->get();
+
+        return $this->respondSuccess([
+            'header' => NavigationMenuResource::collection($items->where('location', 'header')->values()),
+            'footer' => NavigationMenuResource::collection($items->where('location', 'footer')->values()),
+        ], 'Navigation retrieved successfully.');
+    }
+
+    public function contact(Request $request): JsonResponse
+    {
+        app()->setLocale($this->resolveLocale($request));
+
+        return $this->respondSuccess([
+            'channels' => ContactChannelResource::collection(
+                ContactChannel::query()->active()->with('translations')->ordered()->get()
+            ),
+            'social_links' => SocialLinkResource::collection(
+                SocialLink::query()->active()->ordered()->get()
+            ),
+        ], 'Contact information retrieved successfully.');
+    }
+
+    public function seo(Request $request): JsonResponse
+    {
+        app()->setLocale($this->resolveLocale($request));
+
+        $query = SeoSetting::query()->active()->with(['translations', 'ogImage'])->ordered();
+
+        if ($request->filled('page_key')) {
+            $entry = $query->where('page_key', $request->string('page_key'))->first();
+
+            return $this->respondSuccess(
+                $entry === null ? null : new SeoSettingResource($entry),
+                'SEO entry retrieved successfully.'
+            );
+        }
+
+        return $this->respondSuccess(
+            SeoSettingResource::collection($query->get()),
+            'SEO entries retrieved successfully.'
+        );
     }
 
     public function hero(Request $request): JsonResponse

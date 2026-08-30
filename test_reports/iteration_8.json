@@ -1,0 +1,43 @@
+{
+  "summary": "Fase F4 part 2 tested end-to-end (backend + frontend). Backend: new pytest suite /app/backend/tests/pytest/test_phase_f4b_content_modules.py — 74/74 passed. Covers seeded counts for all 9 admin list endpoints (4 skill categories with skills_count 8/6/2/6, 22 skills, 3 pain points, 4 process steps, 5 clients with TripLinq featured, 11 navigation items filtered 6 header / 5 footer, 3 contact channels whatsapp/email/instagram, 4 social links, 2 SEO pages), full CRUD lifecycles (create -> GET verify -> PATCH -> GET verify -> toggle-active -> trash -> trash listing -> restore -> force delete) for skill-categories, skills, pain-points, process-steps, clients, navigation-menus (header+footer, no cross-section leakage), contact-channels, social-links, seo-settings, reorder persistence, validation (empty pain point 422 with readable message, invalid client website_url, non-hex contact colour, invalid social URL, duplicate SEO page_key, missing skill name), all 7 public endpoints without auth incl. /public/navigation (header+footer arrays), /public/contact (channels+social_links), /public/seo?page_key=home, active-only filtering, sort order, ?locale=id default vs ?locale=en, 401 for anonymous admin access, Editor able to list/update all 9 modules but 403 on every /force endpoint, plus regression on hero/hero-metrics/about/about-stats/testimonials/services/faqs/faq-categories/settings. Frontend (Playwright on the production build): all 8 admin pages verified — seeded rows render, create/edit with ID+EN locale tabs, selects, colour pickers, switches, media picker, chevron reorder persisted after reload, trash -> restore -> force delete cycles, inline 422 errors, skills modal category select reflects a newly created category and shows no locale tabs, social-links modal shows no locale tabs, SEO invalid JSON blocked client-side ('This must be valid JSON.') with zero POST requests, duplicate page_key inline error, structured_data + robots persisted. Editor UI hides delete buttons and can save updates. All F4b test data was cleaned up (DB back at seeded counts, 0 trashed rows).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "all /api/v1/admin/*", "issue": "The global 'api' rate limiter (120/min per user) makes an exhaustive automated suite hit 429; the pytest suite now backs off and retries. Not a product defect, but worth knowing for future test runs."},
+      {"endpoint": "POST /api/v1/auth/login", "issue": "Expected failed-login attempts are written to laravel.log at production.ERROR level with a full stack trace (AuthenticationFailedException) — log noise; warning level would be more appropriate."},
+      {"endpoint": "GET /api/v1/admin/skills", "issue": "Ordering uses preOrderColumns = ['skill_category_id'], i.e. rows are grouped by the raw UUID of the category, not by the category's own sort_order. Category groups therefore appear in an arbitrary (uuid) sequence and chevron reorder writes global sort_order values across groups. Works, but grouping order is not editor-controllable."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Dashboard", "issues": ["The static 'Delivery roadmap' card still shows 'F3 — Portfolio & media modules: In progress' and 'F4 — Remaining content modules: Planned' although F3/F4 are delivered — stale hardcoded copy."]},
+      {"screen": "Navigation Menu (header list)", "issues": ["Seeded header label reads 'Faq' instead of 'FAQ' (seeder copy, cosmetic)."]},
+      {"screen": "Validation messages", "issues": ["Attribute names are not humanised in messages, e.g. 'The website url field must be a valid URL.' instead of 'Website URL'. Readable, but slightly off."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/pytest/test_phase_f4b_content_modules.py",
+    "/app/test_reports/pytest/f4b_results.xml"
+  ],
+  "action_items": [
+    "Optional: order skills by their category's sort_order instead of skill_category_id (uuid) so the tech-stack grouping is editor-controllable.",
+    "Optional: update the hardcoded dashboard 'Delivery roadmap' statuses (F3/F4).",
+    "Optional: log failed logins at warning level instead of ERROR with stack trace.",
+    "Optional cosmetic: seeder label 'Faq' -> 'FAQ'; add nicer validation attribute names (e.g. website_url -> Website URL)."
+  ],
+  "critical_code_review_comments": [
+    "ContentModuleController::update calls $form->has('translations') on the raw request while writing $form->safe()->array('translations') — fine today, but a request that sends translations with only invalid keys would silently no-op; consider using safe()->has().",
+    "CrudSection.tsx is at 698 lines (right at the 700-line guideline). Any further additions should be split (e.g. extract the modal/form renderer into its own component).",
+    "CrudSection.move() optimistically swaps rows and posts sort_order for the whole visible list; for the navigation page this is scoped per location which is correct, but for /admin/skills the list spans categories so a reorder rewrites sort_order globally across groups."
+  ],
+  "updated_files": ["/app/backend/tests/pytest/test_phase_f4b_content_modules.py"],
+  "success_rate": {"backend": "100% (74/74 pytest)", "frontend": "100% of the 8 F4b module flows tested"},
+  "seed_data_creation": "Temporary TEST_QA / TEST_ rows were created in every module during API and UI testing and all were force-deleted afterwards; MySQL counts verified back at seeded values (22 skills, 4 categories, 3 pain points, 4 steps, 5 clients, 11 nav items, 3 channels, 4 social links, 2 SEO pages) with 0 soft-deleted rows.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "shell.test@adiprimanto.com / ShellTester#2026 (Super Admin, no 2FA); editor.test@adiprimanto.com / EditorTest#2026 (Editor, no 2FA)",
+  "context_for_next_testing_agent": "Run `pytest /app/backend/tests/pytest/test_phase_f4b_content_modules.py` for F4b regression — it is self-cleaning and contains a ThrottleAwareSession that retries on the 120/min 429 limiter (reuse this pattern; older suites do not have it and can fail with 429 if run back-to-back). Frontend field-key gotchas: the contact-channel 'Link' field key is `url` (not `link`), so its testid is contact-channel-input-url; the same for social links. The inline field error is NOT inside [data-testid=\"<prefix>-field-<key>\"] in every case — assert on the modal's inner_text instead. Confirm dialogs use <prefix>-delete-dialog-confirm-button; locale tab clicks must be scoped to the modal ('[data-testid=\"<prefix>-form-modal\"] [data-testid=\"<prefix>-locale-tab-en\"]'). Reorder is verified by comparing row data-testid order before/after page reload. Editor account renders no delete buttons and gets 403 on /force.",
+  "rca_of_the_issue": "No defects found in the F4b modules. The only failures during this round were test-side: (1) 429 responses from the global 120/min api limiter while running an exhaustive suite — fixed by adding a retry/back-off session in the test file; (2) two wrong selectors in my Playwright script (contact-channel 'link' field is keyed `url`, and the client website_url error is not rendered inside the field testid wrapper) — the application behaviour was correct in both cases (screenshot confirmed the inline 'The website url field must be a valid URL.' message)."
+}

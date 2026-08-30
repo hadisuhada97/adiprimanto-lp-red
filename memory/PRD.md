@@ -865,3 +865,48 @@ Catatan: jalankan `php artisan cache:clear` bila login pytest terkena rate limit
 
 **Berikutnya (F4 lanjutan)**: Skills/Tech Stack, Pain Points, Process Steps, Clients & Brands,
 Navigation Menu, Contact Channels, Social Links, SEO Settings.
+
+---
+
+## Fase F4b — 8 Modul Konten Site-Wide (SELESAI, 30 Jun 2026)
+
+Modul: **Skills/Tech Stack (kategori + skill), Pain Points, Process Steps, Clients & Brands,
+Navigation Menu (header + footer), Contact Channels, Social Links, SEO Settings (per halaman)**.
+
+**Backend**:
+- Migration `2026_06_05_000001_create_content_module_tables.php` → 16 tabel
+  (`skill_categories`, `skills`, `pain_points`, `process_steps`, `clients`, `navigation_menus`,
+  `contact_channels`, `social_links`, `seo_settings` + tabel translations masing-masing;
+  `skills` & `social_links` tanpa translations)
+- **`ContentModuleController` (abstract)**: satu implementasi CRUD generik (index dengan
+  search/filter/trashed, show, store, update, destroy, restore, forceDestroy, toggleActive, reorder)
+  + hook `$relations`, `$withCount`, `$searchColumns`, `$searchTranslationColumns`, `$filterColumns`,
+  `$parentOrder`. 9 controller konkret hanya mendefinisikan model/resource/request → boilerplate minim
+- Rute didaftarkan lewat loop `$contentModules` di `routes/api.php` (9 rute per modul, permission per aksi)
+- Public API: `/public/skills`, `/public/pain-points`, `/public/process-steps`, `/public/clients`,
+  `/public/navigation` (header+footer), `/public/contact` (channels + social_links),
+  `/public/seo[?page_key=]`
+- `SiteContentSeeder`: 4 kategori + 22 skill, 3 pain point, 4 process step, 5 klien, 11 item menu,
+  3 contact channel, 4 social link, 2 entri SEO (ID + EN) — semuanya diambil dari landing page statis
+
+**Frontend**:
+- Komponen generik **`CrudSection`** (list + reorder + toggle + trash lifecycle + modal form dengan
+  LocaleTabs, tipe field: text/textarea/number/color/select/media/switch/json) — dipakai 8 halaman baru
+- Halaman: `/admin/skills` (2 section), `/admin/pain-points`, `/admin/process-steps`, `/admin/clients`,
+  `/admin/navigation` (section header & footer, `location` disuntik otomatis), `/admin/contact-channels`,
+  `/admin/social-links`, `/admin/settings/seo` (JSON-LD divalidasi di klien)
+
+**Perbaikan pasca-QA (iteration_8)**:
+- Urutan `/admin/skills` kini mengikuti `sort_order` kategori (bukan UUID) via hook `$parentOrder`
+- Kartu "Delivery roadmap" di dashboard diperbarui (F3 & F4 = Done, F5/F6 = Planned)
+- Nama atribut validasi lebih manusiawi (`website URL`, `colour`, `latitude`, dst) via
+  `BaseFormRequest::attributes()`
+- Login gagal tidak lagi ditulis sebagai ERROR + stack trace (`dontReport`)
+- Label menu seeder `Faq` → `FAQ`
+
+**Hasil pengujian**: `tests/pytest/test_phase_f4b_content_modules.py` **74/74 lolos** (self-cleaning,
+punya retry untuk rate limit 429); seluruh alur Playwright 8 halaman admin lolos, termasuk cek
+permission Editor (403 pada semua endpoint `/force`). Tidak ada bug kritis/menengah tersisa.
+
+**Berikutnya (F5)**: Contact Messages/Inbox + notifikasi email, UI Activity Log, UI Users & Roles,
+statistik dashboard. Lalu **F6**: integrasi landing page ke API publik & melepas Supabase.

@@ -22,6 +22,26 @@ abstract class BaseFormRequest extends FormRequest
         throw new ValidationException($validator);
     }
 
+    /** Friendlier names used inside validation messages. */
+    public function attributes(): array
+    {
+        return [
+            'website_url' => 'website URL',
+            'url' => 'URL',
+            'color_hex' => 'colour',
+            'page_key' => 'page key',
+            'icon_name' => 'icon name',
+            'og_image_media_id' => 'social image',
+            'logo_media_id' => 'logo',
+            'profile_media_id' => 'profile photo',
+            'photo_media_id' => 'photo',
+            'skill_category_id' => 'category',
+            'faq_category_id' => 'category',
+            'location_lat' => 'latitude',
+            'location_lng' => 'longitude',
+        ];
+    }
+
     /** Locale requested by the client, restricted to active locales. */
     protected function requestedLocale(): string
     {

@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\AuthenticationFailedException;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\ForceJsonResponse;
 use App\Support\ApiExceptionRenderer;
@@ -31,5 +32,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Failed logins are an expected outcome, not an application error.
+        $exceptions->dontReport(AuthenticationFailedException::class);
+
         $exceptions->render(fn (Throwable $e, $request) => ApiExceptionRenderer::render($e, $request));
     })->create();
