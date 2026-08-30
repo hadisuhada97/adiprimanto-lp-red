@@ -562,3 +562,38 @@ REVALIDATE_SECRET=
 ---
 
 *Dokumen ini adalah sumber kebenaran tunggal untuk pengembangan CMS. Setiap perubahan cakupan harus tercatat pada riwayat revisi.*
+
+---
+
+## 15. Riwayat Implementasi
+
+### Fase F1 — Fondasi ✅ SELESAI (2026-06)
+
+**Environment**: PHP 8.2.33, Composer 2.10, Laravel 12.68, MariaDB 10.11 (database `adiprimanto_cms`).
+
+**Restrukturisasi repo**: Next.js dipindah dari `/app` ke `/app/frontend`; Laravel dibuat di `/app/backend`.
+Dua import `react-icons` yang sudah usang diperbaiki (`SiCss3` → `SiCss`, `SiNuxtdotjs` → `SiNuxt`)
+agar `next build` lolos.
+
+**Yang dibangun**:
+- `BaseModel` (UUID v7 + SoftDeletes + Blameable + LogsActivity) dan `BaseTranslationModel`
+- Trait `HasTranslations` (1 baris per locale + fallback), `HasSortOrder`, `LogsActivity`, `Blameable`
+- Pivot model UUID (`RolePermission`, `RoleUser`) agar `sync()`/`attach()` tetap menghasilkan UUID
+- `ApiResponse` (envelope success/created/error/paginated) + `ApiExceptionRenderer` (422/401/403/404/500)
+- `BaseApiController`, `BaseFormRequest`, middleware `CheckPermission` & `ForceJsonResponse`, `config/cors.php`
+- Enum `ModuleKey`, `PermissionAction`, `RoleSlug` sebagai sumber kebenaran matriks permission
+- Migrasi: users, roles, permissions, role_permission, role_user, two_factor_codes, activity_logs,
+  locales, settings, setting_translations, personal_access_tokens (uuidMorphs)
+- Seeder: 128 permission, 3 role (super-admin 128 / admin 97 / editor 54), 2 locale (default `id`),
+  15 setting, 1 admin Super Admin — semuanya idempoten
+- Endpoint `GET /api/v1/health`
+- Supervisor: program `laravel` (port 8001) + `mariadb`
+
+**Pengecualian terdokumentasi**: tabel infrastruktur framework (`cache`, `cache_locks`, `jobs`,
+`job_batches`, `failed_jobs`, `sessions`, `password_reset_tokens`, `migrations`) tetap memakai
+skema bawaan Laravel tanpa UUID.
+
+**Hasil pengujian**: 32 test case, 100% lolos, tanpa temuan (`/app/test_reports/iteration_1.json`).
+
+**Catatan untuk F4**: `setting_translations` masih kosong; terjemahan default id/en akan diisi
+saat modul Site Settings dibangun.

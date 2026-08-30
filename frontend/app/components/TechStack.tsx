@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import {
   SiHtml5,
-  SiCss3,
+  SiCss,
   SiJavascript,
   SiTypescript,
   SiJquery,
@@ -13,7 +13,7 @@ import {
   SiReact,
   SiNextdotjs,
   SiVuedotjs,
-  SiNuxtdotjs,
+  SiNuxt,
   SiFlutter,
   SiNodedotjs,
   SiPhp,
@@ -30,7 +30,7 @@ const skillCategories = [
     eyebrow: "01",
     skills: [
       { title: "HTML5", icon: SiHtml5, color: "#E34F26" },
-      { title: "CSS3", icon: SiCss3, color: "#1572B6" },
+      { title: "CSS3", icon: SiCss, color: "#1572B6" },
       { title: "JavaScript", icon: SiJavascript, color: "#F7DF1E" },
       { title: "TypeScript", icon: SiTypescript, color: "#3178C6" },
       { title: "jQuery", icon: SiJquery, color: "#0769AD" },
@@ -46,7 +46,7 @@ const skillCategories = [
       { title: "React JS", icon: SiReact, color: "#61DAFB" },
       { title: "Next JS", icon: SiNextdotjs, color: "#ffffff" },
       { title: "Vue JS", icon: SiVuedotjs, color: "#42B883" },
-      { title: "Nuxt JS", icon: SiNuxtdotjs, color: "#00DC82" },
+      { title: "Nuxt JS", icon: SiNuxt, color: "#00DC82" },
       { title: "Pinia", icon: SiVuedotjs, color: "#42B883" },
       { title: "Vuex", icon: SiVuedotjs, color: "#42B883" },
     ],
