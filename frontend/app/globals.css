@@ -1,5 +1,43 @@
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne+Mono&family=Inter:wght@300;400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne+Mono&family=Inter:wght@300;400;500&family=Outfit:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
+
+/* Dark mode for the admin panel follows the same data-theme attribute as the landing page. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* TailAdmin v2.3 design tokens (admin panel only) */
+@theme {
+  --font-admin: "Outfit", sans-serif;
+
+  --color-brand-25: #f2f7ff;
+  --color-brand-50: #ecf3ff;
+  --color-brand-100: #dde9ff;
+  --color-brand-200: #c2d6ff;
+  --color-brand-300: #9cb9ff;
+  --color-brand-400: #7592ff;
+  --color-brand-500: #465fff;
+  --color-brand-600: #3641f5;
+  --color-brand-700: #2a31d8;
+  --color-brand-800: #252dae;
+  --color-brand-900: #262e89;
+  --color-brand-950: #161950;
+
+  --color-admin-gray-25: #fcfcfd;
+  --color-admin-gray-50: #f9fafb;
+  --color-admin-gray-100: #f2f4f7;
+  --color-admin-gray-200: #e4e7ec;
+  --color-admin-gray-300: #d0d5dd;
+  --color-admin-gray-400: #98a2b3;
+  --color-admin-gray-500: #667085;
+  --color-admin-gray-600: #475467;
+  --color-admin-gray-700: #344054;
+  --color-admin-gray-800: #1d2939;
+  --color-admin-gray-900: #101828;
+  --color-admin-gray-950: #0c111d;
+
+  --color-success-500: #12b76a;
+  --color-warning-500: #f79009;
+  --color-error-500: #f04438;
+}
 
 @theme inline {
   --font-display: "Space Grotesk", sans-serif;
@@ -106,6 +144,25 @@ body::before {
 ::selection {
   background-color: #EF4444;
   color: #0c0c0e;
+}
+
+/* ========================================
+   ADMIN PANEL BASE
+======================================== */
+.admin-root {
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+@keyframes admin-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
 }
 
 /* ========================================

@@ -1,0 +1,43 @@
+{
+  "summary": "Frontend-only E2E testing of Phase F3: TailAdmin two-step admin login (credentials + 6-box OTP) plus dashboard/logout/route-guard/landing/backend-health regression. Executed 14 Playwright scenarios covering every checklist item in the review request. All 14 PASSED (100%). The paste-full-6-digit flow triggers onComplete auto-submit which unmounts the OTP inputs mid-check; a follow-up run confirmed end-to-end that paste alone (no click on verify) lands on /admin/dashboard with the admin_access_token cookie set, greeting 'Welcome back, Adi Primanto', email 'admin@adiprimanto.com', permission count 128.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "verified_scenarios": [
+    "Login page renders with all data-testids (email, password, toggle, submit, step-credentials)",
+    "Route guard: /admin/dashboard without cookie -> /admin/login",
+    "Route guard: /admin/login WITH cookie -> /admin/dashboard",
+    "Client-side validation: malformed email surfaces login-email-error (backend 422 mapped)",
+    "Invalid credentials -> login-form-error 'These credentials do not match our records.' + toast-error + stays on step 1",
+    "Password visibility toggle switches input type password<->text",
+    "Step 1 happy path -> login-step-verification, toast-success, otp-masked-email='ad***@adiprimanto.com', 6 OTP boxes, 'Code expires in 9:59', '5 attempts left', resend disabled",
+    "Countdown decreases every second (9:59 -> 9:57 after 2.2s)",
+    "OTP behaviour: auto-advance focus, Backspace moves focus back, verify button disabled until 6 digits entered",
+    "Wrong OTP 000000 -> otp-form-error 'The verification code is invalid.' + toast-error + attempts '5 attempts left' -> '4 attempts left'",
+    "Back button returns to step 1 with password field cleared",
+    "Step 2 END-TO-END: real OTP read from laravel.log, paste into box 0 fills all 6 and auto-submits (no verify click needed), lands on /admin/dashboard with cookie, greeting/email/perms all correct",
+    "Logout clears admin_access_token cookie, shows toast, redirects to /admin/login; subsequent /admin/dashboard visit re-redirects to /admin/login",
+    "Landing page (/) still renders (title + hero content intact)",
+    "Backend regression: GET /api/v1/health returns healthy JSON envelope"
+  ],
+  "test_report_links": [
+    "/app/test_reports/iteration_3.json"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Non-httpOnly admin_access_token cookie is intentional (needed by Next.js middleware) and documented, but keep in mind XSS mitigation: strict CSP, sanitize any user-authored HTML fields before rendering. This is a known trade-off, not a defect.",
+    "OTP paste handler correctly consumes clipboard text via ClipboardEvent dispatch and auto-submits through onComplete; consider adding an aria-live region for the countdown and attempts-left so screen readers announce them.",
+    "login attempt rate limit (5/min) is enforced server-side; UI could surface a specific error string when the limiter hits to distinguish from bad credentials."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "100% (health regression only)", "frontend": "100% (14/14)" },
+  "test_credentials": "admin@adiprimanto.com / AdiPrimanto#2026 (super admin, 128 perms), editor.test@adiprimanto.com / EditorTest#2026 (used for wrong-password test; failed_login_attempts and locked_until reset via tinker after test)",
+  "seed_data_creation": "None. Only ran php artisan cache:clear between login bursts to reset rate limiter and reset editor.test failed_login_attempts=0/locked_until=null after wrong-password test.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Phase F3 admin login UI is fully green. When testing anything that repeatedly hits POST /api/v1/auth/login, run 'cd /app/backend && php artisan cache:clear' between bursts (throttle is 5 req/min per email+IP). Use editor.test for any bad-password test and reset via User::update(failed_login_attempts=0, locked_until=null) afterwards. OTP is written to /app/backend/storage/logs/laravel.log by the laravel-queue worker; allow ~2s after step 1. The full-string paste into otp-digit-0 auto-submits and unmounts the inputs, so don't try to read input_value after paste.",
+  "rca of the issue": "No unresolved issue. First run's test #11 initially showed as FAIL because the assertion script tried to read input values of the OTP boxes AFTER paste, but the onComplete auto-submit had already navigated to /admin/dashboard and unmounted them. The follow-up isolated run confirmed the paste + auto-submit flow works end-to-end (cookie set, dashboard reached, all dashboard testids correct)."
+}

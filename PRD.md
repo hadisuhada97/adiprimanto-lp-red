@@ -643,3 +643,36 @@ email OTP (`MAIL_MAILER=log` di lingkungan preview, kode tampil di `storage/logs
 
 **Hasil pengujian**: 18/18 test case F2 lolos + 32/32 regresi F1
 (`/app/test_reports/iteration_2.json`, `backend/tests/pytest/test_phase_f2_auth.py`).
+
+### Fase F3a — Halaman Login Admin (TailAdmin) ✅ SELESAI (2026-06)
+
+**Rute baru di Next.js**: `/admin/login` (2 langkah), `/admin/dashboard` (terproteksi),
+`/admin` (redirect ke dashboard), plus `middleware.ts` sebagai penjaga rute berbasis cookie
+`admin_access_token`.
+
+**Halaman login dua langkah**:
+- Langkah 1: email + password, toggle lihat password, error 422 dari API dipetakan ke bawah
+  field terkait, error umum tampil di kotak inline + toast
+- Langkah 2: **6 kotak OTP** dengan auto-advance, Backspace, panah kiri/kanan, paste satu
+  string 6 digit, dan **auto-submit** saat digit ke-6 terisi
+- **Hitungan waktu kedaluwarsa** (mm:ss) yang menurun tiap detik, indikator sisa percobaan,
+  tombol Resend dengan cooldown 60 detik + sisa kuota resend, serta state "kode kedaluwarsa"
+- Tombol "Back to sign in" mengosongkan password dan kembali ke langkah 1
+
+**Komponen pendukung**: `app/lib/admin/api-client.ts` (wrapper fetch + `ApiError` dengan
+`fieldError()`/`context`), `app/lib/admin/auth-context.tsx` (login/verify/resend/logout/me),
+`app/lib/admin/toast.tsx` (**Toast Message** 4 varian, auto-dismiss 4.5 detik),
+`app/components/admin/OtpInput.tsx`, `app/admin/layout.tsx`.
+
+**Styling**: token TailAdmin v2.3 (brand `#465fff`, skala `admin-gray`, font Outfit) ditambahkan
+ke `@theme` Tailwind v4 di `globals.css`, plus `@custom-variant dark` yang mengikuti atribut
+`data-theme` yang sudah dipakai landing page. Template TailAdmin tidak di-vendor; tampilannya
+direplikasi memakai setup Tailwind yang ada.
+
+**Catatan keamanan**: access token disimpan di cookie non-httpOnly `admin_access_token` agar
+middleware Next.js bisa memproteksi rute. Konsekuensinya CSP ketat dan sanitasi rich text di
+server tetap wajib (sudah tercatat di rekomendasi R-09).
+
+**Hasil pengujian**: 14/14 skenario Playwright lolos, termasuk alur end-to-end nyata
+(login → OTP dari mail log → dashboard → logout) dan regresi landing page
+(`/app/test_reports/iteration_3.json`).

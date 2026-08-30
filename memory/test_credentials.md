@@ -48,8 +48,7 @@ be running. Allow ~2 seconds between step 1 and reading the log.
 
 ## Endpoints available
 
-| Method | Path | Auth | Throttle |
-|---|---|---|---|
+| Method | Path | Auth | Throttle ||---|---|---|---|
 | GET | `/api/v1/health` | none | 120/min |
 | POST | `/api/v1/auth/login` | none | 5/min per email+IP |
 | POST | `/api/v1/auth/two-factor/verify` | none | 10/min per challenge+IP |
@@ -67,6 +66,16 @@ be running. Allow ~2 seconds between step 1 and reading the log.
 | OTP resend | max 3 per challenge, 60 second cooldown |
 | Login lockout | 5 failed passwords → account locked 15 minutes |
 | Access token | Sanctum PAT, expires after 8 hours (`SANCTUM_TOKEN_EXPIRATION`) |
+
+## Admin panel URLs
+
+| Page | URL |
+|---|---|
+| Sign in (2 steps) | `/admin/login` |
+| Dashboard (protected) | `/admin/dashboard` |
+
+The access token is stored in the non-httpOnly cookie `admin_access_token` so the Next.js
+middleware can guard `/admin/*`. Signing in requires the OTP from the mail log (see above).
 
 ## Notes
 
