@@ -597,3 +597,49 @@ skema bawaan Laravel tanpa UUID.
 
 **Catatan untuk F4**: `setting_translations` masih kosong; terjemahan default id/en akan diisi
 saat modul Site Settings dibangun.
+
+### Fase F2 — Autentikasi & 2FA ✅ SELESAI (2026-06)
+
+**Alur login dua langkah** (langkah 1 tidak pernah mengembalikan access token):
+
+| Method | Path | Throttle |
+|---|---|---|
+| POST | `/api/v1/auth/login` | 5/menit per email+IP |
+| POST | `/api/v1/auth/two-factor/verify` | 10/menit per challenge+IP |
+| POST | `/api/v1/auth/two-factor/resend` | 3/menit per challenge+IP |
+| GET | `/api/v1/auth/me` | `auth:sanctum` |
+| POST | `/api/v1/auth/logout` | `auth:sanctum` |
+| POST | `/api/v1/auth/logout-all` | `auth:sanctum` |
+
+**Kontrol keamanan yang aktif**:
+- OTP 6 digit disimpan sebagai bcrypt hash, TTL 10 menit, sekali pakai (`consumed_at`)
+- Maksimal 5 percobaan OTP per challenge; challenge dihancurkan setelah habis
+- Resend maksimal 3 kali dengan cooldown 60 detik; `challenge_token` tetap sama, kode dirotasi
+- Penguncian akun otomatis: 5 password salah → terkunci 15 menit (HTTP 423), password benar
+  pun tetap ditolak selama terkunci; counter direset setelah password benar
+- Proteksi account enumeration: email tidak dikenal tetap melewati bcrypt dummy hash dan
+  mengembalikan pesan generik yang sama
+- Akun non-aktif ditolak 403; token Sanctum PK UUID dengan masa berlaku 8 jam
+- Seluruh event auth tercatat di `activity_logs` dengan prefix `auth.*` (enum `AuthEvent`)
+
+**Berkas kunci**: `AuthenticationService`, `TwoFactorService`, `TwoFactorCode`,
+`LoginController` / `TwoFactorController` / `SessionController`, 3 Form Request di
+`app/Http/Requests/Auth`, `AuthenticationFailedException`, `AuthActivityLogger`,
+`TwoFactorCodeNotification` (queued), `config/two_factor.php`, rate limiter bernama di
+`AppServiceProvider`.
+
+**Perbaikan yang diperlukan selama fase ini**:
+1. `ADMIN_PASSWORD` di `.env` wajib dikutip karena mengandung `#` (tanpa kutip nilainya terpotong
+   dan password hasil seed jadi salah).
+2. Signature callback rate limiter Laravel 12 adalah `fn (Request, array $headers)`, bukan integer —
+   sebelumnya menyebabkan HTTP 500 alih-alih 429.
+3. `ApiExceptionRenderer` harus meneruskan `HttpResponseException` ke framework, jika tidak
+   respons 429 dari throttle akan tertangkap sebagai 500.
+4. `trustProxies(at: '*')` wajib diaktifkan: tanpa itu ingress platform mengirim IP proxy yang
+   berubah-ubah sehingga rate limiter dan audit log mencatat IP yang salah.
+
+**Infrastruktur**: supervisor program `laravel-queue` ditambahkan untuk memproses pengiriman
+email OTP (`MAIL_MAILER=log` di lingkungan preview, kode tampil di `storage/logs/laravel.log`).
+
+**Hasil pengujian**: 18/18 test case F2 lolos + 32/32 regresi F1
+(`/app/test_reports/iteration_2.json`, `backend/tests/pytest/test_phase_f2_auth.py`).

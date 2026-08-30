@@ -77,9 +77,48 @@ Guard routes with `->middleware('permission:projects.create')`.
 - [x] **F1 — Foundation**: project setup, UUID base migrations, traits, base controller /
       form request, API envelope, exception renderer, CORS, permission middleware,
       role / permission / locale / setting / admin seeders, health endpoint
-- [ ] F2 — Auth & 2FA (email OTP)
+- [x] **F2 — Auth & 2FA**: credential check with account lockout, 6-digit email OTP challenge,
+      Sanctum tokens with UUID PKs and 8 hour expiry, session endpoints, named rate limiters,
+      auth audit trail
 - [ ] F3 — Core content modules
 - [ ] F4 — Remaining content modules
 - [ ] F5 — Inbox, audit log, users & roles UI, dashboard
 - [ ] F6 — Next.js integration
 - [ ] F7 — Legacy data migration & QA
+
+## Authentication
+
+Two-step sign-in. Step 1 never returns an access token.
+
+| Method | Path | Middleware |
+|---|---|---|
+| POST | `/api/v1/auth/login` | `throttle:auth-login` (5/min per email+IP) |
+| POST | `/api/v1/auth/two-factor/verify` | `throttle:auth-two-factor` (10/min) |
+| POST | `/api/v1/auth/two-factor/resend` | `throttle:auth-two-factor-resend` (3/min) |
+| GET | `/api/v1/auth/me` | `auth:sanctum` |
+| POST | `/api/v1/auth/logout` | `auth:sanctum` |
+| POST | `/api/v1/auth/logout-all` | `auth:sanctum` |
+
+Tunables live in `config/two_factor.php` (OTP length, TTL, attempts, resend limit and
+cooldown, login max attempts, lockout minutes).
+
+| Concern | Implementation |
+|---|---|
+| OTP storage | bcrypt hash in `two_factor_codes.code_hash`, never the plain code |
+| Single use | `consumed_at` is stamped on success; replays are rejected |
+| Attempts | `attempts` counter; challenge destroyed once `max_attempts` is reached |
+| Resend | `resend_count` + `last_sent_at` enforce the limit and cooldown |
+| Lockout | `users.failed_login_attempts` / `locked_until`, HTTP 423 while locked |
+| Enumeration | Unknown emails still run a bcrypt comparison against a dummy hash |
+| Delivery | `TwoFactorCodeNotification` is queued — the queue worker must be running |
+| Audit | Every event is written to `activity_logs` with an `auth.*` action (see `AuthEvent`) |
+
+### Environment gotchas
+
+- `trustProxies(at: '*')` is enabled in `bootstrap/app.php`. The platform ingress forwards
+  requests from rotating proxy IPs, so without it rate limiter keys and audit-log IP addresses
+  are wrong.
+- `ApiExceptionRenderer` deliberately returns `null` for `HttpResponseException` so that the
+  throttle middleware's own 429 response is used instead of being reported as a 500.
+- Quote any `.env` value containing `#`, otherwise everything after it is treated as a comment.
+

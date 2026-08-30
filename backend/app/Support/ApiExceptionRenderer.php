@@ -2,9 +2,11 @@
 
 namespace App\Support;
 
+use App\Exceptions\AuthenticationFailedException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -20,7 +22,13 @@ class ApiExceptionRenderer
             return null;
         }
 
+        // Laravel already carries a prepared response on these; let the framework use it.
+        if ($e instanceof HttpResponseException) {
+            return null;
+        }
+
         return match (true) {
+            $e instanceof AuthenticationFailedException => $e->render($request),
             $e instanceof ValidationException => ApiResponse::error(
                 'The given data was invalid.',
                 422,

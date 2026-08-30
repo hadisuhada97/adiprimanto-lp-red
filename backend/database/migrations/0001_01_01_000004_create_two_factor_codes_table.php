@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('channel', 16)->default('email');
             $table->timestamp('expires_at');
             $table->timestamp('consumed_at')->nullable();
+            $table->timestamp('last_sent_at')->nullable();
             $table->unsignedTinyInteger('attempts')->default(0);
             $table->unsignedTinyInteger('resend_count')->default(0);
             $table->string('ip_address', 45)->nullable();

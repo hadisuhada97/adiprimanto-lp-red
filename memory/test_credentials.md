@@ -1,21 +1,21 @@
 # Test Credentials — Adiprimanto CMS
 
-> Updated: 2026-06 (Phase F1 — Foundation)
+> Updated: 2026-06 (Phase F2 — Authentication & 2FA)
 
-## Admin Panel / API (Laravel backend)
+## Admin Panel / API accounts
 
-| Field | Value |
-|---|---|
-| Email | `admin@adiprimanto.com` |
-| Password | `AdiPrimanto#2026` |
-| Role | Super Admin (all 128 permissions) |
-| 2FA | Enabled on the account, but the login endpoints are **not implemented yet** (Phase F2) |
+| Field | Super Admin | Editor (test) |
+|---|---|---|
+| Email | `admin@adiprimanto.com` | `editor.test@adiprimanto.com` |
+| Password | `AdiPrimanto#2026` | `EditorTest#2026` |
+| Role | Super Admin (128 permissions) | Editor (54 permissions) |
+| 2FA | Enabled | Enabled |
 
-Seeded idempotently by `database/seeders/AdminUserSeeder.php` from `ADMIN_EMAIL` /
-`ADMIN_PASSWORD` in `/app/backend/.env`. Re-running `php artisan db:seed` keeps the
-password in sync with the env file.
+The Super Admin is seeded idempotently by `database/seeders/AdminUserSeeder.php` from
+`ADMIN_EMAIL` / `ADMIN_PASSWORD` in `/app/backend/.env`. The password is quoted in `.env`
+because it contains `#`.
 
-## Database (MySQL / MariaDB, local)
+## Database (MariaDB, local)
 
 | Field | Value |
 |---|---|
@@ -24,24 +24,52 @@ password in sync with the env file.
 | Username | `cms_user` |
 | Password | `cms_secret_2026` |
 
-## Roles Seeded
+`mysql -u root adiprimanto_cms` also works through the local socket without a password.
 
-| Role | Slug | Permissions |
-|---|---|---|
-| Super Admin | `super-admin` | 128 (all) |
-| Admin | `admin` | 97 (no users/roles, no force delete) |
-| Editor | `editor` | 54 (view/create/update on content only) |
+## Sign-in flow (two steps — an access token is never returned by step 1)
 
-## Endpoints Available Now
+```bash
+BASE=https://f0003dca-8c80-420a-8483-8aa28d35c0fc.preview.emergentagent.com
 
-| Method | Path | Auth |
-|---|---|---|
-| GET | `/api/v1/health` | none |
+# 1. credentials -> challenge_token
+curl -X POST $BASE/api/v1/auth/login -H "Content-Type: application/json" \
+  -d '{"email":"admin@adiprimanto.com","password":"AdiPrimanto#2026"}'
 
-Auth endpoints (`/api/v1/auth/login`, `/api/v1/auth/two-factor/verify`,
-`/api/v1/auth/two-factor/resend`, `/api/v1/auth/logout`) arrive in Phase F2.
+# 2. read the 6-digit OTP from the mail log (MAIL_MAILER=log in this environment)
+grep -oE '\*\*[0-9]{6}\*\*' /app/backend/storage/logs/laravel.log | head -1 | tr -d '*'
+
+# 3. challenge_token + code -> Bearer access token (valid 8 hours)
+curl -X POST $BASE/api/v1/auth/two-factor/verify -H "Content-Type: application/json" \
+  -d '{"challenge_token":"<TOKEN>","code":"<CODE>"}'
+```
+
+The OTP email is delivered through the queue, so the `laravel-queue` supervisor worker must
+be running. Allow ~2 seconds between step 1 and reading the log.
+
+## Endpoints available
+
+| Method | Path | Auth | Throttle |
+|---|---|---|---|
+| GET | `/api/v1/health` | none | 120/min |
+| POST | `/api/v1/auth/login` | none | 5/min per email+IP |
+| POST | `/api/v1/auth/two-factor/verify` | none | 10/min per challenge+IP |
+| POST | `/api/v1/auth/two-factor/resend` | none | 3/min per challenge+IP |
+| GET | `/api/v1/auth/me` | Bearer | 120/min |
+| POST | `/api/v1/auth/logout` | Bearer | 120/min |
+| POST | `/api/v1/auth/logout-all` | Bearer | 120/min |
+
+## Security limits in force
+
+| Rule | Value |
+|---|---|
+| OTP length / TTL | 6 digits / 10 minutes, single use, stored as bcrypt hash |
+| OTP attempts | 5 per challenge, then the challenge is destroyed |
+| OTP resend | max 3 per challenge, 60 second cooldown |
+| Login lockout | 5 failed passwords → account locked 15 minutes |
+| Access token | Sanctum PAT, expires after 8 hours (`SANCTUM_TOKEN_EXPIRATION`) |
 
 ## Notes
 
-- `MAIL_MAILER=log` in this environment: OTP emails will be written to
-  `/app/backend/storage/logs/laravel.log` instead of being sent.
+- If a test locks an account, clear it with:
+  `php artisan tinker --execute="App\Models\User::where('email','...')->first()->forceFill(['failed_login_attempts'=>0,'locked_until'=>null])->save();"`
+- All authentication events are written to the `activity_logs` table with actions prefixed `auth.`.

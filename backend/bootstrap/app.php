@@ -16,9 +16,15 @@ return Application::configure(basePath: dirname(__DIR__))
         apiPrefix: 'api',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Requests arrive through the platform ingress, so the client IP and scheme
+        // must be read from the forwarded headers.
+        $middleware->trustProxies(at: '*');
+
         $middleware->api(prepend: [
             ForceJsonResponse::class,
         ]);
+
+        $middleware->throttleApi();
 
         $middleware->alias([
             'permission' => CheckPermission::class,
