@@ -715,3 +715,66 @@ user (`can()`):
 **Hasil pengujian**: 100% lolos — 26 rute admin disapu satu per satu, uji collapse + persistensi
 localStorage, drawer mobile 390×844, toggle dark/light tanpa kontras rusak, logout + route guard,
 regresi login 2FA, dan regresi landing page di kedua tema (`/app/test_reports/iteration_4.json`).
+
+### Fase F3c — Media Library & Modul Portofolio ✅ SELESAI (2026-06)
+
+**Catatan environment (penting untuk sesi berikutnya)**: pod pernah ter-reset dan seluruh isi
+di luar `/app` serta `/root` hilang — PHP, MariaDB, Composer, `vendor/`, `node_modules/`, `.env`,
+dan program supervisor. Skrip **`/app/scripts/bootstrap.sh`** memulihkan semuanya dalam satu
+perintah (`bash /app/scripts/bootstrap.sh`). Keputusan yang dibakukan di sana:
+
+| Hal | Nilai |
+|---|---|
+| Datadir MariaDB | `/root/mysql-data` (persisten; `/root` di-chmod 711 agar user `mysql` bisa masuk) |
+| Supervisor `backend` | diubah dari uvicorn menjadi `php artisan serve --port=8001` |
+| Supervisor tambahan | `mariadb` + `laravel-queue` di `/etc/supervisor/conf.d/cms.conf` |
+| Frontend | `yarn start` (production build). `next dev` **tidak bisa dipakai**: ingress preview mengembalikan 403 untuk URL chunk mode dev. Setelah mengubah kode frontend wajib `yarn build` lalu `supervisorctl restart frontend` |
+| `NEXT_PUBLIC_API_BASE_URL` | sudah termasuk `/api/v1` |
+
+Reinstall paket `mariadb-server` oleh mekanisme replay dependensi sistem dapat mengubah uid user
+`mysql`; karena itu bootstrap selalu menegaskan ulang `chown -R mysql:mysql /root/mysql-data`
+dan opsi datadir dikirim lewat argumen perintah supervisor, bukan lewat file di `/etc/mysql`.
+
+**Penyajian file media**: ingress hanya meneruskan `/api/*` ke Laravel, jadi `/storage/...` tidak
+dapat diakses. Ditambahkan `GET /api/storage/{path}` (`MediaFileController`) yang men-stream file
+dari public disk, dan `Media::getUrlAttribute()` membangun `{APP_URL}/api/storage/{path}`.
+
+**Backend yang dilengkapi** (kode CRUD dasar sudah ada sebelumnya, dokumentasinya belum):
+- `ProjectController` — index (search, filter kategori & status, `trashed=1`), store, show, update,
+  destroy, restore, forceDestroy, toggleActive, reorder
+- `ProjectCategoryController` & `TechnologyController` — pola aksi yang sama, lengkap dengan
+  `withCount('projects')`
+- `MediaController` — index (search, filter `type=image`, paginasi 24), store, show, update
+  (alt text), destroy, restore, forceDestroy; force delete menghapus file fisik
+- `ReorderRequest` & `UpdateMediaRequest` baru; validasi inline `reorder` di `ProjectController`
+  dihapus agar tidak melanggar aturan Form Request
+- 30+ rute admin baru di `routes/api.php`
+
+**Admin panel (TailAdmin v2.3)** — 5 halaman nyata menggantikan placeholder:
+| Rute | Isi |
+|---|---|
+| `/admin/media` | Grid, upload multi-file, pencarian, modal Details untuk alt text, trash + restore + hapus permanen, paginasi |
+| `/admin/portfolio/projects` | Tabel dengan cover, kategori berwarna, chip teknologi, badge status, switch Active, filter status & kategori, pencarian, **drag & drop reorder**, trash + restore + hapus permanen |
+| `/admin/portfolio/projects/new` & `/[id]` | Form dua kolom, tab locale ID/EN dengan indikator kelengkapan, Media Picker untuk cover, pemilih kategori, chip teknologi, Save / Save & publish, penjaga unsaved-changes |
+| `/admin/portfolio/categories` | Tabel ID/EN + jumlah project, modal form dengan tab locale, color picker, trash lifecycle |
+| `/admin/portfolio/technologies` | Tabel + jumlah project, modal form dengan slug otomatis, `icon_name`, color picker, trash lifecycle |
+
+Komponen bersama baru: `ui/Modal`, `ui/Button`, `ui/Form` (Field/TextInput/TextArea/Select/Switch),
+`ui/ConfirmDialog`, `ui/LocaleTabs`, `ui/Table` (TableCard/EmptyState/TableSkeleton/StatusBadge),
+`MediaPicker`, `ProjectForm`, plus `apiUpload()` di `api-client.ts` dan `lib/admin/types.ts`.
+
+**Bug yang ditemukan pengujian & diperbaiki**:
+1. Membuat ulang slug yang masih dipakai baris soft-deleted mengembalikan HTTP 500 (duplicate key).
+   Rule `unique` tidak lagi memakai `withoutTrashed()` sehingga menjadi 422 dengan pesan yang
+   menyebut Trash. Berlaku untuk projects, project_categories, dan technologies.
+2. `published_at` hanya terisi karena dikirim frontend. Sekarang diisi di hook `saving` model
+   `Project` saat status menjadi `published`, sehingga publish lewat API murni tetap konsisten.
+3. `TechnologyResource` tidak mengembalikan `projects_count` meski controller sudah menghitungnya.
+
+**Hasil pengujian**: 18/18 test backend F3c + regresi total 68/68 pytest
+(`/app/test_reports/iteration_5.json`, `backend/tests/pytest/test_phase_f3c_portfolio.py`).
+Playwright: seluruh alur UI lolos — login, media, technologies, categories, projects (termasuk
+drag reorder yang bertahan setelah reload), pembatasan role Editor, dan regresi landing page di
+kedua tema. Paginasi UI belum teruji karena dataset masih kecil (meta paginasi diverifikasi via API).
+
+**Sisa pekerjaan Fase F3**: Site Settings, Testimonials, Services, FAQ.

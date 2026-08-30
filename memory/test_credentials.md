@@ -1,6 +1,6 @@
 # Test Credentials — Adiprimanto CMS
 
-> Updated: 2026-06 (Phase F2 — Authentication & 2FA)
+> Updated: 2026-06 (Phase F3c — Media Library & Portfolio modules)
 
 ## Admin Panel / API accounts
 
@@ -29,7 +29,7 @@ because it contains `#`.
 ## Sign-in flow (two steps — an access token is never returned by step 1)
 
 ```bash
-BASE=https://f0003dca-8c80-420a-8483-8aa28d35c0fc.preview.emergentagent.com
+BASE=https://adiprimanto-cms.preview.emergentagent.com
 
 # 1. credentials -> challenge_token
 curl -X POST $BASE/api/v1/auth/login -H "Content-Type: application/json" \
@@ -78,14 +78,47 @@ be running. Allow ~2 seconds between step 1 and reading the log.
 The access token is stored in the non-httpOnly cookie `admin_access_token` so the Next.js
 middleware can guard `/admin/*`. Signing in requires the OTP from the mail log (see above).
 
-### UI test account without 2FA
+### UI test accounts without 2FA
 
-`shell.test@adiprimanto.com` / `ShellTester#2026` — Super Admin with
-`is_two_factor_enabled = false`, so `POST /auth/login` returns an access token immediately and
-browser tests can reach the dashboard without reading the mail log.
+| Email | Password | Role |
+|---|---|---|
+| `shell.test@adiprimanto.com` | `ShellTester#2026` | Super Admin |
+| `editor.test@adiprimanto.com` | `EditorTest#2026` | Editor |
 
-> Created manually via tinker for the preview environment only. It is **not** part of any seeder
-> and must never exist in production.
+Both have `is_two_factor_enabled = false`, so `POST /auth/login` returns an access token
+immediately and browser tests can reach the dashboard without reading the mail log. The Editor
+account is used to assert 403 responses on delete/force-delete endpoints.
+
+> Created manually via tinker for the preview environment only. They are **not** part of any
+> seeder and must never exist in production. Recreate them with:
+>
+> ```bash
+> cd /app/backend && php artisan tinker --execute="
+> \$u = App\Models\User::firstOrNew(['email' => 'shell.test@adiprimanto.com']);
+> \$u->name = 'Shell Tester'; \$u->password = bcrypt('ShellTester#2026');
+> \$u->is_active = true; \$u->is_two_factor_enabled = false; \$u->save();
+> \$u->roles()->sync([App\Models\Role::where('slug','super-admin')->value('id')]);"
+> ```
+
+## Rebuilding the environment after a pod reset
+
+Everything outside `/app` and `/root` is ephemeral. Run `bash /app/scripts/bootstrap.sh` to
+reinstall PHP, MariaDB, Composer, dependencies, the supervisor programs and the database, then
+recreate the accounts above. The frontend runs a **production build** (`yarn start`), so after any
+frontend change run `yarn build` and `sudo supervisorctl restart frontend`.
+
+## Phase F3c endpoints (admin, Bearer token)
+
+| Module | Base path |
+|---|---|
+| Projects | `/api/v1/admin/projects` + `/reorder`, `/{id}/toggle-active`, `/{id}/restore`, `/{id}/force` |
+| Project categories | `/api/v1/admin/project-categories` (same action set) |
+| Technologies | `/api/v1/admin/technologies` (same action set) |
+| Media | `/api/v1/admin/media` + `/{id}/restore`, `/{id}/force` |
+| File serving | `GET /api/storage/{path}` (public, no auth) |
+
+List endpoints accept `search`, `trashed=1`, `per_page`, and — for projects — `status` and
+`category_id`.
 
 ## Notes
 

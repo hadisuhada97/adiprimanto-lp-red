@@ -1,0 +1,41 @@
+{
+  "summary": "Phase F3c (Media Library + Portfolio CRUD UI) tested end-to-end. Backend: new pytest suite /app/backend/tests/pytest/test_phase_f3c_portfolio.py with 18 tests -> 18/18 passing (auth with/without 2FA, media upload + /api/storage serve + alt-text + trash/restore/force, technologies CRUD + toggle + trash lifecycle + 422 slug, categories translatable create/partial update/projects_count, projects list/filters/search/create/publish/toggle/trash/reorder, editor 403 on delete & force-delete). Frontend: 5 Playwright runs against the public preview URL covering login (no-2FA + 2FA account verified via API), Media Library (upload, image render, search, details/alt-text persistence, delete->trash->restore->force delete), Technologies (auto-slug, 422 inline error + error toast, create/edit/toggle/trash/restore/force), Categories (locale ID/EN tabs, both locale names in table, EN-only edit preserves ID, toggle/trash/restore/force), Projects (3 seeded rows with category+tech chips+Published badge+Active switch, status & category filters, slug search, toggle-active toast, empty-form validation inline + error toast, create with Media Picker upload + chips + category then redirect to edit page, EN locale edit keeps ID title, Save & publish -> status published, trash/restore/force delete, drag-and-drop reorder persisted after reload with 'Project order updated successfully.' toast), Editor role (no delete buttons on projects/categories/technologies/media UI + API 403), landing page regression in dark and light theme with zero console errors. No functional blockers found.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/v1/admin/technologies", "issue": "Re-creating a slug that exists only on a soft-deleted row returns HTTP 500 (SQLSTATE 23000 duplicate key on technologies_slug_unique) because the unique validation rule uses withoutTrashed() while the DB unique index still covers trashed rows. Should be a 422/409 with a clear message (same risk for projects/project-categories slugs)."},
+      {"endpoint": "PUT /api/v1/admin/projects/{id}", "issue": "Setting status=published does not auto-populate published_at server-side; it is only filled because ProjectForm sends new Date().toISOString(). An API-only publish leaves published_at NULL, which affects the public 'published' scope. Recommend defaulting published_at in the controller/model when status transitions to published."},
+      {"endpoint": "POST /api/v1/admin/projects/reorder", "issue": "Only accepts {items:[{id,sort_order}]}; a simple {ids:[...]} payload returns 422. Not a defect, just noted for API consumers/documentation."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Media Library / Projects list", "issues": ["Pagination controls (media-pagination / project-pagination) never render with the current small dataset, so UI pagination stayed unverified; API meta (current_page/per_page/total) was verified instead."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/pytest/test_phase_f3c_portfolio.py",
+    "/app/test_reports/pytest/pytest_f3c_results.xml"
+  ],
+  "action_items": [
+    "Return 422/409 instead of 500 when creating a technology/category/project whose slug is held by a soft-deleted record (or drop/scope the DB unique index).",
+    "Set published_at server-side when a project transitions to published so API-only publishes are consistent."
+  ],
+  "critical_code_review_comments": [
+    "ProjectController::update relies on client-supplied published_at; move publish-time bookkeeping into the model/controller to keep the public scope correct.",
+    "MediaPicker auto-uploads on file input change and immediately selects+closes; the 'Upload' button is therefore only a proxy for the hidden input. Works, but consider disabling/labelling it during upload to make the flow obvious to users and tests.",
+    "ProjectForm.tsx is 535 lines and approaching the 700-line threshold; consider extracting the publishing/cover/classification panels before more fields are added."
+  ],
+  "updated_files": [
+    "/app/backend/tests/pytest/test_phase_f3c_portfolio.py"
+  ],
+  "success_rate": {"backend": "100% (18/18 pytest)", "frontend": "100% of tested flows (all assertions passed; UI pagination not exercised)"},
+  "seed_data_creation": "Temporary records created and fully cleaned up: media TEST_ui_media.png / TEST_picker_upload.png / TEST_picker2.png (force deleted), technology test-tech-ui + test-tech-f3c, category test-cat-ui + test-cat-f3c, project test-proyek-ui + test-project-f3c (all force deleted). Seeded project sort order restored to sentraoto-marketplace, dkn-digital-company-profile, asih-photography-portfolio after the reorder test; all 3 seeded projects left published and active.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "shell.test@adiprimanto.com / ShellTester#2026 (Super Admin, no 2FA), admin@adiprimanto.com / AdiPrimanto#2026 (2FA, OTP from /app/backend/storage/logs/laravel.log), editor.test@adiprimanto.com / EditorTest#2026",
+  "context_for_next_testing_agent": "Run backend suite with: cd /app/backend && python -m pytest tests/pytest/test_phase_f3c_portfolio.py -p no:randomly. Notes for Playwright: (1) toasts auto-dismiss after 4500ms and stack newest-last, so always read [data-testid='toast-success'].last immediately after the action (a .first read returns the stale previous toast). (2) Media upload field name is 'file' (single file per request); the MediaPicker uploads automatically on set_input_files and then closes itself - do not click media-picker-upload-button afterwards. (3) List endpoints use trashed=1 (boolean), not trashed=only. (4) data-testid='project-cover-preview' is on the <img> element itself. (5) Frontend runs a production build: after any frontend code change run `yarn build` then `sudo supervisorctl restart frontend`.",
+  "rca_of_the_issue": "Two backend gaps only: (a) unique slug validation uses withoutTrashed() while the MySQL unique index is not soft-delete aware, so a soft-deleted slug causes a duplicate-key 500; (b) published_at is client-supplied, so publishing through the API without that field leaves it NULL. All initial Playwright failures were test-script artifacts (stale toast selector, wrong upload field/flow, wrong cover-preview selector) and were corrected; the underlying UI behaviour is correct."
+}

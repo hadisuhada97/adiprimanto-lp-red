@@ -129,7 +129,7 @@ export default function AdminDashboardPage() {
             {[
               ["F1 — Foundation", "Done"],
               ["F2 — Authentication & 2FA", "Done"],
-              ["F3 — Core content modules", "Next"],
+              ["F3 — Portfolio & media modules", "In progress"],
               ["F4 — Remaining content modules", "Planned"],
               ["F5 — Inbox, audit log, users", "Planned"],
             ].map(([label, state]) => (

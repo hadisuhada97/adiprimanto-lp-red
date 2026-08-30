@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Http\Requests\Admin\ProjectRequest;
+use App\Http\Requests\Admin\ReorderRequest;
 use App\Http\Resources\ProjectResource;
 use App\Models\Project;
 use Illuminate\Http\JsonResponse;
@@ -109,15 +110,9 @@ class ProjectController extends BaseApiController
         );
     }
 
-    public function reorder(Request $request): JsonResponse
+    public function reorder(ReorderRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'items' => ['required', 'array'],
-            'items.*.id' => ['required', 'uuid'],
-            'items.*.sort_order' => ['required', 'integer', 'min:0'],
-        ]);
-
-        Project::applyOrder($validated['items']);
+        Project::applyOrder($request->items());
 
         return $this->respondSuccess(null, 'Project order updated successfully.');
     }

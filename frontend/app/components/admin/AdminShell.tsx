@@ -12,7 +12,13 @@ function ShellBody({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { isExpanded, isHovered } = useSidebar();
 
-  const title = ROUTE_TITLES[pathname]?.title ?? "Admin Panel";
+  const title =
+    ROUTE_TITLES[pathname]?.title ??
+    Object.keys(ROUTE_TITLES)
+      .filter((route) => pathname.startsWith(`${route}/`))
+      .sort((a, b) => b.length - a.length)
+      .map((route) => ROUTE_TITLES[route].title)[0] ??
+    "Admin Panel";
   const isWide = isExpanded || isHovered;
 
   return (

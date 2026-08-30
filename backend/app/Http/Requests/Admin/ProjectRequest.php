@@ -16,7 +16,7 @@ class ProjectRequest extends BaseFormRequest
             'slug' => [
                 $isUpdate ? 'sometimes' : 'required',
                 'string', 'max:191', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
-                Rule::unique('projects', 'slug')->ignore($projectId)->withoutTrashed(),
+                Rule::unique('projects', 'slug')->ignore($projectId),
             ],
             'project_category_id' => ['nullable', 'uuid', 'exists:project_categories,id'],
             'cover_media_id' => ['nullable', 'uuid', 'exists:media,id'],
@@ -43,6 +43,7 @@ class ProjectRequest extends BaseFormRequest
     {
         return [
             'slug.regex' => 'The slug may only contain lowercase letters, numbers and single hyphens.',
+            'slug.unique' => 'This slug is already taken. It may belong to an item in the trash.',
             'translations.required' => 'At least one language must be filled in.',
             'translations.*.title.required' => 'The title is required for every language you fill in.',
         ];

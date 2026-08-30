@@ -4,18 +4,26 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Http\Requests\Admin\ProjectCategoryRequest;
+use App\Http\Requests\Admin\ReorderRequest;
 use App\Http\Resources\ProjectCategoryResource;
 use App\Models\ProjectCategory;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ProjectCategoryController extends BaseApiController
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $categories = ProjectCategory::query()
             ->with('translations')
             ->withCount('projects')
+            ->when($request->boolean('trashed'), fn ($query) => $query->onlyTrashed())
+            ->when($request->filled('search'), fn ($query) => $query->where(function ($inner) use ($request) {
+                $term = '%'.$request->string('search').'%';
+                $inner->where('slug', 'like', $term)
+                    ->orWhereHas('translations', fn ($t) => $t->where('name', 'like', $term));
+            }))
             ->ordered()
             ->get();
 
@@ -35,8 +43,16 @@ class ProjectCategoryController extends BaseApiController
         });
 
         return $this->respondCreated(
-            new ProjectCategoryResource($category->load('translations')),
+            new ProjectCategoryResource($category->load('translations')->loadCount('projects')),
             'Project category created successfully.'
+        );
+    }
+
+    public function show(ProjectCategory $category): JsonResponse
+    {
+        return $this->respondSuccess(
+            new ProjectCategoryResource($category->load('translations')->loadCount('projects')),
+            'Project category retrieved successfully.'
         );
     }
 
@@ -51,7 +67,7 @@ class ProjectCategoryController extends BaseApiController
         });
 
         return $this->respondSuccess(
-            new ProjectCategoryResource($category->fresh('translations')),
+            new ProjectCategoryResource($category->fresh('translations')->loadCount('projects')),
             'Project category updated successfully.'
         );
     }
@@ -61,5 +77,38 @@ class ProjectCategoryController extends BaseApiController
         $category->delete();
 
         return $this->respondSuccess(null, 'Project category moved to trash successfully.');
+    }
+
+    public function restore(string $category): JsonResponse
+    {
+        ProjectCategory::onlyTrashed()->findOrFail($category)->restore();
+
+        return $this->respondSuccess(null, 'Project category restored successfully.');
+    }
+
+    public function forceDestroy(string $category): JsonResponse
+    {
+        ProjectCategory::withTrashed()->findOrFail($category)->forceDelete();
+
+        return $this->respondSuccess(null, 'Project category permanently deleted successfully.');
+    }
+
+    public function toggleActive(ProjectCategory $category): JsonResponse
+    {
+        $category->update(['is_active' => ! $category->is_active]);
+
+        return $this->respondSuccess(
+            ['is_active' => $category->is_active],
+            $category->is_active
+                ? 'Project category activated successfully.'
+                : 'Project category deactivated successfully.'
+        );
+    }
+
+    public function reorder(ReorderRequest $request): JsonResponse
+    {
+        ProjectCategory::applyOrder($request->items());
+
+        return $this->respondSuccess(null, 'Project category order updated successfully.');
     }
 }

@@ -8,8 +8,13 @@ use App\Http\Controllers\Api\V1\Auth\LoginController;
 use App\Http\Controllers\Api\V1\Auth\SessionController;
 use App\Http\Controllers\Api\V1\Auth\TwoFactorController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Controllers\Api\V1\MediaFileController;
 use App\Http\Controllers\Api\V1\PublicApi\PublicProjectController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('storage/{path}', [MediaFileController::class, 'show'])
+    ->where('path', '.*')
+    ->name('api.storage.show');
 
 Route::prefix('v1')->group(function (): void {
     Route::get('health', [HealthController::class, 'show'])->name('api.v1.health');
@@ -61,25 +66,53 @@ Route::prefix('v1')->group(function (): void {
             ->middleware('permission:project_categories.view')->name('project-categories.index');
         Route::post('project-categories', [ProjectCategoryController::class, 'store'])
             ->middleware('permission:project_categories.create')->name('project-categories.store');
+        Route::post('project-categories/reorder', [ProjectCategoryController::class, 'reorder'])
+            ->middleware('permission:project_categories.update')->name('project-categories.reorder');
+        Route::get('project-categories/{category}', [ProjectCategoryController::class, 'show'])
+            ->middleware('permission:project_categories.view')->name('project-categories.show');
         Route::match(['put', 'patch'], 'project-categories/{category}', [ProjectCategoryController::class, 'update'])
             ->middleware('permission:project_categories.update')->name('project-categories.update');
+        Route::patch('project-categories/{category}/toggle-active', [ProjectCategoryController::class, 'toggleActive'])
+            ->middleware('permission:project_categories.update')->name('project-categories.toggle-active');
         Route::delete('project-categories/{category}', [ProjectCategoryController::class, 'destroy'])
             ->middleware('permission:project_categories.delete')->name('project-categories.destroy');
+        Route::post('project-categories/{category}/restore', [ProjectCategoryController::class, 'restore'])
+            ->middleware('permission:project_categories.restore')->name('project-categories.restore');
+        Route::delete('project-categories/{category}/force', [ProjectCategoryController::class, 'forceDestroy'])
+            ->middleware('permission:project_categories.force_delete')->name('project-categories.force-destroy');
 
         Route::get('technologies', [TechnologyController::class, 'index'])
             ->middleware('permission:technologies.view')->name('technologies.index');
         Route::post('technologies', [TechnologyController::class, 'store'])
             ->middleware('permission:technologies.create')->name('technologies.store');
+        Route::post('technologies/reorder', [TechnologyController::class, 'reorder'])
+            ->middleware('permission:technologies.update')->name('technologies.reorder');
+        Route::get('technologies/{technology}', [TechnologyController::class, 'show'])
+            ->middleware('permission:technologies.view')->name('technologies.show');
         Route::match(['put', 'patch'], 'technologies/{technology}', [TechnologyController::class, 'update'])
             ->middleware('permission:technologies.update')->name('technologies.update');
+        Route::patch('technologies/{technology}/toggle-active', [TechnologyController::class, 'toggleActive'])
+            ->middleware('permission:technologies.update')->name('technologies.toggle-active');
         Route::delete('technologies/{technology}', [TechnologyController::class, 'destroy'])
             ->middleware('permission:technologies.delete')->name('technologies.destroy');
+        Route::post('technologies/{technology}/restore', [TechnologyController::class, 'restore'])
+            ->middleware('permission:technologies.restore')->name('technologies.restore');
+        Route::delete('technologies/{technology}/force', [TechnologyController::class, 'forceDestroy'])
+            ->middleware('permission:technologies.force_delete')->name('technologies.force-destroy');
 
         Route::get('media', [MediaController::class, 'index'])
             ->middleware('permission:media.view')->name('media.index');
         Route::post('media', [MediaController::class, 'store'])
             ->middleware('permission:media.create')->name('media.store');
+        Route::get('media/{medium}', [MediaController::class, 'show'])
+            ->middleware('permission:media.view')->name('media.show');
+        Route::match(['put', 'patch'], 'media/{medium}', [MediaController::class, 'update'])
+            ->middleware('permission:media.update')->name('media.update');
         Route::delete('media/{medium}', [MediaController::class, 'destroy'])
             ->middleware('permission:media.delete')->name('media.destroy');
+        Route::post('media/{medium}/restore', [MediaController::class, 'restore'])
+            ->middleware('permission:media.restore')->name('media.restore');
+        Route::delete('media/{medium}/force', [MediaController::class, 'forceDestroy'])
+            ->middleware('permission:media.force_delete')->name('media.force-destroy');
     });
 });

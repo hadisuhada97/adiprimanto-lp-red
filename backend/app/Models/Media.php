@@ -19,7 +19,7 @@ class Media extends BaseModel
 
     public function getUrlAttribute(): string
     {
-        return Storage::disk($this->disk)->url($this->path);
+        return rtrim((string) config('app.url'), '/').'/api/storage/'.ltrim($this->path, '/');
     }
 
     protected static function booted(): void

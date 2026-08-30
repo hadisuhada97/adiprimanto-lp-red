@@ -97,3 +97,32 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   return payload as ApiEnvelope<T>;
 }
+
+/** Multipart upload; the browser sets the Content-Type boundary itself. */
+export async function apiUpload<T>(path: string, formData: FormData): Promise<ApiEnvelope<T>> {
+  const headers: Record<string, string> = { Accept: "application/json" };
+  const token = readToken();
+
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, { method: "POST", headers, body: formData });
+  } catch {
+    throw new ApiError("Cannot reach the server. Check your connection and try again.", 0);
+  }
+
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok || payload?.success === false) {
+    throw new ApiError(
+      payload?.message ?? "Something went wrong. Please try again.",
+      response.status,
+      payload?.errors ?? {},
+      payload?.data ?? {},
+    );
+  }
+
+  return payload as ApiEnvelope<T>;
+}
