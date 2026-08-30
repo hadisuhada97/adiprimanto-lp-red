@@ -778,3 +778,48 @@ drag reorder yang bertahan setelah reload), pembatasan role Editor, dan regresi 
 kedua tema. Paginasi UI belum teruji karena dataset masih kecil (meta paginasi diverifikasi via API).
 
 **Sisa pekerjaan Fase F3**: Site Settings, Testimonials, Services, FAQ.
+
+---
+
+## Fase F3d — Testimonials, Services, FAQ & Site Settings (SELESAI, 30 Jun 2026)
+
+Fase F3 kini **tuntas**. Empat modul terakhir dibuat penuh (backend + admin UI + public API).
+
+**Backend baru**:
+- Migration `2026_06_03_000001_create_faq_tables.php` → `faq_categories`, `faq_category_translations`,
+  `faqs`, `faq_translations` (UUIDv7, soft delete, blameable, sort_order)
+- Model `Faq`, `FaqTranslation`, `FaqCategory`, `FaqCategoryTranslation`; `ServiceTranslation`
+  mendapat cast `tags => array`
+- Request `FaqRequest`, `FaqCategoryRequest` (slug regex + unique)
+- Resource `TestimonialResource`, `ServiceResource`, `ServiceStatResource`, `FaqResource`,
+  `FaqCategoryResource`, `SettingResource`
+- Controller admin: `TestimonialController`, `ServiceController`, `ServiceStatController`,
+  `FaqController`, `FaqCategoryController` (index/store/show/update/destroy/restore/forceDestroy/
+  toggleActive/reorder) dan `SettingController` (index bergrup + PATCH massal, resolve media)
+- `PublicContentController` → `GET /api/v1/public/{testimonials,services,faqs,settings}` dengan
+  `?locale=id|en`, hanya record aktif, grup `integration` tidak diekspos ke publik
+- Seeder konten dari landing page statis: 3 testimoni, 7 layanan, 3 service stat, 3 kategori FAQ,
+  4 pertanyaan FAQ; `SettingSeeder` menambah `general.logo_media_id` & `general.favicon_media_id`
+- Perbaikan pasca-QA: default locale API + admin menjadi `id` (`APP_LOCALE`/`APP_FALLBACK_LOCALE=id`
+  dan `resolveLocale()` memakai `Locale::defaultCode()`), serta fallback **per-field** di
+  `HasTranslations::translated()` agar bahasa yang belum lengkap tidak menampilkan sel kosong
+
+**Admin panel baru**:
+| Rute | Isi |
+|---|---|
+| `/admin/testimonials` | Tabel avatar + rating bintang, badge Featured, switch Active, reorder naik/turun, trash lifecycle; modal form tab ID/EN (nama, peran, perusahaan, label project, feedback), rating, accent colour, source, Media Picker avatar & screenshot |
+| `/admin/services` | Tab **Services** (7 seed) & **Stats** (3 seed); tags chip, harga + mata uang, durasi, icon lucide, toggle, reorder, trash lifecycle untuk kedua tab |
+| `/admin/faq/questions` | Tabel pertanyaan + kategori, filter kategori, pencarian, toggle, reorder, trash lifecycle; modal tab ID/EN |
+| `/admin/faq/categories` | Tabel + jumlah pertanyaan, slug otomatis dari nama Indonesia, toggle, reorder, trash lifecycle |
+| `/admin/settings/general` | Kartu grup General / Appearance / Integrations; text, select (bahasa & tema default), colour picker, switch boolean, Media Picker logo & favicon; simpan massal satu tombol |
+
+Komponen baru: `ui/SortButtons` (reorder naik/turun, dipakai semua modul F3d).
+
+**Hasil pengujian** (`/app/test_reports/iteration_6.json`):
+- Backend 28/28 pytest (`backend/tests/pytest/test_phase_f3_content.py`) — CRUD, reorder persist,
+  trash/restore/force, 422 validasi, public API per locale, 403 Editor pada force delete
+- Playwright: seluruh alur 5 halaman admin lolos, tanpa blocker fungsional
+- Media Picker untuk Logo/Favicon belum diuji end-to-end karena Media Library masih kosong
+
+**Berikutnya (F4)**: modul konten Hero, About + Stats, Skills/Tech Stack, Pain Points, Process Steps,
+Clients & Brands, Navigation Menu, Contact Channels, Social Links, SEO Settings.

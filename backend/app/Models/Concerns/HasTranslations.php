@@ -37,10 +37,16 @@ trait HasTranslations
             ?? $translations->first();
     }
 
-    /** Read a single translated attribute. */
+    /** Read a single translated attribute, falling back per field to the default locale. */
     public function translated(string $attribute, ?string $locale = null): mixed
     {
-        return $this->translate($locale)?->getAttribute($attribute);
+        $value = $this->translate($locale)?->getAttribute($attribute);
+
+        if ($value !== null && $value !== '' && $value !== []) {
+            return $value;
+        }
+
+        return $this->translate(Locale::defaultCode())?->getAttribute($attribute) ?? $value;
     }
 
     /**

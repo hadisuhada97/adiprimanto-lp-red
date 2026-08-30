@@ -1,0 +1,51 @@
+{
+  "summary": "Phase F3 (Testimonials, Services + Service Stats, FAQ categories/questions, Site Settings) tested end-to-end. Backend: new pytest suite /app/backend/tests/pytest/test_phase_f3_content.py with 28 tests -> 28/28 passing (seed counts, full CRUD + persistence re-GET, toggle-active, reorder persistence, trash/restore/force-delete, 422 validation for missing translations / bad accent colour / duplicate FAQ slug / unknown setting key, settings index groups + PATCH persistence, public API testimonials/services/faqs/settings with ?locale=id|en, active-only filtering, integration group excluded from public settings, editor 403 on force-delete, 401 for unauthenticated admin). Frontend: 5 Playwright runs on the public preview URL (production Next build) covering login with the non-2FA super admin -> dashboard, testimonials (list 3 seeded rows, empty-form 422 inline error, create with ID+EN translations/rating/accent/featured, edit, toggle-active persisted after reload, chevron reorder persisted after reload, trash -> trash view -> restore -> permanent delete), services (7 seeded + Stats tab 3 seeded, validation, create with comma-separated tags rendered as chips + price/currency/duration, edit with tags prefill, toggle, reorder, trash/restore/force), service stats (create/edit/toggle/reorder/trash/restore/force), FAQ questions (4 seeded rows with category chips, validation, create with category select, category filter, search, edit, toggle, reorder, full trash lifecycle), FAQ categories (3 seeded with question counts, slug auto-generated from Indonesian name, duplicate slug -> inline 'The slug has already been taken.' + 422, edit/toggle/reorder/trash/restore/force), settings/general (3 group cards General/Appearance/Integrations, 10 text inputs, 2 selects, colour picker, 3 boolean switches, 2 media pickers; text value, select value and boolean switch each saved with 'Settings saved successfully.' toast and verified after reload, then restored), editor account sees no delete buttons on testimonials. No functional blockers found; all test data cleaned up.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "GET /api/v1/public/{testimonials,services,faqs} (no ?locale) + all admin list endpoints",
+        "issue": "Locale default mismatch: /app/backend/.env sets APP_LOCALE=en and APP_FALLBACK_LOCALE=en, while the content default locale is 'id' (setting general.default_locale = 'id'). PublicContentController::resolveLocale() falls back to config('app.fallback_locale') so a request without ?locale returns ENGLISH content (verified: GET /public/faqs returns 'How long does it take to build a website?' vs locale=id 'Berapa lama proses pembuatan website?'). Admin lists also render the EN translation, so a record whose EN row omits optional fields shows '—' in the table even though the Indonesian values exist. Recommend resolving the default from Locale::defaultCode()/general.default_locale (or set APP_LOCALE/APP_FALLBACK_LOCALE=id) and adding per-field fallback in HasTranslations::translated()."
+      },
+      {
+        "endpoint": "App\\Models\\Concerns\\HasTranslations::translate()",
+        "issue": "Fallback is row-level only: when the requested locale row exists but a field is null, no fallback to the default locale field happens (name/role/company render as '—')."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "All F3 list tables (testimonials/services/stats/faq/faq-categories)",
+        "issues": ["Up/down reorder chevrons are very small and low-contrast in dark mode (thin gray glyphs on gray-900); consider larger hit area / stronger colour", "Admin tables display the English translation for every row (see backend locale issue), which can be confusing for an Indonesian-first CMS"]
+      },
+      {
+        "screen": "Settings · General",
+        "issues": ["Media pickers (Logo/Favicon) could not be exercised end-to-end because the Media Library is currently empty ('No images yet'); the picker modal itself opens and search/upload controls render correctly"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/pytest/test_phase_f3_content.py",
+    "/app/test_reports/pytest/f3_results.xml"
+  ],
+  "action_items": [
+    "Decide and fix the default locale: make public API + admin resource serialization default to 'id' (Locale::defaultCode() / general.default_locale) instead of config('app.fallback_locale')='en'",
+    "Add per-field translation fallback in HasTranslations::translated() so partially filled locales do not render empty cells"
+  ],
+  "critical_code_review_comments": [
+    "PublicContentController::resolveLocale() should not depend on config('app.fallback_locale'); the CMS already stores general.default_locale = 'id'.",
+    "Admin list endpoints have no pagination (Testimonial/Service/Faq index use ->get()); acceptable for current data volumes but will not scale — consider per_page like the projects module.",
+    "SettingController::update() silently skips a row when the first() lookup returns null; the UpdateSettingsRequest guard covers it today, but a 404/422 on miss would be safer."
+  ],
+  "updated_files": ["/app/backend/tests/pytest/test_phase_f3_content.py", "/app/test_reports/iteration_6.json"],
+  "success_rate": {"backend": "100% (28/28)", "frontend": "100% of tested F3 flows (2 test-script selector fixes: shared service/stat confirm dialog testId 'service-delete-dialog-*', settings select key is 'default_locale')"},
+  "seed_data_creation": "All records created during testing (QA testimonial, QA service, QA stat, QA FAQ question, QA FAQ category, temporary setting values) were force-deleted / restored to original values. Seed data untouched: 3 testimonials, 7 services, 3 stats, 3 FAQ categories, 4 FAQ questions.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "shell.test@adiprimanto.com / ShellTester#2026 (super admin, no 2FA); editor.test@adiprimanto.com / EditorTest#2026 (editor, no 2FA)",
+  "context_for_next_testing_agent": "Run `python3 -m pytest /app/backend/tests/pytest/test_phase_f3_content.py -v` for F3 regression (uses NEXT_PUBLIC_API_BASE_URL from /app/frontend/.env). Reorder testids are `<entity>-<id>-move-up/-move-down`; FAQ category rows/actions are keyed by SLUG not id; the Services page shares ONE confirm dialog testId `service-delete-dialog-confirm-button` for both services and stats tabs; settings selects are `setting-select-default_locale` / `setting-select-default_theme`. Media Library is empty, so settings/testimonial media selection needs an upload first.",
+  "rca_of_the_issue": "Locale issue root cause: backend/.env has APP_LOCALE=en / APP_FALLBACK_LOCALE=en, so app()->getLocale() is 'en' everywhere and PublicContentController::resolveLocale() returns 'en' when no ?locale is supplied; HasTranslations::translate() therefore picks the EN row whenever it exists, and falls back only per-row (not per-field) to Locale::defaultCode(). Reproduce: curl $BASE/api/v1/public/faqs (English) vs curl $BASE/api/v1/public/faqs?locale=id (Indonesian)."
+}

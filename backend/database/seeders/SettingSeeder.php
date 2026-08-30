@@ -21,6 +21,8 @@ class SettingSeeder extends Seeder
             ['general', 'default_theme', 'dark', 'string'],
             ['general', 'cv_file_path', '/CV_New_ADI_PRIMANTO.pdf', 'string'],
             ['general', 'base_url', 'https://adiprimanto.com', 'string'],
+            ['general', 'logo_media_id', null, 'media'],
+            ['general', 'favicon_media_id', null, 'media'],
             ['appearance', 'primary_color', '#ef4444', 'string'],
             ['appearance', 'is_language_switcher_enabled', true, 'boolean'],
             ['appearance', 'is_theme_switcher_enabled', true, 'boolean'],
