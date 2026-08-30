@@ -49,6 +49,11 @@ class AppServiceProvider extends ServiceProvider
             ->by((string) $request->input('challenge_token').'|'.$request->ip())
             ->response($tooManyRequests));
 
+        RateLimiter::for('contact-form', fn (Request $request) => [
+            Limit::perMinute(5)->by('contact-minute:'.$request->ip()),
+            Limit::perDay(30)->by('contact-day:'.$request->ip()),
+        ]);
+
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute(120)
             ->by($request->user()?->id ?: $request->ip())
             ->response($tooManyRequests));

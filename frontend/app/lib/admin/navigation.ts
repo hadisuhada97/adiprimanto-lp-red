@@ -139,10 +139,6 @@ export const ROUTE_TITLES: Record<string, { title: string; group: string; icon: 
 
 export const PHASE_BY_ROUTE: Record<string, string> = {
   "/admin/settings/localization": "F4",
-  "/admin/inbox": "F5",
-  "/admin/users": "F5",
-  "/admin/roles": "F5",
-  "/admin/activity-log": "F5",
   "/admin/trash": "F5",
 };
 

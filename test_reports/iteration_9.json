@@ -1,0 +1,93 @@
+{
+  "summary": "Phase F5 end-to-end testing (backend pytest + Playwright UI). Created /app/backend/tests/pytest/test_phase_f5_inbox_users.py with 48 tests: 46 passed, 2 failed (95.8%). Public contact endpoint (201, 422 validation, honeypot 422, 429 after 5/min, mail written to laravel.log) all verified. UI verified for Inbox, Activity Log, Users, Roles and Dashboard with the super-admin account, plus Editor 403 boundaries and light/dark + mobile rendering. Two real defects found: soft-deleted messages cannot be opened (blocks restore / permanent delete from the inbox trash UI) and the activity-log 'to' date filter excludes the selected day.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "GET /api/v1/admin/contact-messages/{id}",
+        "issue": "show() uses ContactMessage::query()->findOrFail() (no withTrashed), so a soft-deleted message returns 404. The inbox trash view calls this endpoint on row click, so the detail panel never opens in Trash and inbox-restore-button / permanent delete are unreachable in the UI (reproduced in Playwright: click on trashed item -> 404 + 'Could not open the message.' toast). Fix: withTrashed() in show() and skip the read/handled_by mutation for trashed rows.",
+        "priority": "HIGH"
+      }
+    ],
+    "minor": [
+      {
+        "endpoint": "GET /api/v1/admin/activity-logs?from=&to=",
+        "issue": "The 'to' bound uses $request->date('to') which parses YYYY-MM-DD as 00:00, so created_at <= midnight excludes the whole selected day. from=to=today returns 0 rows and the UI shows 'No activity matches these filters'. Use ->endOfDay() on the 'to' value."
+      },
+      {
+        "endpoint": "PUT /api/v1/admin/users/{id}",
+        "issue": "No self-protection on update: the authenticated user can set is_active=false (or change roles) on their own account via update, while toggle-active and destroy are correctly guarded. Add the same self guard in update()."
+      },
+      {
+        "endpoint": "GET /api/v1/admin/activity-logs",
+        "issue": "Several auth.login_succeeded rows are attributed to 'System' (user_id null) while other login rows carry the user name, so the user filter misses them. Inconsistent actor attribution on auth events."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "InboxPage (trash view)",
+        "issue": "In Trash, clicking a message does not open the detail panel (backend 404 on show for trashed rows), so restore and permanent delete cannot be performed from the UI. Root cause is backend, but the page should also handle it (e.g. select from the list payload instead of re-fetching).",
+        "selector": "[data-testid=\"inbox-item-<id>\"] -> [data-testid=\"inbox-restore-button\"]",
+        "priority": "HIGH"
+      },
+      {
+        "component": "UsersPage / ActivityLogPage",
+        "issue": "For an Editor account the 403 from /admin/users and /admin/activity-logs is swallowed and the page renders 'No users found' / 'No activity matches these filters' instead of a permission-denied state (the Roles page does show a toast). Misleading empty state.",
+        "selector": "[data-testid=\"user-table-card\"], [data-testid=\"activity-table-card\"]",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Activity log date range filter",
+        "issue": "Setting from=to=today returns an empty table because of the backend end-of-day bug; the filter appears broken to the user.",
+        "affected_selectors": ["[data-testid=\"activity-filter-from\"]", "[data-testid=\"activity-filter-to\"]"]
+      },
+      {
+        "flow": "Public contact form",
+        "issue": "No public-site component posts to /api/v1/public/contact-messages yet (no honeypot 'website' field rendered anywhere in /app/frontend/app/components). Endpoint verified via API only.",
+        "affected_selectors": []
+      }
+    ],
+    "design_issues": [
+      {
+        "screen": "Activity Log filters",
+        "issues": ["Uses native browser date inputs (mm/dd/yyyy) instead of the admin date-picker component used elsewhere — inconsistent look and no localisation"]
+      },
+      {
+        "screen": "Roles & Permissions",
+        "issues": ["Role cards are ordered alphabetically (Admin, Editor, Super Admin) rather than by privilege level; minor"]
+      },
+      {
+        "screen": "Users table on 390px",
+        "issues": ["Table scrolls horizontally inside the card and the 2FA/Status columns are clipped at the right edge (no visual scroll affordance)"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/pytest/test_phase_f5_inbox_users.py",
+    "/app/test_reports/pytest/f5_results.xml"
+  ],
+  "action_items": [
+    "ContactMessageController::show — use withTrashed()->findOrFail() so the inbox trash view can open, restore and permanently delete a message",
+    "ActivityLogController::index — apply endOfDay() to the 'to' filter so from=to=today returns the day's entries",
+    "Users/Activity-log pages — surface a permission-denied state on 403 instead of an empty-list message",
+    "UserController::update — add the self-account guard (cannot deactivate/demote yourself) that toggleActive/destroy already have",
+    "Attribute auth.login_succeeded activity rows to the user instead of 'System'",
+    "Replace the native date inputs on the activity log with the admin date-picker component"
+  ],
+  "critical_code_review_comments": [
+    "ContactMessage show() both fetches and mutates (read_at/status) on a GET; combined with findOrFail it breaks the trash flow — split read-marking into an explicit action or guard it with withTrashed()",
+    "AdminUserRequest allows role_ids on update without checking that the actor is not removing their own super-admin role — privilege lockout risk",
+    "Inbox page re-fetches the message on every list click even though the list payload already contains the full record; a single GET failure (404) leaves the panel empty"
+  ],
+  "updated_files": ["/app/backend/tests/pytest/test_phase_f5_inbox_users.py", "/app/test_reports/iteration_9.json"],
+  "success_rate": {"backend": "95.8% (46/48 pytest)", "frontend": "90% (all 5 pages functional; inbox trash restore/permanent-delete blocked)"},
+  "seed_data_creation": "Created TEST_ contact messages via the public endpoint and TEST_/ui_test_user accounts; all removed afterwards (contact_messages back to the single seeded 'Budi Santoso' lead, users table back to admin@ / shell.test@ / editor.test@ only). No password of the two shared accounts was changed.",
+  "should_call_test_agent_after_fix": true,
+  "should_main_agent_self_test": false,
+  "test_credentials": "shell.test@adiprimanto.com / ShellTester#2026 (super admin, no 2FA), editor.test@adiprimanto.com / EditorTest#2026 (editor, no 2FA) — both worked",
+  "context_for_next_testing_agent": "Run `cd /app/backend && python3 -m pytest tests/pytest/test_phase_f5_inbox_users.py -q` (no pytest.ini in /app/backend; tests are sequential on purpose because of the 5/min contact-form rate limit — clear_cache() is called before each submit). The two currently failing tests are TestInbox::test_show_trashed_message and TestActivityLog::test_to_date_includes_same_day; both should pass after the fixes above. Verified working and no need to re-test in depth: honeypot, 429 throttle, mail log entry, inbox status transitions/notes/search/unread counter, activity expand + action/module/user filters, roles matrix (128 rows), users create/validate/edit/toggle/trash/restore + token revocation + self-protection, dashboard 5 cards & links, editor 403s, regression pages (/admin/hero, /admin/skills, /admin/navigation, /admin/settings/general).",
+  "rca_of_the_issue": "1) Inbox trash: ContactMessageController::show() queries without the SoftDeletes withTrashed() scope; the frontend open() handler always GETs the message before showing the detail panel, so any trashed row 404s and the restore/force-delete buttons (rendered only inside inbox-detail) never mount. 2) Date filter: `$request->date('to')` yields Carbon at 00:00:00 for a YYYY-MM-DD input, so `created_at <= 2026-08-30 00:00:00` excludes every entry made during that day."
+}

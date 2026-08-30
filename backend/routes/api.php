@@ -2,8 +2,11 @@
 
 use App\Http\Controllers\Api\V1\Admin\AboutSectionController;
 use App\Http\Controllers\Api\V1\Admin\AboutStatController;
+use App\Http\Controllers\Api\V1\Admin\ActivityLogController;
 use App\Http\Controllers\Api\V1\Admin\ClientController;
 use App\Http\Controllers\Api\V1\Admin\ContactChannelController;
+use App\Http\Controllers\Api\V1\Admin\ContactMessageController;
+use App\Http\Controllers\Api\V1\Admin\DashboardController;
 use App\Http\Controllers\Api\V1\Admin\FaqCategoryController;
 use App\Http\Controllers\Api\V1\Admin\FaqController;
 use App\Http\Controllers\Api\V1\Admin\HeroMetricController;
@@ -12,10 +15,12 @@ use App\Http\Controllers\Api\V1\Admin\MediaController;
 use App\Http\Controllers\Api\V1\Admin\NavigationMenuController;
 use App\Http\Controllers\Api\V1\Admin\PainPointController;
 use App\Http\Controllers\Api\V1\Admin\ProcessStepController;
+use App\Http\Controllers\Api\V1\Admin\RoleController;
 use App\Http\Controllers\Api\V1\Admin\SeoSettingController;
 use App\Http\Controllers\Api\V1\Admin\SkillCategoryController;
 use App\Http\Controllers\Api\V1\Admin\SkillController;
 use App\Http\Controllers\Api\V1\Admin\SocialLinkController;
+use App\Http\Controllers\Api\V1\Admin\UserController;
 use App\Http\Controllers\Api\V1\Admin\ProjectCategoryController;
 use App\Http\Controllers\Api\V1\Admin\ProjectController;
 use App\Http\Controllers\Api\V1\Admin\ServiceController;
@@ -28,6 +33,7 @@ use App\Http\Controllers\Api\V1\Auth\SessionController;
 use App\Http\Controllers\Api\V1\Auth\TwoFactorController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\MediaFileController;
+use App\Http\Controllers\Api\V1\PublicApi\PublicContactMessageController;
 use App\Http\Controllers\Api\V1\PublicApi\PublicContentController;
 use App\Http\Controllers\Api\V1\PublicApi\PublicProjectController;
 use Illuminate\Support\Facades\Route;
@@ -73,6 +79,8 @@ Route::prefix('v1')->group(function (): void {
         Route::get('navigation', [PublicContentController::class, 'navigation'])->name('navigation.index');
         Route::get('contact', [PublicContentController::class, 'contact'])->name('contact.index');
         Route::get('seo', [PublicContentController::class, 'seo'])->name('seo.index');
+        Route::post('contact-messages', [PublicContactMessageController::class, 'store'])
+            ->middleware('throttle:contact-form')->name('contact-messages.store');
     });
 
     Route::prefix('admin')->name('api.v1.admin.')->middleware('auth:sanctum')->group(function (): void {
@@ -302,8 +310,7 @@ Route::prefix('v1')->group(function (): void {
             ['seo-settings', SeoSettingController::class, 'seo_settings'],
         ];
 
-        foreach ($contentModules as [$uri, $controller, $module]) {
-            Route::get($uri, [$controller, 'index'])
+        foreach ($contentModules as [$uri, $controller, $module]) {            Route::get($uri, [$controller, 'index'])
                 ->middleware("permission:{$module}.view")->name("{$uri}.index");
             Route::post($uri, [$controller, 'store'])
                 ->middleware("permission:{$module}.create")->name("{$uri}.store");
@@ -322,5 +329,43 @@ Route::prefix('v1')->group(function (): void {
             Route::delete("{$uri}/{id}/force", [$controller, 'forceDestroy'])
                 ->middleware("permission:{$module}.force_delete")->name("{$uri}.force-destroy");
         }
+
+        Route::get('dashboard/stats', [DashboardController::class, 'stats'])->name('dashboard.stats');
+
+        Route::get('contact-messages', [ContactMessageController::class, 'index'])
+            ->middleware('permission:contact_messages.view')->name('contact-messages.index');
+        Route::get('contact-messages/summary', [ContactMessageController::class, 'summary'])
+            ->middleware('permission:contact_messages.view')->name('contact-messages.summary');
+        Route::get('contact-messages/{id}', [ContactMessageController::class, 'show'])
+            ->middleware('permission:contact_messages.view')->name('contact-messages.show');
+        Route::match(['put', 'patch'], 'contact-messages/{id}', [ContactMessageController::class, 'update'])
+            ->middleware('permission:contact_messages.update')->name('contact-messages.update');
+        Route::delete('contact-messages/{id}', [ContactMessageController::class, 'destroy'])
+            ->middleware('permission:contact_messages.delete')->name('contact-messages.destroy');
+        Route::post('contact-messages/{id}/restore', [ContactMessageController::class, 'restore'])
+            ->middleware('permission:contact_messages.restore')->name('contact-messages.restore');
+        Route::delete('contact-messages/{id}/force', [ContactMessageController::class, 'forceDestroy'])
+            ->middleware('permission:contact_messages.force_delete')->name('contact-messages.force-destroy');
+
+        Route::get('activity-logs', [ActivityLogController::class, 'index'])
+            ->middleware('permission:activity_logs.view')->name('activity-logs.index');
+        Route::get('activity-logs/filters', [ActivityLogController::class, 'filters'])
+            ->middleware('permission:activity_logs.view')->name('activity-logs.filters');
+
+        Route::get('roles', [RoleController::class, 'index'])
+            ->middleware('permission:roles.view')->name('roles.index');
+
+        Route::get('users', [UserController::class, 'index'])
+            ->middleware('permission:users.view')->name('users.index');
+        Route::post('users', [UserController::class, 'store'])
+            ->middleware('permission:users.create')->name('users.store');
+        Route::match(['put', 'patch'], 'users/{id}', [UserController::class, 'update'])
+            ->middleware('permission:users.update')->name('users.update');
+        Route::patch('users/{id}/toggle-active', [UserController::class, 'toggleActive'])
+            ->middleware('permission:users.update')->name('users.toggle-active');
+        Route::delete('users/{id}', [UserController::class, 'destroy'])
+            ->middleware('permission:users.delete')->name('users.destroy');
+        Route::post('users/{id}/restore', [UserController::class, 'restore'])
+            ->middleware('permission:users.restore')->name('users.restore');
     });
 });
