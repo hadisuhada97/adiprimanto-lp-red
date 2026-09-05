@@ -23,7 +23,7 @@ class ActivityLogController extends BaseApiController
                 '%'.$request->string('subject_type')
             ))
             ->when($request->filled('from'), fn ($query) => $query->where('created_at', '>=', $request->date('from')))
-            ->when($request->filled('to'), fn ($query) => $query->where('created_at', '<=', $request->date('to')))
+            ->when($request->filled('to'), fn ($query) => $query->where('created_at', '<=', $request->date('to')->endOfDay()))
             ->latest('created_at')
             ->paginate($this->perPage(25));
 

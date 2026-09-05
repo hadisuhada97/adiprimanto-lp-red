@@ -910,3 +910,18 @@ permission Editor (403 pada semua endpoint `/force`). Tidak ada bug kritis/menen
 
 **Berikutnya (F5)**: Contact Messages/Inbox + notifikasi email, UI Activity Log, UI Users & Roles,
 statistik dashboard. Lalu **F6**: integrasi landing page ke API publik & melepas Supabase.
+
+---
+
+## Fase F5-fix — Perbaikan 3 bug tersisa (SELESAI, 05 Sep 2026)
+
+Environment di-bootstrap ulang setelah pod reset (`bash /app/scripts/bootstrap.sh`) — backend/frontend/mariadb/laravel-queue RUNNING, DB connected, health OK.
+
+Tiga defect dari `iteration_9.json` diperbaiki:
+1. **HIGH** `ContactMessageController::show()` kini pakai `withTrashed()` + skip mutasi read/handled_by bila record trashed → pesan di Trash Inbox bisa dibuka, di-restore, & dihapus permanen.
+2. **MINOR** `ActivityLogController::index()` filter `to` kini pakai `->endOfDay()` → `from=to=today` mengembalikan entri hari itu.
+3. **MINOR** `UserController::update()` mendapat self-guard: tidak bisa menonaktifkan akun sendiri maupun melepas role Super Admin sendiri (privilege lockout).
+
+**Hasil pengujian**: F5 48/48 (sebelumnya 46/48), F4 37/37, F4b+F3c 92/92 — semua lolos terisolasi, tanpa regresi. Catatan: menjalankan seluruh suite sekaligus memicu 429 (throttle login 5/menit) — jalankan per-file dengan `php artisan cache:clear` di antaranya.
+
+**Berikutnya (F6)**: cabut Supabase + sambungkan 13 komponen landing page Next.js ke API publik, API client, ISR + revalidate, metadata/JSON-LD dinamis, sitemap. Lalu F7 (migrasi & QA).

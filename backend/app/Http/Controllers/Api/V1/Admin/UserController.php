@@ -56,8 +56,23 @@ class UserController extends BaseApiController
 
     public function update(AdminUserRequest $request, string $id): JsonResponse
     {
-        $user = User::query()->findOrFail($id);
+        $user = User::query()->with('roles')->findOrFail($id);
         $data = $request->safe()->all();
+
+        if ($user->id === $request->user()->id) {
+            if (($data['is_active'] ?? true) === false) {
+                return $this->respondError('You cannot deactivate your own account.', 422);
+            }
+
+            if (isset($data['role_ids'])) {
+                $superAdminId = \App\Models\Role::query()->where('slug', 'super-admin')->value('id');
+
+                if ($superAdminId && $user->roles->contains('id', $superAdminId)
+                    && ! in_array($superAdminId, $data['role_ids'], true)) {
+                    return $this->respondError('You cannot remove your own Super Admin role.', 422);
+                }
+            }
+        }
 
         DB::transaction(function () use ($user, $data) {
             $attributes = collect($data)

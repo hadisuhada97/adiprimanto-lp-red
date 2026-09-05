@@ -50,9 +50,9 @@ class ContactMessageController extends BaseApiController
 
     public function show(string $id): JsonResponse
     {
-        $message = ContactMessage::query()->with('handler')->findOrFail($id);
+        $message = ContactMessage::withTrashed()->with('handler')->findOrFail($id);
 
-        if ($message->read_at === null) {
+        if ($message->trashed() === false && $message->read_at === null) {
             $message->update([
                 'read_at' => now(),
                 'status' => $message->status === 'new' ? 'read' : $message->status,
