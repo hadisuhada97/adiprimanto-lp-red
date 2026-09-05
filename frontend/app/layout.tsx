@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "./lib/theme-context";
 import { LanguageProvider } from "./lib/language-context";
+import { LandingProvider } from "./lib/landing-context";
 
 const BASE_URL = "https://adiprimanto.com";
 
@@ -237,10 +238,12 @@ export default function RootLayout({
       <body className="antialiased" suppressHydrationWarning>
         <ThemeProvider>
           <LanguageProvider>
-            <a href="#main-content" className="skip-to-content">
-              Lewati ke konten utama
-            </a>
-            {children}
+            <LandingProvider>
+              <a href="#main-content" className="skip-to-content">
+                Lewati ke konten utama
+              </a>
+              {children}
+            </LandingProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>

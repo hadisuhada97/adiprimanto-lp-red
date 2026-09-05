@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { Star, Coffee, Zap, Ghost, Activity, MapPinned } from "lucide-react";
+import { Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/app/lib/language-context";
+import { useLanding } from "@/app/lib/landing-context";
+import { Icon } from "@/app/lib/icons";
 
 const avatars = [
   "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=80&auto=format&fit=crop",
@@ -12,18 +14,27 @@ const avatars = [
   "https://images.unsplash.com/photo-1700126761911-84f19978e8bb?q=80&w=80&auto=format&fit=crop",
 ];
 
-const brands = [
-  { name: "TripLinq", icon: MapPinned, className: "font-display font-semibold tracking-widest uppercase" },
-  { name: "Tea Sense", icon: Coffee, className: "font-display italic font-medium tracking-tight" },
-  { name: "Quik Shine", icon: Zap, className: "font-display font-black italic uppercase tracking-tight" },
-  { name: "HoodVerse", icon: Ghost, className: "font-display font-extrabold tracking-tight" },
-  { name: "Nakalang Electronics", icon: Activity, className: "font-display font-bold tracking-tight" },
+const fallbackBrands = [
+  { name: "TripLinq", iconName: "MapPinned", className: "font-display font-semibold tracking-widest uppercase" },
+  { name: "Tea Sense", iconName: "Coffee", className: "font-display italic font-medium tracking-tight" },
+  { name: "Quik Shine", iconName: "Zap", className: "font-display font-black italic uppercase tracking-tight" },
+  { name: "HoodVerse", iconName: "Ghost", className: "font-display font-extrabold tracking-tight" },
+  { name: "Nakalang Electronics", iconName: "Activity", className: "font-display font-bold tracking-tight" },
 ];
-
-const marqueeBrands = [...brands, ...brands];
 
 const HappyClients = () => {
   const { t } = useLanguage();
+  const { data } = useLanding();
+  const cms = data?.clients ?? [];
+  const brands =
+    cms.length > 0
+      ? cms.map((c) => ({
+          name: c.name,
+          iconName: c.icon_name ?? "Activity",
+          className: c.font_class ?? "font-display font-bold tracking-tight",
+        }))
+      : fallbackBrands;
+  const marqueeBrands = [...brands, ...brands];
 
   return (
   <section
@@ -92,13 +103,13 @@ const HappyClients = () => {
         }}
       >
         <div className="marquee-track" style={{ animationDuration: "5s" }}>
-          {marqueeBrands.map(({ name, icon: Icon, className }, i) => (
+          {marqueeBrands.map(({ name, iconName, className }, i) => (
             <span
               key={i}
               className="inline-flex items-center gap-2.5 px-9 whitespace-nowrap transition-colors duration-300"
               style={{ color: "var(--color-muted)" }}
             >
-              <Icon size={18} />
+              <Icon name={iconName} size={18} />
               <span className={`${className} text-base`}>{name}</span>
             </span>
           ))}

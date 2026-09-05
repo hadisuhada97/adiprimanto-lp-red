@@ -1,10 +1,16 @@
 'use client';
 
 import { useLanguage } from '@/app/lib/language-context';
+import { useLanding } from '@/app/lib/landing-context';
 
 const Process = () => {
   const { t } = useLanguage();
-  const steps = t.process.steps;
+  const { data } = useLanding();
+  const cms = data?.process_steps ?? [];
+  const steps =
+    cms.length > 0
+      ? cms.map((s) => ({ title: s.title, desc: s.description }))
+      : t.process.steps;
 
   return (
   <section id="process" className="section-padding" style={{ background: 'var(--color-bg-2)', borderTop: '1px solid var(--color-border)' }}>

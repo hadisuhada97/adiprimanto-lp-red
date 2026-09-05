@@ -1,22 +1,30 @@
 "use client";
 
-import { Zap, Layout, Smartphone } from "lucide-react";
 import { useLanguage } from "@/app/lib/language-context";
+import { useLanding } from "@/app/lib/landing-context";
+import { Icon } from "@/app/lib/icons";
 
-const icons = [
-  <Zap size={20} key="zap" />,
-  <Layout size={20} key="layout" />,
-  <Smartphone size={20} key="smartphone" />,
-];
 const colors = ["#f97316", "#a855f7", "#22c55e"];
+const fallbackIcons = ["Zap", "Layout", "Smartphone"];
 
 const PainPoints = () => {
   const { t } = useLanguage();
-  const points = t.painPoints.points.map((p, i) => ({
-    ...p,
-    icon: icons[i],
-    color: colors[i],
-  }));
+  const { data } = useLanding();
+  const cms = data?.pain_points ?? [];
+  const points =
+    cms.length > 0
+      ? cms.map((p, i) => ({
+          title: p.title,
+          desc: p.description,
+          iconName: p.icon_name ?? fallbackIcons[i] ?? "Zap",
+          color: colors[i % colors.length],
+        }))
+      : t.painPoints.points.map((p, i) => ({
+          title: p.title,
+          desc: p.desc,
+          iconName: fallbackIcons[i] ?? "Zap",
+          color: colors[i % colors.length],
+        }));
 
   return (
   <section
@@ -83,7 +91,7 @@ const PainPoints = () => {
                   color: p.color,
                 }}
               >
-                {p.icon}
+                <Icon name={p.iconName} size={20} />
               </div>
               <span
                 className="font-code text-[11px] tracking-[0.06em]"

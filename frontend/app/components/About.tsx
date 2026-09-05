@@ -2,28 +2,53 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import {
-  MapPin,
-  Calendar,
-  Briefcase,
-  Code2,
-  MessageCircle,
-  ArrowDown,
-} from "lucide-react";
+import { MapPin, MessageCircle, ArrowDown } from "lucide-react";
 
 import { useLanguage } from "@/app/lib/language-context";
+import { useLanding } from "@/app/lib/landing-context";
+import { Icon } from "@/app/lib/icons";
 
 const WA_URL =
   "https://wa.me/6285727346620?text=Halo%20Adi%20Primanto,%20saya%20ingin%20membuat%20website%20untuk%20bisnis%20saya.";
 
+const fallbackStatIcons = ["CalendarDays", "Briefcase", "Code2"];
+
 const About = () => {
   const { t } = useLanguage();
-  const stats = t.about.stats;
-  const statIcons = [
-    <Calendar size={16} key="calendar" />,
-    <Briefcase size={16} key="briefcase" />,
-    <Code2 size={16} key="code" />,
-  ];
+  const { data } = useLanding();
+  const about = data?.about?.about ?? null;
+  const c = about?.content ?? null;
+  const cmsStats = data?.about?.stats ?? [];
+
+  const stats =
+    cmsStats.length > 0
+      ? cmsStats.map((s, i) => ({
+          value: s.value,
+          label: s.label,
+          sub: s.sublabel,
+          iconName: s.icon_name ?? fallbackStatIcons[i] ?? "Circle",
+        }))
+      : t.about.stats.map((s, i) => ({
+          value: s.value,
+          label: s.label,
+          sub: s.sub,
+          iconName: fallbackStatIcons[i] ?? "Circle",
+        }));
+
+  const eyebrow = c?.eyebrow || t.about.eyebrow;
+  const location = c?.location || t.about.location;
+  const headline = c?.headline || t.about.headingLine1;
+  const headlineHighlight = c?.headline_highlight || t.about.headingHighlight;
+  const bio1 =
+    c?.bio_paragraph_1 ||
+    `${t.about.bio1Prefix} ${t.about.bioStrong1} ${t.about.bio1Middle} ${t.about.bio1Strong2} ${t.about.bio1Suffix}`;
+  const bio2 = c?.bio_paragraph_2 || t.about.bio2;
+  const bio3 = c?.bio_paragraph_3 || t.about.bio3;
+  const primaryCtaLabel = c?.primary_cta_label || t.about.contactMe;
+  const secondaryCtaLabel = c?.secondary_cta_label || t.about.viewPortfolio;
+  const primaryCtaUrl = about?.primary_cta_url || WA_URL;
+  const secondaryCtaUrl = about?.secondary_cta_url || "#portfolio";
+  const photoUrl = about?.photo?.url || "/adi.webp";
 
   return (
   <section
@@ -38,7 +63,6 @@ const About = () => {
       style={{ width: "78%", margin: "0 auto" }}
       className="max-lg:w-[88%] max-md:w-[92%]"
     >
-      {/* Eyebrow */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -46,7 +70,7 @@ const About = () => {
         transition={{ duration: 0.5 }}
       >
         <div className="section-eyebrow">
-          01 <span className="eyebrow-sep">/</span> {t.about.eyebrow}
+          01 <span className="eyebrow-sep">/</span> {eyebrow}
         </div>
       </motion.div>
 
@@ -60,7 +84,6 @@ const About = () => {
           className="flex flex-col gap-4"
         >
           <div className="relative w-full max-lg:max-w-100 max-lg:mx-auto">
-            {/* Corner accents */}
             <div
               className="absolute -top-px -left-px w-7 h-7 z-10 pointer-events-none"
               style={{
@@ -77,8 +100,6 @@ const About = () => {
                 borderRadius: "0 0 2px 0",
               }}
             />
-
-            {/* Photo */}
             <div
               className="w-full overflow-hidden relative group"
               style={{
@@ -89,7 +110,7 @@ const About = () => {
               }}
             >
               <Image
-                src="/adi.webp"
+                src={photoUrl}
                 alt="Adi Primanto"
                 fill
                 sizes="(max-width: 1024px) 400px, 500px"
@@ -105,7 +126,6 @@ const About = () => {
                     "linear-gradient(to bottom, transparent 50%, rgba(12,12,14,0.6) 100%)",
                 }}
               />
-              {/* Badge */}
               <div
                 className="absolute bottom-5 left-5 flex items-center gap-2 z-10"
                 style={{
@@ -129,13 +149,12 @@ const About = () => {
                   className="font-display font-semibold text-[11px] tracking-[0.08em] uppercase"
                   style={{ color: "var(--color-light)" }}
                 >
-                  {t.about.location}
+                  {location}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Code deco */}
           <div
             className="flex flex-col gap-0.5 font-code text-xs leading-[1.9]"
             style={{
@@ -188,10 +207,9 @@ const About = () => {
               color: "var(--color-white)",
             }}
           >
-            {t.about.headingLine1} <span className="gradient-text">{t.about.headingHighlight}</span>
+            {headline} <span className="gradient-text">{headlineHighlight}</span>
           </h2>
 
-          {/* Stats row */}
           <div
             className="grid grid-cols-1 sm:grid-cols-3 overflow-hidden"
             style={{
@@ -227,7 +245,7 @@ const About = () => {
                     filter: "drop-shadow(0 0 6px rgba(239,68,68,0.4))",
                   }}
                 >
-                  {statIcons[i]}
+                  <Icon name={s.iconName} size={16} />
                 </div>
                 <div className="font-display font-black leading-none gradient-text text-2xl sm:text-[28px]">
                   {s.value}
@@ -248,48 +266,38 @@ const About = () => {
             ))}
           </div>
 
-          {/* Bio */}
           <div className="flex flex-col gap-3.5">
             <p
               className="text-sm leading-[1.85] font-light"
               style={{ color: "var(--color-muted)" }}
             >
-              {t.about.bio1Prefix}{" "}
-              <strong style={{ color: "var(--color-white)", fontWeight: 500 }}>
-                {t.about.bioStrong1}
-              </strong>{" "}
-              {t.about.bio1Middle}{" "}
-              <strong style={{ color: "var(--color-white)", fontWeight: 500 }}>
-                {t.about.bio1Strong2}
-              </strong>{" "}
-              {t.about.bio1Suffix}
+              {bio1}
             </p>
             <p
               className="text-sm leading-[1.85] font-light"
               style={{ color: "var(--color-muted)" }}
             >
-              {t.about.bio2}
+              {bio2}
             </p>
             <p
               className="text-sm leading-[1.85] font-light"
               style={{ color: "var(--color-muted)" }}
             >
-              {t.about.bio3}
+              {bio3}
             </p>
           </div>
 
-          {/* CTAs */}
           <div className="flex gap-4 items-center flex-wrap">
             <a
-              href={WA_URL}
+              href={primaryCtaUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary-style"
             >
-              {t.about.contactMe} <MessageCircle size={15} />
+              {primaryCtaLabel} <MessageCircle size={15} />
             </a>
-            <a href="#portfolio" className="btn-ghost-style">
-              {t.about.viewPortfolio} <ArrowDown size={15} />
+            <a href={secondaryCtaUrl} className="btn-ghost-style">
+              {secondaryCtaLabel} <ArrowDown size={15} />
             </a>
           </div>
         </motion.div>

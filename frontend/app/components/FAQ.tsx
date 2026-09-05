@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus, Minus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/app/lib/language-context";
+import { useLanding } from "@/app/lib/landing-context";
 
 const FAQItem = ({
   question,
@@ -72,7 +73,12 @@ const FAQItem = ({
 
 const FAQ = () => {
   const { t } = useLanguage();
-  const faqs = t.faq.items;
+  const { data } = useLanding();
+  const cms = data?.faqs?.faqs ?? [];
+  const faqs =
+    cms.length > 0
+      ? cms.map((f) => ({ q: f.question, a: f.answer }))
+      : t.faq.items;
 
   return (
   <section

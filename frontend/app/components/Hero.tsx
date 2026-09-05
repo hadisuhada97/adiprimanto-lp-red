@@ -4,41 +4,28 @@ import Image from "next/image";
 import {
   MessageCircle,
   Download,
-  Zap,
-  TrendingUp,
-  Search,
   Github,
   Linkedin,
   Instagram,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/app/lib/language-context";
+import { useLanding } from "@/app/lib/landing-context";
+import { Icon } from "@/app/lib/icons";
 
 const WA_URL =
   "https://wa.me/6285727346620?text=Halo%20Adi%20Primanto,%20saya%20ingin%20membuat%20website%20untuk%20bisnis%20saya.";
 
-const metrics = [
-  {
-    icon: <Zap size={14} />,
-    label: "Page Speed",
-    value: "98+",
-    color: "#eab308",
-    pos: "top-0 right-0 -translate-y-1/2 translate-x-4",
-  },
-  {
-    icon: <TrendingUp size={14} />,
-    label: "Conversion",
-    value: "↑ 32%",
-    color: "#22c55e",
-    pos: "bottom-0 right-0 translate-y-1/2 translate-x-4",
-  },
-  {
-    icon: <Search size={14} />,
-    label: "SEO Score",
-    value: "A",
-    color: "#EF4444",
-    pos: "bottom-0 left-0 translate-y-1/2 -translate-x-4",
-  },
+const metricPositions = [
+  "top-0 right-0 -translate-y-1/2 translate-x-4",
+  "bottom-0 right-0 translate-y-1/2 translate-x-4",
+  "bottom-0 left-0 translate-y-1/2 -translate-x-4",
+];
+
+const fallbackMetrics = [
+  { iconName: "Zap", label: "Page Speed", value: "98+", color: "#eab308" },
+  { iconName: "TrendingUp", label: "Conversion", value: "↑ 32%", color: "#22c55e" },
+  { iconName: "Search", label: "SEO Score", value: "A", color: "#EF4444" },
 ];
 
 const fadeUp = (delay: number) => ({
@@ -49,6 +36,33 @@ const fadeUp = (delay: number) => ({
 
 const Hero = () => {
   const { t } = useLanguage();
+  const { data } = useLanding();
+  const hero = data?.hero?.hero ?? null;
+  const c = hero?.content ?? null;
+  const cmsMetrics = data?.hero?.metrics ?? [];
+
+  const metrics = (
+    cmsMetrics.length > 0
+      ? cmsMetrics.map((m, i) => ({
+          iconName: m.icon_name ?? fallbackMetrics[i]?.iconName ?? "Zap",
+          label: m.label,
+          value: m.value,
+          color: m.color_hex ?? fallbackMetrics[i]?.color ?? "#EF4444",
+        }))
+      : fallbackMetrics
+  ).map((m, i) => ({ ...m, pos: metricPositions[i] ?? metricPositions[0] }));
+
+  const badge = c?.badge || t.hero.badge;
+  const role = c?.role || t.hero.role;
+  const headlineLine1 = c?.headline_line_1 || t.hero.headlineLine1;
+  const highlightLines = c?.headline_highlight
+    ? [c.headline_highlight]
+    : t.hero.headlineHighlight;
+  const headlineStroke = c?.headline_stroke || t.hero.headlineStroke;
+  const downloadLabel = c?.secondary_cta_label || t.hero.downloadCV;
+  const consultLabel = c?.primary_cta_label || t.hero.consultFree;
+  const downloadUrl = hero?.secondary_cta_url || "/CV_New_ADI_PRIMANTO.pdf";
+  const consultUrl = hero?.primary_cta_url || WA_URL;
 
   return (
   <>
@@ -109,7 +123,7 @@ const Hero = () => {
               icon: Instagram,
               href: "https://www.instagram.com/adiprimanto",
             },
-          ].map(({ label, icon: Icon, href }) => (
+          ].map(({ label, icon: SocialIcon, href }) => (
             <a
               key={label}
               href={href}
@@ -125,7 +139,7 @@ const Hero = () => {
                 (e.currentTarget.style.color = "var(--color-muted)")
               }
             >
-              <Icon size={16} />
+              <SocialIcon size={16} />
             </a>
           ))}
           <div
@@ -163,7 +177,7 @@ const Hero = () => {
                 className="font-display font-semibold text-[10px] tracking-widest uppercase"
                 style={{ color: "var(--color-light)" }}
               >
-                {t.hero.badge}
+                {badge}
               </span>
             </div>
           </motion.div>
@@ -184,7 +198,7 @@ const Hero = () => {
               className="font-display font-medium text-xs tracking-[0.14em] uppercase"
               style={{ color: "var(--color-muted)" }}
             >
-              {t.hero.role}
+              {role}
             </span>
           </motion.div>
 
@@ -197,7 +211,7 @@ const Hero = () => {
                 color: "var(--color-white)",
               }}
             >
-              {t.hero.headlineLine1}
+              {headlineLine1}
               <br />
               <span className="relative">
                 <span
@@ -209,9 +223,12 @@ const Hero = () => {
                     backgroundClip: "text",
                   }}
                 >
-                  {t.hero.headlineHighlight[0]}
-                  <br />
-                  {t.hero.headlineHighlight[1]}
+                  {highlightLines.map((line, i) => (
+                    <span key={i}>
+                      {i > 0 && <br />}
+                      {line}
+                    </span>
+                  ))}
                 </span>
               </span>
               <br />
@@ -222,7 +239,7 @@ const Hero = () => {
                   display: "inline-block",
                 }}
               >
-                {t.hero.headlineStroke}
+                {headlineStroke}
               </span>
             </h1>
           </motion.div>
@@ -255,11 +272,11 @@ const Hero = () => {
             className="text-sm leading-[1.85] font-light max-w-sm mb-4"
             style={{ color: "var(--color-muted)" }}
           >
-            {t.hero.descriptionPrefix}{" "}
+            {c?.description_prefix || t.hero.descriptionPrefix}{" "}
             <strong style={{ color: "var(--color-white)", fontWeight: 500 }}>
-              {t.hero.descriptionStrong}
+              {c?.description_strong || t.hero.descriptionStrong}
             </strong>{" "}
-            {t.hero.descriptionSuffix}
+            {c?.description_suffix || t.hero.descriptionSuffix}
           </motion.p>
 
           {/* CTAs */}
@@ -267,16 +284,16 @@ const Hero = () => {
             {...fadeUp(0.35)}
             className="flex flex-wrap gap-3 items-center mb-8"
           >
-            <a href="/CV_New_ADI_PRIMANTO.pdf" download className="btn-ghost-style">
-              {t.hero.downloadCV} <Download size={14} />
+            <a href={downloadUrl} download className="btn-ghost-style">
+              {downloadLabel} <Download size={14} />
             </a>
             <a
-              href={WA_URL}
+              href={consultUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary-style"
             >
-              {t.hero.consultFree} <MessageCircle size={14} />
+              {consultLabel} <MessageCircle size={14} />
             </a>
           </motion.div>
 
@@ -301,7 +318,7 @@ const Hero = () => {
                 icon: Instagram,
                 href: "https://www.instagram.com/adiprimanto",
               },
-            ].map(({ label, icon: Icon, href }) => (
+            ].map(({ label, icon: SocialIcon, href }) => (
               <a
                 key={label}
                 href={href}
@@ -317,7 +334,7 @@ const Hero = () => {
                   (e.currentTarget.style.color = "var(--color-muted)")
                 }
               >
-                <Icon size={18} />
+                <SocialIcon size={18} />
               </a>
             ))}
           </motion.div>
@@ -332,11 +349,11 @@ const Hero = () => {
               className="text-xs font-light"
               style={{ color: "var(--color-muted)" }}
             >
-              {t.hero.trustedPrefix}{" "}
+              {c?.trusted_prefix || t.hero.trustedPrefix}{" "}
               <strong style={{ color: "var(--color-white)", fontWeight: 500 }}>
-                {t.hero.trustedStrong}
+                {c?.trusted_strong || t.hero.trustedStrong}
               </strong>{" "}
-              {t.hero.trustedSuffix}
+              {c?.trusted_suffix || t.hero.trustedSuffix}
             </p>
           </motion.div>
         </div>
@@ -414,7 +431,7 @@ const Hero = () => {
           </div>
 
           {/* Metric badges */}
-          {metrics.map(({ icon, label, value, color, pos }) => (
+          {metrics.map(({ iconName, label, value, color, pos }) => (
             <div
               key={label}
               className={`absolute ${pos} flex items-center gap-2 px-3 py-2 rounded-xl z-20`}
@@ -425,7 +442,9 @@ const Hero = () => {
                 boxShadow: `0 0 20px ${color}18`,
               }}
             >
-              <span style={{ color }}>{icon}</span>
+              <span style={{ color }}>
+                <Icon name={iconName} size={14} />
+              </span>
               <div>
                 <p
                   className="font-code text-[9px] tracking-[0.06em] uppercase"

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -12,12 +12,12 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/app/lib/language-context";
+import { useLanding } from "@/app/lib/landing-context";
 
-const testimonials = [
+const fallbackTestimonials = [
   {
     name: "Asih Angger",
     role: "Photographer",
-    project: "Website Portfolio Jasa Fotografi",
     image: "/testimoni/asih.jpeg",
     feedback:
       "Makasih banyak yaa mas adi udah bantu buatin website nya rapi dan sesuai request.. Udah sabar banget juga..makin berkah dan sukses yaa mas adi.. 🤲🏻 aamiin",
@@ -27,7 +27,6 @@ const testimonials = [
   {
     name: "Dr. Ade Salman Alfarisi",
     role: "Co-Founder & Principal Consultant, DKN Digital",
-    project: "Website Company Profile",
     image: "/testimoni/dkn.jpeg",
     feedback:
       "Kami sangat mengapresiasi kerja sama dengan mas Adi Primanto dan team. Selama proses pengerjaan, mereka menunjukkan respons yang baik, komunikasi yang jelas, serta kemampuan teknis yang memadai dalam memahami kebutuhan kami. Website berhasil diselesaikan dengan cukup rapi dan sesuai arahan, termasuk beberapa revisi yang ditangani dengan profesional. Secara keseluruhan, pengalaman bekerja sama berjalan lancar dan memuaskan, sehingga layak dipertimbangkan untuk proyek pengembangan web berikutnya.",
@@ -37,7 +36,6 @@ const testimonials = [
   {
     name: "Rezky Perdana Ramadhansyah",
     role: "CEO & Founder, Sentraoto",
-    project: "Website Jual Beli Kendaraan",
     image: "/testimoni/sentra.jpeg",
     feedback:
       "Website nya oke, Responsif. Request revisian nya juga ga pelit. Pengerjaan lumayan cepat beberapa hal yg harusnya add cost tapi ini free",
@@ -48,27 +46,41 @@ const testimonials = [
 
 const Testimonial = () => {
   const { t } = useLanguage();
-  const testimonialsWithProject = testimonials.map((item, i) => ({
-    ...item,
-    project: t.testimonial.projects[i],
-  }));
+  const { data } = useLanding();
+  const cms = data?.testimonials ?? [];
+  const testimonialsWithProject =
+    cms.length > 0
+      ? cms.map((item) => ({
+          name: item.name,
+          role: item.role,
+          project: item.project_label || item.company || "",
+          image: item.screenshot?.url || item.avatar?.url || null,
+          feedback: item.feedback,
+          rating: item.rating || 5,
+          accentColor: item.accent_color || "var(--color-primary)",
+        }))
+      : fallbackTestimonials.map((item, i) => ({
+          ...item,
+          project: t.testimonial.projects[i],
+        }));
+
   const [activeIndex, setActiveIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
-  // Minimum swipe distance in pixels
   const minSwipeDistance = 50;
 
-  const nextSlide = () => {
-    setActiveIndex((prev) => (prev === testimonialsWithProject.length - 1 ? 0 : prev + 1));
-  };
+  const total = testimonialsWithProject.length;
+  const nextSlide = () =>
+    setActiveIndex((prev) => (prev === total - 1 ? 0 : prev + 1));
+  const prevSlide = () =>
+    setActiveIndex((prev) => (prev === 0 ? total - 1 : prev - 1));
 
-  const prevSlide = () => {
-    setActiveIndex((prev) => (prev === 0 ? testimonialsWithProject.length - 1 : prev - 1));
-  };
+  useEffect(() => {
+    if (activeIndex > total - 1) setActiveIndex(0);
+  }, [total, activeIndex]);
 
-  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isZoomed) {
@@ -80,31 +92,25 @@ const Testimonial = () => {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isZoomed]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isZoomed, total]);
 
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
-
   const onTouchMove = (e: React.TouchEvent) => {
     setTouchEnd(e.targetTouches[0].clientX);
   };
-
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
     const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe) {
-      nextSlide();
-    } else if (isRightSwipe) {
-      prevSlide();
-    }
+    if (distance > minSwipeDistance) nextSlide();
+    else if (distance < -minSwipeDistance) prevSlide();
   };
 
   const current = testimonialsWithProject[activeIndex];
+  if (!current) return null;
 
   return (
     <section
@@ -217,17 +223,21 @@ const Testimonial = () => {
                   </div>
                   <div className="text-xs font-light text-slate-400 flex flex-wrap gap-x-2 gap-y-1 items-center">
                     <span>{current.role}</span>
-                    <span className="text-slate-600">•</span>
-                    <span
-                      className="font-code text-[10px] tracking-[0.04em] px-2 py-0.5 rounded-full"
-                      style={{
-                        background: "var(--color-primary-subtle)",
-                        border: "1px solid rgba(239, 68, 68, 0.15)",
-                        color: "var(--color-primary-2)",
-                      }}
-                    >
-                      {current.project}
-                    </span>
+                    {current.project && (
+                      <>
+                        <span className="text-slate-600">•</span>
+                        <span
+                          className="font-code text-[10px] tracking-[0.04em] px-2 py-0.5 rounded-full"
+                          style={{
+                            background: "var(--color-primary-subtle)",
+                            border: "1px solid rgba(239, 68, 68, 0.15)",
+                            color: "var(--color-primary-2)",
+                          }}
+                        >
+                          {current.project}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -336,29 +346,53 @@ const Testimonial = () => {
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ duration: 0.3 }}
                       className="relative w-full h-full cursor-pointer group/screen"
-                      onClick={() => setIsZoomed(true)}
+                      onClick={() => current.image && setIsZoomed(true)}
                     >
-                      <Image
-                        src={current.image}
-                        alt={`Screenshot percakapan testimoni ${current.name}`}
-                        fill
-                        sizes="(max-width: 768px) 256px, 288px"
-                        className="object-cover object-top filter brightness-[0.85] transition-all duration-300 group-hover/screen:scale-102 group-hover/screen:brightness-[0.95]"
-                        priority={activeIndex === 0}
-                      />
-
-                      {/* Screen Glass Glow/Reflection Effect */}
-                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none" />
-
-                      {/* Zoom Overlay on Hover */}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/screen:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2">
-                        <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white scale-90 group-hover/screen:scale-100 transition-transform duration-300">
-                          <ZoomIn size={22} />
+                      {current.image ? (
+                        <>
+                          <Image
+                            src={current.image}
+                            alt={`Screenshot percakapan testimoni ${current.name}`}
+                            fill
+                            sizes="(max-width: 768px) 256px, 288px"
+                            className="object-cover object-top filter brightness-[0.85] transition-all duration-300 group-hover/screen:scale-102 group-hover/screen:brightness-[0.95]"
+                            priority={activeIndex === 0}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/screen:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2">
+                            <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white scale-90 group-hover/screen:scale-100 transition-transform duration-300">
+                              <ZoomIn size={22} />
+                            </div>
+                            <span className="text-white text-xs font-medium tracking-wide">
+                              {t.testimonial.zoomImage}
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <div
+                          className="w-full h-full flex flex-col items-center justify-center gap-4 p-6 text-center"
+                          style={{
+                            background:
+                              "linear-gradient(135deg, var(--color-bg-3) 0%, var(--color-surface) 100%)",
+                          }}
+                        >
+                          <div
+                            className="w-20 h-20 rounded-full flex items-center justify-center font-display font-black text-3xl"
+                            style={{
+                              background: `color-mix(in srgb, ${current.accentColor} 18%, transparent)`,
+                              color: current.accentColor,
+                            }}
+                          >
+                            {current.name.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="text-slate-300 text-sm font-display font-semibold">
+                            {current.name}
+                          </span>
+                          <span className="text-slate-500 text-[11px] font-light">
+                            {current.role}
+                          </span>
                         </div>
-                        <span className="text-white text-xs font-medium tracking-wide">
-                          {t.testimonial.zoomImage}
-                        </span>
-                      </div>
+                      )}
                     </motion.div>
                   </AnimatePresence>
                 </div>
@@ -370,7 +404,7 @@ const Testimonial = () => {
 
       {/* Lightbox / Zoom Modal */}
       <AnimatePresence>
-        {isZoomed && (
+        {isZoomed && current.image && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -394,7 +428,7 @@ const Testimonial = () => {
               exit={{ scale: 0.9, y: 20 }}
               transition={{ type: "spring", damping: 25, stiffness: 220 }}
               className="relative max-w-full max-h-[85vh] aspect-[740/1600] w-[400px] max-md:w-[320px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
-              onClick={(e) => e.stopPropagation()} // Stop propagation so clicking on the image doesn't close it
+              onClick={(e) => e.stopPropagation()}
             >
               <Image
                 src={current.image}

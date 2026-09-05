@@ -242,6 +242,61 @@ class PublicContentController extends BaseApiController
         return $this->respondSuccess($values, 'Settings retrieved successfully.');
     }
 
+    public function landing(Request $request): JsonResponse
+    {
+        app()->setLocale($this->resolveLocale($request));
+
+        $hero = HeroSection::query()->with(['translations', 'profile', 'cv'])->first();
+        $about = AboutSection::query()->with(['translations', 'photo'])->first();
+
+        $faqs = Faq::query()->active()->with(['translations', 'category.translations'])->ordered()->get();
+        $faqCategories = FaqCategory::query()->active()->with('translations')->ordered()->get();
+
+        return $this->respondSuccess([
+            'hero' => [
+                'hero' => $hero === null ? null : new HeroSectionResource($hero),
+                'metrics' => HeroMetricResource::collection(
+                    HeroMetric::query()->active()->with('translations')->ordered()->get()
+                ),
+            ],
+            'about' => [
+                'about' => $about === null ? null : new AboutSectionResource($about),
+                'stats' => AboutStatResource::collection(
+                    AboutStat::query()->active()->with('translations')->ordered()->get()
+                ),
+            ],
+            'services' => [
+                'services' => ServiceResource::collection(
+                    Service::query()->active()->with('translations')->ordered()->get()
+                ),
+                'stats' => ServiceStatResource::collection(
+                    ServiceStat::query()->active()->with('translations')->ordered()->get()
+                ),
+            ],
+            'testimonials' => TestimonialResource::collection(
+                Testimonial::query()->active()->with(['translations', 'avatar', 'screenshot'])->ordered()->get()
+            ),
+            'faqs' => [
+                'categories' => FaqCategoryResource::collection($faqCategories),
+                'faqs' => FaqResource::collection($faqs),
+            ],
+            'skills' => SkillCategoryResource::collection(
+                SkillCategory::query()->active()
+                    ->with(['translations', 'skills' => fn ($query) => $query->active()->ordered()])
+                    ->ordered()->get()
+            ),
+            'pain_points' => PainPointResource::collection(
+                PainPoint::query()->active()->with('translations')->ordered()->get()
+            ),
+            'process_steps' => ProcessStepResource::collection(
+                ProcessStep::query()->active()->with('translations')->ordered()->get()
+            ),
+            'clients' => ClientResource::collection(
+                Client::query()->active()->with(['translations', 'logo'])->ordered()->get()
+            ),
+        ], 'Landing content retrieved successfully.');
+    }
+
     protected function resolveLocale(Request $request): string
     {
         $locale = $request->query('locale', $request->header('Accept-Language'));

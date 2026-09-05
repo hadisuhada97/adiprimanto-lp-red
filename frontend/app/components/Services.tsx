@@ -1,45 +1,51 @@
 "use client";
 
-import {
-  ArrowRight,
-  Globe,
-  Zap,
-  ShieldCheck,
-  Bot,
-  Smartphone,
-  Clock,
-  Gauge,
-  HeartHandshake,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useLanguage } from "@/app/lib/language-context";
+import { useLanding } from "@/app/lib/landing-context";
+import { Icon } from "@/app/lib/icons";
 
 const WA_URL =
   "https://wa.me/6285727346620?text=Halo%20Adi%20Primanto,%20saya%20ingin%20membuat%20website%20untuk%20bisnis%20saya.";
 
-const serviceIcons = [
-  <ArrowRight size={17} key="arrow" />,
-  <Globe size={17} key="globe" />,
-  <Zap size={17} key="zap" />,
-  <ShieldCheck size={17} key="shield" />,
-  <Bot size={17} key="bot" />,
-  <Smartphone size={17} key="smartphone" />,
-  <ShieldCheck size={17} key="shield2" />,
-];
-
-const statIcons = [
-  <Clock size={18} key="clock" />,
-  <Gauge size={18} key="gauge" />,
-  <HeartHandshake size={18} key="heart" />,
-];
+const fallbackServiceIcons = ["Rocket", "Globe", "Zap", "ShieldCheck", "Bot", "Smartphone", "ShieldCheck"];
+const fallbackStatIcons = ["Clock", "Gauge", "HeartHandshake"];
 
 const Services = () => {
   const { t } = useLanguage();
-  const services = t.services.list.map((s, i) => ({
-    ...s,
-    num: String(i + 1).padStart(2, "0"),
-    icon: serviceIcons[i],
-  }));
-  const stats = t.services.stats.map((s, i) => ({ ...s, icon: statIcons[i] }));
+  const { data } = useLanding();
+  const cmsServices = data?.services?.services ?? [];
+  const cmsStats = data?.services?.stats ?? [];
+  const services =
+    cmsServices.length > 0
+      ? cmsServices.map((s, i) => ({
+          title: s.title,
+          desc: s.description,
+          tags: s.tags ?? [],
+          num: String(i + 1).padStart(2, "0"),
+          iconName: s.icon_name ?? fallbackServiceIcons[i] ?? "Rocket",
+        }))
+      : t.services.list.map((s, i) => ({
+          title: s.title,
+          desc: s.desc,
+          tags: s.tags,
+          num: String(i + 1).padStart(2, "0"),
+          iconName: fallbackServiceIcons[i] ?? "Rocket",
+        }));
+  const stats =
+    cmsStats.length > 0
+      ? cmsStats.map((s, i) => ({
+          value: s.value,
+          unit: s.unit,
+          label: s.label,
+          iconName: s.icon_name ?? fallbackStatIcons[i] ?? "Clock",
+        }))
+      : t.services.stats.map((s, i) => ({
+          value: s.value,
+          unit: s.unit,
+          label: s.label,
+          iconName: fallbackStatIcons[i] ?? "Clock",
+        }));
 
   return (
   <section
@@ -110,7 +116,7 @@ const Services = () => {
                     filter: "drop-shadow(0 0 5px rgba(239,68,68,0.4))",
                   }}
                 >
-                  {s.icon}
+                  <Icon name={s.iconName} size={18} />
                 </div>
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <div className="flex items-baseline gap-1.5">
@@ -190,7 +196,7 @@ const Services = () => {
                     className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                     style={{ color: "var(--color-primary)" }}
                   >
-                    {s.icon}
+                    <Icon name={s.iconName} size={17} />
                   </div>
                 </div>
                 <p

@@ -79,6 +79,7 @@ Route::prefix('v1')->group(function (): void {
         Route::get('navigation', [PublicContentController::class, 'navigation'])->name('navigation.index');
         Route::get('contact', [PublicContentController::class, 'contact'])->name('contact.index');
         Route::get('seo', [PublicContentController::class, 'seo'])->name('seo.index');
+        Route::get('landing', [PublicContentController::class, 'landing'])->name('landing.index');
         Route::post('contact-messages', [PublicContactMessageController::class, 'store'])
             ->middleware('throttle:contact-form')->name('contact-messages.store');
     });

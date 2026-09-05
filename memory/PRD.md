@@ -937,3 +937,16 @@ Tiga defect dari `iteration_9.json` diperbaiki:
 - **Verifikasi**: `yarn build` sukses, screenshot menampilkan 3 project + filter berfungsi (React → 1 kartu). Cover kosong menampilkan fallback (belum ada gambar di Media Library).
 
 **Berikutnya (F6 lanjutan)**: Contact.tsx → POST `/public/contact-messages` (+honeypot), 12 komponen sisa (Hero/About/Services/dst) baca API, `app/api/revalidate/route.ts`, metadata & JSON-LD dinamis dari `/public/seo`, sitemap/robots dari API.
+
+---
+
+## Fase F6b — Seluruh seksi konten dinamis dari CMS (SELESAI, 05 Sep 2026)
+
+- **Endpoint agregat baru** `GET /api/v1/public/landing?locale=` (PublicContentController::landing) mengembalikan hero+metrics, about+stats, services+stats, testimonials, faqs, skills, pain_points, process_steps, clients dalam 1 request (mendukung ISR tag `landing`).
+- **Fondasi frontend**: `app/lib/icons.tsx` (registry lucide + react-icons/si + fallback `Circle`), `app/lib/api/landing.ts` (typed fetch), `app/lib/landing-context.tsx` (`LandingProvider`/`useLanding`, refetch saat ganti bahasa) dibungkus di `layout.tsx` dalam `LanguageProvider`.
+- **9 komponen di-refactor** membaca data dari CMS (markup & styling dipertahankan identik, fallback ke `translations.ts` bila API kosong): Hero (badge/headline/deskripsi/CTA/metrics), About (lokasi/headline/3 bio/CTA/stats/foto), Services (list+tags+stats), TechStack (kategori skill+ikon berwarna+marquee), PainPoints, Process, HappyClients (clients marquee), Testimonial (fallback inisial saat screenshot kosong), FAQ.
+- **Verifikasi**: `yarn build` sukses; screenshot ID menampilkan seluruh seksi tampil dari DB; API `locale=en` mengembalikan konten terjemahan (headline "Building Quality", stat "Years of Experience"). Tidak ada error console (hanya abort Cloudflare yang tak terkait).
+
+Catatan: eyebrow/heading seksi masih dari `translations.ts` (label UI, bukan data). Media testimonial/cover project & foto About kosong di Media Library → tampil fallback anggun.
+
+**Berikutnya (F6 lanjutan)**: Navbar (navigation menu), Contact form → POST `/public/contact-messages` + honeypot, Footer/WhatsApp dari settings/social-links, `app/api/revalidate/route.ts`, metadata & JSON-LD dinamis dari `/public/seo`, sitemap/robots. Lalu F7 (migrasi & QA).
