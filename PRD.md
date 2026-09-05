@@ -788,3 +788,49 @@ terang diperbaiki.
 | P2 | CSP frontend masih memakai `'unsafe-inline' 'unsafe-eval'`; perlu CSP berbasis nonce (middleware + strict-dynamic) |
 | P2 | Backup DB harian + retensi, audit Lighthouse, dan E2E Playwright yang tersimpan di repo |
 | P3 | Middleware `Accept-Language` untuk rute admin agar `content` mengikuti locale permintaan |
+
+### Fase F7b — Impor Konten Legacy, E2E & Audit Lighthouse ✅ SELESAI (2026-06)
+
+**`php artisan content:import-legacy`** — memasukkan konten landing lama (yang semula
+hard-coded di `frontend/app/lib/translations.ts`) ke CMS. Sumbernya adalah snapshot JSON
+portabel `backend/database/data/legacy-content.json` (22 modul, 118 record, ID+EN).
+
+- **Idempotent**: record yang sudah ada dilewati, jadi aman dijalankan berulang
+- Opsi `--only=faqs,services` (per modul), `--fresh` (timpa yang sudah ada),
+  `--dry-run` (laporan tanpa menulis), `--file=` (snapshot lain)
+- Relasi diselesaikan lewat kunci natural, bukan UUID: `skills → skill_categories.eyebrow`,
+  `faqs → faq_categories.slug`, `projects → project_categories.slug` + pivot
+  `projects ↔ technologies.slug`; kolom media diabaikan karena spesifik lingkungan
+- Pendamping **`php artisan content:export-snapshot`** menulis ulang snapshot dari database,
+  sehingga file JSON juga berguna sebagai backup konten yang bisa dibaca manusia
+- Spesifikasi modul dipusatkan di `app/Support/ContentSnapshot.php` (dipakai kedua perintah)
+- **Diuji**: dry-run pada DB terisi → 118 record dilewati; impor pada database kosong
+  (`cms_import_test`) → 118 record dibuat lengkap dengan relasi, dan pengulangan langsung
+  melewati semuanya
+
+**E2E Playwright tersimpan di repo** (`frontend/e2e/`, `frontend/playwright.config.ts`,
+`yarn e2e`): 10 skenario — 4 landing (semua seksi + nol error console, toggle tema, ganti
+bahasa, form kontak tersimpan) dan 6 admin (login sekali lewat `auth.setup.ts` + `storageState`
+agar tidak menabrak throttle 5 login/menit, dashboard, Trash, Localization + coverage,
+CRUD folder Media, dan state Access denied untuk Editor). **10/10 lolos.**
+
+**Audit Lighthouse** (`yarn audit:lighthouse`, ringkasan di
+`/app/test_reports/lighthouse-landing.md`): Accessibility **94 → 100** setelah memperbaiki
+kontras token `--color-muted` di tema gelap, tombol submit WhatsApp (1.98:1 → 4.6:1), urutan
+heading (`h4` → `h3` di footer & kartu portofolio), dan `aria-label` tombol bahasa.
+Skor lain: Performance 61 (LCP 2.0 s, TBT 790 ms), Best Practices 81, SEO 83 — temuan
+`is-crawlable`, `robots-txt`, `deprecations`, dan `bf-cache` berasal dari ingress preview
+(header `x-robots-tag: noindex`, robots.txt Cloudflare, skrip challenge, `no-store`) dan hilang
+di domain produksi.
+
+### Backlog terbaru
+
+| Prioritas | Item |
+|---|---|
+| P1 | Galeri gambar per proyek (tabel `project_media` + pengurutan) |
+| P2 | Turnstile/captcha form kontak (ditunda atas pilihan user) |
+| P2 | Performance landing: `LazyMotion` + komponen server untuk menurunkan TBT (790 ms) |
+| P2 | CSP frontend berbasis nonce (kini masih `'unsafe-inline' 'unsafe-eval'`) |
+| P2 | Backup DB harian + retensi |
+| P2 | Belum diputuskan: modul Blog, Preview Mode draft, `/helda` jadi CMS, analytics, notifikasi WhatsApp |
+| P3 | Middleware `Accept-Language` untuk rute admin |

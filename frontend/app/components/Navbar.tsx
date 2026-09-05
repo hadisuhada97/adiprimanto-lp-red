@@ -138,7 +138,7 @@ const Navbar = () => {
           {showLanguageSwitcher && (
             <button
               onClick={toggleLanguage}
-              aria-label={t.nav.language}
+              aria-label={`${t.nav.language}: ${language.toUpperCase()}`}
               title={t.nav.language}
               className="flex items-center gap-1.5 rounded-full transition-all duration-300 cursor-pointer"
               style={{
@@ -192,7 +192,7 @@ const Navbar = () => {
           {showLanguageSwitcher && (
             <button
               onClick={toggleLanguage}
-              aria-label={t.nav.language}
+              aria-label={`${t.nav.language}: ${language.toUpperCase()}`}
               className="flex items-center gap-1 transition-colors"
               style={{ color: 'var(--color-white)' }}
               data-testid="navbar-language-toggle-mobile"

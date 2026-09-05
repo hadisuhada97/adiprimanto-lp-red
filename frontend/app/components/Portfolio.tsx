@@ -402,12 +402,12 @@ const Portfolio = () => {
                       borderTop: "1px solid var(--color-border)",
                     }}
                   >
-                    <h4
+                    <h3
                       className="font-display font-bold leading-[1.3] tracking-[-0.01em]"
                       style={{ fontSize: "15px", color: "var(--color-white)" }}
                     >
                       {p.title}
-                    </h4>
+                    </h3>
                     <p
                       className="text-xs leading-[1.6] font-light"
                       style={{ color: "var(--color-muted)" }}

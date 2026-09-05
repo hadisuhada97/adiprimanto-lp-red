@@ -1,0 +1,2105 @@
+{
+    "hero": [
+        {
+            "attributes": {
+                "badge_icon": "Sparkles",
+                "primary_cta_url": "/CV_New_ADI_PRIMANTO.pdf",
+                "secondary_cta_url": "https://wa.me/6285727346620?text=Halo%20Adi%20Primanto,%20saya%20ingin%20membuat%20website%20untuk%20bisnis%20saya.",
+                "is_active": true,
+                "sort_order": 0
+            },
+            "translations": {
+                "en": {
+                    "badge": "Website & Mobile App Services",
+                    "role": "Premium App Development",
+                    "headline_line_1": "Building Quality",
+                    "headline_highlight": "Websites for Your",
+                    "headline_stroke": "Business",
+                    "description_prefix": "Helping businesses look more",
+                    "description_strong": "professional and trustworthy",
+                    "description_suffix": "from the very first impression.",
+                    "primary_cta_label": "Download CV",
+                    "secondary_cta_label": "Free Consultation",
+                    "trusted_prefix": "Trusted by",
+                    "trusted_strong": "30+ local businesses & startups",
+                    "trusted_suffix": "in Indonesia"
+                },
+                "id": {
+                    "badge": "Jasa Website & Mobile App",
+                    "role": "Premium App Development",
+                    "headline_line_1": "Membangun Website",
+                    "headline_highlight": "Berkualitas untuk Bisnis",
+                    "headline_stroke": "Anda",
+                    "description_prefix": "Bantu bisnis tampil lebih",
+                    "description_strong": "profesional dan dipercaya",
+                    "description_suffix": "sejak kesan pertama.",
+                    "primary_cta_label": "Download CV",
+                    "secondary_cta_label": "Konsultasi Gratis",
+                    "trusted_prefix": "Dipercaya",
+                    "trusted_strong": "30+ bisnis lokal & startup",
+                    "trusted_suffix": "di Indonesia"
+                }
+            }
+        }
+    ],
+    "hero_metrics": [
+        {
+            "attributes": {
+                "value": "98+",
+                "icon_name": "Zap",
+                "color_hex": "#eab308",
+                "is_active": true,
+                "sort_order": 0
+            },
+            "translations": {
+                "en": {
+                    "label": "Page Speed"
+                },
+                "id": {
+                    "label": "Page Speed"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "value": "↑ 32%",
+                "icon_name": "TrendingUp",
+                "color_hex": "#22c55e",
+                "is_active": true,
+                "sort_order": 1
+            },
+            "translations": {
+                "en": {
+                    "label": "Conversion"
+                },
+                "id": {
+                    "label": "Conversion"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "value": "A",
+                "icon_name": "Search",
+                "color_hex": "#ef4444",
+                "is_active": true,
+                "sort_order": 2
+            },
+            "translations": {
+                "en": {
+                    "label": "SEO Score"
+                },
+                "id": {
+                    "label": "SEO Score"
+                }
+            }
+        }
+    ],
+    "about": [
+        {
+            "attributes": {
+                "location_lat": -7.7955798,
+                "location_lng": 110.3694896,
+                "primary_cta_url": "#contact",
+                "secondary_cta_url": "#portfolio",
+                "is_active": true,
+                "sort_order": 0
+            },
+            "translations": {
+                "en": {
+                    "eyebrow": "ABOUT ME",
+                    "location": "Yogyakarta, Indonesia",
+                    "headline": "The Person",
+                    "headline_highlight": "Behind the Screen.",
+                    "bio_paragraph_1": "A Software Engineer with more than 5 years of experience building websites and applications that are not only beautiful, but also functional and user-focused.",
+                    "bio_paragraph_2": "Currently working at a startup in Yogyakarta, I'm used to the challenge of building digital products from scratch to being used by thousands of users.",
+                    "bio_paragraph_3": "Outside of work hours, I channel my passion into helping local SMEs and businesses show up professionally online through websites designed specifically for their needs.",
+                    "primary_cta_label": "Contact Me",
+                    "secondary_cta_label": "View Portfolio"
+                },
+                "id": {
+                    "eyebrow": "TENTANG SAYA",
+                    "location": "Yogyakarta, Indonesia",
+                    "headline": "Orang di Balik",
+                    "headline_highlight": "Layar.",
+                    "bio_paragraph_1": "Seorang Software Engineer dengan pengalaman lebih dari 5 tahun membangun website dan aplikasi yang tidak hanya cantik, tapi juga fungsional dan memenuhi kebutuhan pengguna.",
+                    "bio_paragraph_2": "Saat ini bekerja di salah satu startup di Yogyakarta, saya terbiasa menghadapi tantangan membangun produk digital dari nol hingga digunakan ribuan pengguna.",
+                    "bio_paragraph_3": "Di luar jam kerja, saya menyalurkan passion untuk membantu UMKM dan bisnis lokal hadir secara profesional di dunia digital melalui website yang didesain khusus untuk kebutuhan mereka.",
+                    "primary_cta_label": "Hubungi Saya",
+                    "secondary_cta_label": "Lihat Portfolio"
+                }
+            }
+        }
+    ],
+    "about_stats": [
+        {
+            "attributes": {
+                "value": "5+",
+                "icon_name": "CalendarDays",
+                "is_active": true,
+                "sort_order": 0
+            },
+            "translations": {
+                "en": {
+                    "label": "Years of Experience",
+                    "sublabel": "since 2020"
+                },
+                "id": {
+                    "label": "Tahun Pengalaman",
+                    "sublabel": "since 2020"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "value": "30+",
+                "icon_name": "FolderCheck",
+                "is_active": true,
+                "sort_order": 1
+            },
+            "translations": {
+                "en": {
+                    "label": "Projects Completed",
+                    "sublabel": "various industries"
+                },
+                "id": {
+                    "label": "Proyek Selesai",
+                    "sublabel": "berbagai industri"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "value": "100%",
+                "icon_name": "Timer",
+                "is_active": true,
+                "sort_order": 2
+            },
+            "translations": {
+                "en": {
+                    "label": "On-Time Delivery",
+                    "sublabel": "committed to deadlines"
+                },
+                "id": {
+                    "label": "Project Selesai Tepat Waktu",
+                    "sublabel": "komitmen terhadap deadline"
+                }
+            }
+        }
+    ],
+    "skill_categories": [
+        {
+            "attributes": {
+                "eyebrow": "01",
+                "icon_name": null,
+                "is_active": true,
+                "sort_order": 1
+            },
+            "translations": {
+                "en": {
+                    "name": "Frontend Core"
+                },
+                "id": {
+                    "name": "Frontend Core"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "eyebrow": "02",
+                "icon_name": null,
+                "is_active": true,
+                "sort_order": 2
+            },
+            "translations": {
+                "en": {
+                    "name": "Frameworks"
+                },
+                "id": {
+                    "name": "Frameworks"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "eyebrow": "03",
+                "icon_name": null,
+                "is_active": true,
+                "sort_order": 3
+            },
+            "translations": {
+                "en": {
+                    "name": "Mobile Development"
+                },
+                "id": {
+                    "name": "Mobile Development"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "eyebrow": "04",
+                "icon_name": null,
+                "is_active": true,
+                "sort_order": 4
+            },
+            "translations": {
+                "en": {
+                    "name": "Backend & Tools"
+                },
+                "id": {
+                    "name": "Backend & Tools"
+                }
+            }
+        }
+    ],
+    "skills": [
+        {
+            "attributes": {
+                "name": "HTML5",
+                "icon_name": "SiHtml5",
+                "color_hex": "#E34F26",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 1
+            },
+            "belongs": {
+                "skill_category_id": "01"
+            }
+        },
+        {
+            "attributes": {
+                "name": "React JS",
+                "icon_name": "SiReact",
+                "color_hex": "#61DAFB",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 1
+            },
+            "belongs": {
+                "skill_category_id": "02"
+            }
+        },
+        {
+            "attributes": {
+                "name": "React Native",
+                "icon_name": "SiReact",
+                "color_hex": "#61DAFB",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 1
+            },
+            "belongs": {
+                "skill_category_id": "03"
+            }
+        },
+        {
+            "attributes": {
+                "name": "Node JS",
+                "icon_name": "SiNodedotjs",
+                "color_hex": "#339933",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 1
+            },
+            "belongs": {
+                "skill_category_id": "04"
+            }
+        },
+        {
+            "attributes": {
+                "name": "CSS3",
+                "icon_name": "SiCss",
+                "color_hex": "#1572B6",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 2
+            },
+            "belongs": {
+                "skill_category_id": "01"
+            }
+        },
+        {
+            "attributes": {
+                "name": "Next JS",
+                "icon_name": "SiNextdotjs",
+                "color_hex": "#FFFFFF",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 2
+            },
+            "belongs": {
+                "skill_category_id": "02"
+            }
+        },
+        {
+            "attributes": {
+                "name": "Flutter",
+                "icon_name": "SiFlutter",
+                "color_hex": "#54C5F8",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 2
+            },
+            "belongs": {
+                "skill_category_id": "03"
+            }
+        },
+        {
+            "attributes": {
+                "name": "PHP",
+                "icon_name": "SiPhp",
+                "color_hex": "#777BB4",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 2
+            },
+            "belongs": {
+                "skill_category_id": "04"
+            }
+        },
+        {
+            "attributes": {
+                "name": "JavaScript",
+                "icon_name": "SiJavascript",
+                "color_hex": "#F7DF1E",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 3
+            },
+            "belongs": {
+                "skill_category_id": "01"
+            }
+        },
+        {
+            "attributes": {
+                "name": "Vue JS",
+                "icon_name": "SiVuedotjs",
+                "color_hex": "#42B883",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 3
+            },
+            "belongs": {
+                "skill_category_id": "02"
+            }
+        },
+        {
+            "attributes": {
+                "name": "Laravel",
+                "icon_name": "SiLaravel",
+                "color_hex": "#FF2D20",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 3
+            },
+            "belongs": {
+                "skill_category_id": "04"
+            }
+        },
+        {
+            "attributes": {
+                "name": "TypeScript",
+                "icon_name": "SiTypescript",
+                "color_hex": "#3178C6",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 4
+            },
+            "belongs": {
+                "skill_category_id": "01"
+            }
+        },
+        {
+            "attributes": {
+                "name": "Nuxt JS",
+                "icon_name": "SiNuxt",
+                "color_hex": "#00DC82",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 4
+            },
+            "belongs": {
+                "skill_category_id": "02"
+            }
+        },
+        {
+            "attributes": {
+                "name": "MySQL",
+                "icon_name": "SiMysql",
+                "color_hex": "#4479A1",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 4
+            },
+            "belongs": {
+                "skill_category_id": "04"
+            }
+        },
+        {
+            "attributes": {
+                "name": "jQuery",
+                "icon_name": "SiJquery",
+                "color_hex": "#0769AD",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 5
+            },
+            "belongs": {
+                "skill_category_id": "01"
+            }
+        },
+        {
+            "attributes": {
+                "name": "Pinia",
+                "icon_name": "SiVuedotjs",
+                "color_hex": "#42B883",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 5
+            },
+            "belongs": {
+                "skill_category_id": "02"
+            }
+        },
+        {
+            "attributes": {
+                "name": "Python",
+                "icon_name": "SiPython",
+                "color_hex": "#3776AB",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 5
+            },
+            "belongs": {
+                "skill_category_id": "04"
+            }
+        },
+        {
+            "attributes": {
+                "name": "Bootstrap",
+                "icon_name": "SiBootstrap",
+                "color_hex": "#7952B3",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 6
+            },
+            "belongs": {
+                "skill_category_id": "01"
+            }
+        },
+        {
+            "attributes": {
+                "name": "Vuex",
+                "icon_name": "SiVuedotjs",
+                "color_hex": "#42B883",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 6
+            },
+            "belongs": {
+                "skill_category_id": "02"
+            }
+        },
+        {
+            "attributes": {
+                "name": "Git",
+                "icon_name": "SiGit",
+                "color_hex": "#F05032",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 6
+            },
+            "belongs": {
+                "skill_category_id": "04"
+            }
+        },
+        {
+            "attributes": {
+                "name": "Tailwind",
+                "icon_name": "SiTailwindcss",
+                "color_hex": "#06B6D4",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 7
+            },
+            "belongs": {
+                "skill_category_id": "01"
+            }
+        },
+        {
+            "attributes": {
+                "name": "WordPress",
+                "icon_name": "SiWordpress",
+                "color_hex": "#21759B",
+                "proficiency": null,
+                "is_active": true,
+                "sort_order": 8
+            },
+            "belongs": {
+                "skill_category_id": "01"
+            }
+        }
+    ],
+    "pain_points": [
+        {
+            "attributes": {
+                "icon_name": "Gauge",
+                "is_active": true,
+                "sort_order": 1
+            },
+            "translations": {
+                "en": {
+                    "title": "Slow & Unoptimised",
+                    "description": "More than 70% of visitors leave a website that takes longer than 3 seconds to load."
+                },
+                "id": {
+                    "title": "Lambat & Tidak Optimal",
+                    "description": "Lebih dari 70% pengunjung meninggalkan website yang membutuhkan waktu loading lebih dari 3 detik."
+                }
+            }
+        },
+        {
+            "attributes": {
+                "icon_name": "Palette",
+                "is_active": true,
+                "sort_order": 2
+            },
+            "translations": {
+                "en": {
+                    "title": "Unconvincing Design",
+                    "description": "An untidy design makes a brand look unprofessional and lowers the trust of potential customers."
+                },
+                "id": {
+                    "title": "Tampilan Tidak Meyakinkan",
+                    "description": "Desain yang kurang rapi membuat brand terlihat tidak profesional dan menurunkan kepercayaan calon pelanggan."
+                }
+            }
+        },
+        {
+            "attributes": {
+                "icon_name": "Smartphone",
+                "is_active": true,
+                "sort_order": 3
+            },
+            "translations": {
+                "en": {
+                    "title": "Not Mobile-Friendly",
+                    "description": "Most users browse on a smartphone. Without a solid mobile layout you lose a large part of the market."
+                },
+                "id": {
+                    "title": "Tidak Mobile-Friendly",
+                    "description": "Mayoritas pengguna mengakses website lewat smartphone. Tanpa tampilan mobile yang baik, potensi pasar ikut hilang."
+                }
+            }
+        }
+    ],
+    "services": [
+        {
+            "attributes": {
+                "icon_name": "Rocket",
+                "price_from": null,
+                "price_currency": null,
+                "duration_days": null,
+                "is_featured": true,
+                "is_active": true,
+                "sort_order": 1
+            },
+            "translations": {
+                "en": {
+                    "title": "Landing Page",
+                    "description": "One page built around one action. A proven structure to maximise leads and sales, not just good looks.",
+                    "tags": [
+                        "High Converting",
+                        "SEO-Ready"
+                    ]
+                },
+                "id": {
+                    "title": "Landing Page",
+                    "description": "Satu halaman yang mendorong satu aksi. Struktur terbukti untuk memaksimalkan leads dan penjualan — bukan sekadar cantik.",
+                    "tags": [
+                        "Konversi Tinggi",
+                        "SEO-Ready"
+                    ]
+                }
+            }
+        },
+        {
+            "attributes": {
+                "icon_name": "Building2",
+                "price_from": null,
+                "price_currency": null,
+                "duration_days": null,
+                "is_featured": false,
+                "is_active": true,
+                "sort_order": 2
+            },
+            "translations": {
+                "en": {
+                    "title": "Company Profile",
+                    "description": "A first impression that builds trust before clients even reach out. Clean, professional and on brand.",
+                    "tags": [
+                        "Brand Identity",
+                        "Credibility"
+                    ]
+                },
+                "id": {
+                    "title": "Company Profile",
+                    "description": "Kesan pertama yang membangun kepercayaan sebelum klien menghubungi Anda. Rapi, profesional, dan selaras dengan brand.",
+                    "tags": [
+                        "Brand Identity",
+                        "Kredibilitas"
+                    ]
+                }
+            }
+        },
+        {
+            "attributes": {
+                "icon_name": "ShoppingCart",
+                "price_from": null,
+                "price_currency": null,
+                "duration_days": null,
+                "is_featured": false,
+                "is_active": true,
+                "sort_order": 3
+            },
+            "translations": {
+                "en": {
+                    "title": "E-Commerce / Online Shop",
+                    "description": "A fast online store that is easy to manage and pleasant for customers, with payments ready to go.",
+                    "tags": [
+                        "Payment Ready",
+                        "Easy To Manage"
+                    ]
+                },
+                "id": {
+                    "title": "E-Commerce / Online Shop",
+                    "description": "Toko online yang cepat, mudah dikelola, dan nyaman untuk pelanggan — dengan sistem pembayaran yang siap pakai.",
+                    "tags": [
+                        "Payment Ready",
+                        "Mudah Kelola"
+                    ]
+                }
+            }
+        },
+        {
+            "attributes": {
+                "icon_name": "LayoutDashboard",
+                "price_from": null,
+                "price_currency": null,
+                "duration_days": null,
+                "is_featured": false,
+                "is_active": true,
+                "sort_order": 4
+            },
+            "translations": {
+                "en": {
+                    "title": "Custom Web App",
+                    "description": "Dashboards, SaaS or internal systems, built around the way your business actually works.",
+                    "tags": [
+                        "Full Custom",
+                        "Scalable"
+                    ]
+                },
+                "id": {
+                    "title": "Custom Web App",
+                    "description": "Dashboard, SaaS, atau sistem internal — dibangun sesuai alur bisnis Anda.",
+                    "tags": [
+                        "Full Custom",
+                        "Scalable"
+                    ]
+                }
+            }
+        },
+        {
+            "attributes": {
+                "icon_name": "Bot",
+                "price_from": null,
+                "price_currency": null,
+                "duration_days": null,
+                "is_featured": false,
+                "is_active": true,
+                "sort_order": 5
+            },
+            "translations": {
+                "en": {
+                    "title": "AI & Automation",
+                    "description": "Chatbots, workflow automation or AI integrations to cut repetitive work and answer customers faster.",
+                    "tags": [
+                        "Time Saving",
+                        "AI-Powered"
+                    ]
+                },
+                "id": {
+                    "title": "AI & Automation",
+                    "description": "Chatbot, otomatisasi alur kerja, atau integrasi AI — kurangi pekerjaan repetitif dan tingkatkan respons pelanggan.",
+                    "tags": [
+                        "Hemat Waktu",
+                        "AI-Powered"
+                    ]
+                }
+            }
+        },
+        {
+            "attributes": {
+                "icon_name": "Smartphone",
+                "price_from": null,
+                "price_currency": null,
+                "duration_days": null,
+                "is_featured": false,
+                "is_active": true,
+                "sort_order": 6
+            },
+            "translations": {
+                "en": {
+                    "title": "Mobile Application",
+                    "description": "Responsive mobile apps with a smooth experience on both Android and iOS.",
+                    "tags": [
+                        "Android & iOS",
+                        "User-Friendly"
+                    ]
+                },
+                "id": {
+                    "title": "Mobile Application",
+                    "description": "Aplikasi mobile yang responsif — pengalaman pengguna yang mulus di Android maupun iOS.",
+                    "tags": [
+                        "Android & iOS",
+                        "User-Friendly"
+                    ]
+                }
+            }
+        },
+        {
+            "attributes": {
+                "icon_name": "Wrench",
+                "price_from": null,
+                "price_currency": null,
+                "duration_days": null,
+                "is_featured": false,
+                "is_active": true,
+                "sort_order": 7
+            },
+            "translations": {
+                "en": {
+                    "title": "Maintenance & Support",
+                    "description": "Routine updates, bug fixes and technical support so your website or app keeps performing.",
+                    "tags": [
+                        "Routine Updates",
+                        "Technical Support"
+                    ]
+                },
+                "id": {
+                    "title": "Maintenance & Support",
+                    "description": "Pembaruan rutin, perbaikan bug, dan dukungan teknis — memastikan website atau aplikasi Anda selalu optimal.",
+                    "tags": [
+                        "Pembaruan Rutin",
+                        "Dukungan Teknis"
+                    ]
+                }
+            }
+        }
+    ],
+    "service_stats": [
+        {
+            "attributes": {
+                "value": "7–14",
+                "icon_name": "CalendarClock",
+                "is_active": true,
+                "sort_order": 1
+            },
+            "translations": {
+                "en": {
+                    "unit": "working days",
+                    "label": "Typical delivery time for a standard landing page"
+                },
+                "id": {
+                    "unit": "hari kerja",
+                    "label": "Estimasi pengerjaan landing page standar"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "value": "98+",
+                "icon_name": "Gauge",
+                "is_active": true,
+                "sort_order": 2
+            },
+            "translations": {
+                "en": {
+                    "unit": "page speed",
+                    "label": "Average performance score across delivered projects"
+                },
+                "id": {
+                    "unit": "page speed",
+                    "label": "Skor performa rata-rata project yang selesai"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "value": "3",
+                "icon_name": "LifeBuoy",
+                "is_active": true,
+                "sort_order": 3
+            },
+            "translations": {
+                "en": {
+                    "unit": "months free support",
+                    "label": "Technical assistance after the website goes live"
+                },
+                "id": {
+                    "unit": "bulan support gratis",
+                    "label": "Bantuan teknis setelah website live"
+                }
+            }
+        }
+    ],
+    "process_steps": [
+        {
+            "attributes": {
+                "icon_name": "MessagesSquare",
+                "step_number": 1,
+                "is_active": true,
+                "sort_order": 1
+            },
+            "translations": {
+                "en": {
+                    "title": "Brief & Analysis",
+                    "description": "An initial discussion to understand your business goals, audience and website needs so the solution is genuinely relevant."
+                },
+                "id": {
+                    "title": "Brief & Analisis",
+                    "description": "Diskusi awal untuk memahami tujuan bisnis, target audiens, dan kebutuhan website agar solusi yang dibuat benar-benar relevan."
+                }
+            }
+        },
+        {
+            "attributes": {
+                "icon_name": "PenTool",
+                "step_number": 2,
+                "is_active": true,
+                "sort_order": 2
+            },
+            "translations": {
+                "en": {
+                    "title": "Design & Planning",
+                    "description": "Mapping the page structure, user flow and a modern, easy-to-use visual design that matches your brand."
+                },
+                "id": {
+                    "title": "Desain & Perencanaan",
+                    "description": "Menyusun struktur halaman, alur pengguna, dan desain visual yang modern, mudah digunakan, serta selaras dengan brand Anda."
+                }
+            }
+        },
+        {
+            "attributes": {
+                "icon_name": "Code2",
+                "step_number": 3,
+                "is_active": true,
+                "sort_order": 3
+            },
+            "translations": {
+                "en": {
+                    "title": "Website Development",
+                    "description": "Development with high performance standards: SEO-friendly, responsive and secure on every device."
+                },
+                "id": {
+                    "title": "Pengembangan Website",
+                    "description": "Proses pengembangan website dengan standar performa tinggi, SEO-friendly, responsif, dan aman di semua perangkat."
+                }
+            }
+        },
+        {
+            "attributes": {
+                "icon_name": "Rocket",
+                "step_number": 4,
+                "is_active": true,
+                "sort_order": 4
+            },
+            "translations": {
+                "en": {
+                    "title": "Launch & Support",
+                    "description": "The website is tested, launched and ready to use, with technical support and a usage guide after going live."
+                },
+                "id": {
+                    "title": "Launch & Support",
+                    "description": "Website diuji, diluncurkan, dan siap digunakan. Saya juga menyediakan dukungan teknis serta panduan penggunaan setelah website online."
+                }
+            }
+        }
+    ],
+    "project_categories": [
+        {
+            "attributes": {
+                "slug": "next-nuxt",
+                "color_hex": "#00DC82",
+                "is_active": true,
+                "sort_order": 1
+            },
+            "translations": {
+                "en": {
+                    "name": "Next/Nuxt"
+                },
+                "id": {
+                    "name": "Next/Nuxt"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "slug": "react",
+                "color_hex": "#61DAFB",
+                "is_active": true,
+                "sort_order": 2
+            },
+            "translations": {
+                "en": {
+                    "name": "React"
+                },
+                "id": {
+                    "name": "React"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "slug": "vue",
+                "color_hex": "#42B883",
+                "is_active": true,
+                "sort_order": 3
+            },
+            "translations": {
+                "en": {
+                    "name": "Vue"
+                },
+                "id": {
+                    "name": "Vue"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "slug": "php-laravel",
+                "color_hex": "#F05340",
+                "is_active": true,
+                "sort_order": 4
+            },
+            "translations": {
+                "en": {
+                    "name": "PHP/Laravel"
+                },
+                "id": {
+                    "name": "PHP/Laravel"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "slug": "other",
+                "color_hex": "#7A788A",
+                "is_active": true,
+                "sort_order": 5
+            },
+            "translations": {
+                "en": {
+                    "name": "Other"
+                },
+                "id": {
+                    "name": "Lainnya"
+                }
+            }
+        }
+    ],
+    "technologies": [
+        {
+            "attributes": {
+                "name": "Next.js",
+                "slug": "nextjs",
+                "icon_name": "SiNextdotjs",
+                "color_hex": "#ffffff",
+                "is_active": true,
+                "sort_order": 1
+            }
+        },
+        {
+            "attributes": {
+                "name": "React",
+                "slug": "react",
+                "icon_name": "SiReact",
+                "color_hex": "#61DAFB",
+                "is_active": true,
+                "sort_order": 2
+            }
+        },
+        {
+            "attributes": {
+                "name": "Vue.js",
+                "slug": "vuejs",
+                "icon_name": "SiVuedotjs",
+                "color_hex": "#42B883",
+                "is_active": true,
+                "sort_order": 3
+            }
+        },
+        {
+            "attributes": {
+                "name": "Nuxt",
+                "slug": "nuxt",
+                "icon_name": "SiNuxt",
+                "color_hex": "#00DC82",
+                "is_active": true,
+                "sort_order": 4
+            }
+        },
+        {
+            "attributes": {
+                "name": "TypeScript",
+                "slug": "typescript",
+                "icon_name": "SiTypescript",
+                "color_hex": "#3178C6",
+                "is_active": true,
+                "sort_order": 5
+            }
+        },
+        {
+            "attributes": {
+                "name": "Tailwind CSS",
+                "slug": "tailwindcss",
+                "icon_name": "SiTailwindcss",
+                "color_hex": "#06B6D4",
+                "is_active": true,
+                "sort_order": 6
+            }
+        },
+        {
+            "attributes": {
+                "name": "Laravel",
+                "slug": "laravel",
+                "icon_name": "SiLaravel",
+                "color_hex": "#F05340",
+                "is_active": true,
+                "sort_order": 7
+            }
+        },
+        {
+            "attributes": {
+                "name": "PHP",
+                "slug": "php",
+                "icon_name": "SiPhp",
+                "color_hex": "#777BB4",
+                "is_active": true,
+                "sort_order": 8
+            }
+        },
+        {
+            "attributes": {
+                "name": "MySQL",
+                "slug": "mysql",
+                "icon_name": "SiMysql",
+                "color_hex": "#4479A1",
+                "is_active": true,
+                "sort_order": 9
+            }
+        },
+        {
+            "attributes": {
+                "name": "Node.js",
+                "slug": "nodejs",
+                "icon_name": "SiNodedotjs",
+                "color_hex": "#339933",
+                "is_active": true,
+                "sort_order": 10
+            }
+        },
+        {
+            "attributes": {
+                "name": "Flutter",
+                "slug": "flutter",
+                "icon_name": "SiFlutter",
+                "color_hex": "#54C5F8",
+                "is_active": true,
+                "sort_order": 11
+            }
+        },
+        {
+            "attributes": {
+                "name": "React Native",
+                "slug": "react-native",
+                "icon_name": "SiReact",
+                "color_hex": "#61DAFB",
+                "is_active": true,
+                "sort_order": 12
+            }
+        }
+    ],
+    "projects": [
+        {
+            "attributes": {
+                "slug": "asih-photography-portfolio",
+                "demo_url": null,
+                "github_url": null,
+                "client_name": "Asih Angger",
+                "year": 2024,
+                "is_featured": false,
+                "status": "published",
+                "published_at": "2026-08-15T03:45:45.000000Z",
+                "is_active": true,
+                "sort_order": 1
+            },
+            "translations": {
+                "en": {
+                    "title": "Photography Portfolio Website",
+                    "description": "A lightweight photography portfolio gallery focused on the images.",
+                    "content": null
+                },
+                "id": {
+                    "title": "Website Portfolio Jasa Fotografi",
+                    "description": "Galeri portofolio fotografi yang ringan dan fokus pada gambar.",
+                    "content": null
+                }
+            },
+            "belongs": {
+                "project_category_id": "react"
+            },
+            "many": {
+                "technologies": [
+                    "react",
+                    "tailwindcss"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "slug": "sentraoto-marketplace",
+                "demo_url": "https://sentraoto.com",
+                "github_url": null,
+                "client_name": "Sentraoto",
+                "year": 2025,
+                "is_featured": true,
+                "status": "published",
+                "published_at": "2026-08-29T03:45:45.000000Z",
+                "is_active": true,
+                "sort_order": 2
+            },
+            "translations": {
+                "en": {
+                    "title": "Vehicle Marketplace Website",
+                    "description": "A vehicle marketplace with fast search and clean detail pages.",
+                    "content": null
+                },
+                "id": {
+                    "title": "Website Jual Beli Kendaraan",
+                    "description": "Marketplace kendaraan dengan pencarian cepat dan halaman detail yang rapi.",
+                    "content": "<p>Aman</p>"
+                }
+            },
+            "belongs": {
+                "project_category_id": "next-nuxt"
+            },
+            "many": {
+                "technologies": [
+                    "nextjs",
+                    "typescript",
+                    "tailwindcss"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "slug": "dkn-digital-company-profile",
+                "demo_url": "https://dkndigital.com",
+                "github_url": null,
+                "client_name": "DKN Digital",
+                "year": 2024,
+                "is_featured": false,
+                "status": "published",
+                "published_at": "2026-08-22T03:45:45.000000Z",
+                "is_active": true,
+                "sort_order": 3
+            },
+            "translations": {
+                "en": {
+                    "title": "Company Profile Website",
+                    "description": "A company profile that builds credibility before clients reach out.",
+                    "content": null
+                },
+                "id": {
+                    "title": "Website Company Profile",
+                    "description": "Company profile yang membangun kredibilitas sebelum klien menghubungi.",
+                    "content": null
+                }
+            },
+            "belongs": {
+                "project_category_id": "php-laravel"
+            },
+            "many": {
+                "technologies": [
+                    "laravel",
+                    "php",
+                    "mysql"
+                ]
+            }
+        }
+    ],
+    "testimonials": [
+        {
+            "attributes": {
+                "rating": 5,
+                "accent_color": "#ef4444",
+                "is_featured": true,
+                "source": "manual",
+                "is_active": true,
+                "sort_order": 1
+            },
+            "translations": {
+                "en": {
+                    "name": "Asih Angger",
+                    "role": "Photographer",
+                    "company": null,
+                    "project_label": "Photography Portfolio Website",
+                    "feedback": "Thank you so much for building my website — clean and exactly as requested. Very patient throughout the process too."
+                },
+                "id": {
+                    "name": "Asih Angger",
+                    "role": "Photographer",
+                    "company": null,
+                    "project_label": "Website Portfolio Jasa Fotografi",
+                    "feedback": "Makasih banyak yaa mas adi udah bantu buatin website nya rapi dan sesuai request.. Udah sabar banget juga.. makin berkah dan sukses yaa mas adi."
+                }
+            }
+        },
+        {
+            "attributes": {
+                "rating": 5,
+                "accent_color": "#f97316",
+                "is_featured": false,
+                "source": "manual",
+                "is_active": true,
+                "sort_order": 2
+            },
+            "translations": {
+                "en": {
+                    "name": "Dr. Ade Salman Alfarisi",
+                    "role": "Co-Founder & Principal Consultant",
+                    "company": "DKN Digital",
+                    "project_label": "Company Profile Website",
+                    "feedback": "We really appreciated working with Adi Primanto and his team. Responsive, clear communication and technically capable of understanding our needs. The website was delivered cleanly and on brief, revisions included."
+                },
+                "id": {
+                    "name": "Dr. Ade Salman Alfarisi",
+                    "role": "Co-Founder & Principal Consultant",
+                    "company": "DKN Digital",
+                    "project_label": "Website Company Profile",
+                    "feedback": "Kami sangat mengapresiasi kerja sama dengan mas Adi Primanto dan team. Respons baik, komunikasi jelas, serta kemampuan teknis yang memadai dalam memahami kebutuhan kami. Website selesai dengan rapi dan sesuai arahan, termasuk revisi yang ditangani secara profesional."
+                }
+            }
+        },
+        {
+            "attributes": {
+                "rating": 5,
+                "accent_color": "#3ecfb2",
+                "is_featured": false,
+                "source": "manual",
+                "is_active": true,
+                "sort_order": 3
+            },
+            "translations": {
+                "en": {
+                    "name": "Rezky Perdana Ramadhansyah",
+                    "role": "CEO & Founder",
+                    "company": "Sentraoto",
+                    "project_label": "Vehicle Marketplace Website",
+                    "feedback": "The website is great and responsive. Generous with revision requests, delivery was quick, and a few things that should have cost extra were included for free."
+                },
+                "id": {
+                    "name": "Rezky Perdana Ramadhansyah",
+                    "role": "CEO & Founder",
+                    "company": "Sentraoto",
+                    "project_label": "Website Jual Beli Kendaraan",
+                    "feedback": "Website nya oke, responsif. Request revisian nya juga ga pelit. Pengerjaan lumayan cepat, beberapa hal yang harusnya add cost tapi ini free."
+                }
+            }
+        }
+    ],
+    "faq_categories": [
+        {
+            "attributes": {
+                "slug": "general",
+                "is_active": true,
+                "sort_order": 1
+            },
+            "translations": {
+                "en": {
+                    "name": "General"
+                },
+                "id": {
+                    "name": "Umum"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "slug": "pricing",
+                "is_active": true,
+                "sort_order": 2
+            },
+            "translations": {
+                "en": {
+                    "name": "Pricing & Payment"
+                },
+                "id": {
+                    "name": "Harga & Pembayaran"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "slug": "technical",
+                "is_active": true,
+                "sort_order": 3
+            },
+            "translations": {
+                "en": {
+                    "name": "Technical"
+                },
+                "id": {
+                    "name": "Teknis"
+                }
+            }
+        }
+    ],
+    "faqs": [
+        {
+            "attributes": {
+                "is_featured": false,
+                "is_active": true,
+                "sort_order": 1
+            },
+            "translations": {
+                "en": {
+                    "question": "How long does it take to build a website?",
+                    "answer": "Timelines depend on complexity. A standard landing page usually takes 7–14 working days once the requirements are agreed."
+                },
+                "id": {
+                    "question": "Berapa lama proses pembuatan website?",
+                    "answer": "Durasi pengerjaan menyesuaikan dengan tingkat kompleksitas website. Untuk landing page standar, proses pengerjaan umumnya memakan waktu 7–14 hari kerja sejak kebutuhan disepakati."
+                }
+            },
+            "belongs": {
+                "faq_category_id": "general"
+            }
+        },
+        {
+            "attributes": {
+                "is_featured": false,
+                "is_active": true,
+                "sort_order": 2
+            },
+            "translations": {
+                "en": {
+                    "question": "Will I be able to edit the content myself?",
+                    "answer": "Yes. You can choose a CMS-backed website for full control, or a lighter static website where I handle content changes whenever you need them."
+                },
+                "id": {
+                    "question": "Apakah saya bisa mengedit konten website sendiri nantinya?",
+                    "answer": "Fleksibilitas pengelolaan konten selalu disesuaikan dengan kebutuhan Anda. Anda bisa memilih website dengan CMS untuk kontrol penuh, atau website statis yang lebih ringan dengan dukungan perubahan konten dari saya kapan pun dibutuhkan."
+                }
+            },
+            "belongs": {
+                "faq_category_id": "technical"
+            }
+        },
+        {
+            "attributes": {
+                "is_featured": false,
+                "is_active": true,
+                "sort_order": 3
+            },
+            "translations": {
+                "en": {
+                    "question": "Is SEO included?",
+                    "answer": "Yes. Every website is built SEO-ready: proper heading structure, optimised meta tags and technical practices aligned with the latest Google guidance."
+                },
+                "id": {
+                    "question": "Apakah website-nya sudah termasuk SEO?",
+                    "answer": "Ya. Setiap website dibangun dengan struktur SEO-ready, meliputi penggunaan heading yang tepat, meta tag teroptimasi, serta praktik teknis yang sesuai dengan standar terbaru Google."
+                }
+            },
+            "belongs": {
+                "faq_category_id": "technical"
+            }
+        },
+        {
+            "attributes": {
+                "is_featured": false,
+                "is_active": true,
+                "sort_order": 4
+            },
+            "translations": {
+                "en": {
+                    "question": "Are there annual maintenance fees?",
+                    "answer": "There are no monthly or annual maintenance fees. You only renew your domain and hosting each year, and minor technical help is free for the first 3 months after launch."
+                },
+                "id": {
+                    "question": "Apakah ada biaya maintenance tahunan?",
+                    "answer": "Tidak ada biaya maintenance bulanan atau tahunan. Anda hanya perlu memperpanjang domain dan hosting setiap tahun. Selain itu, saya juga menyediakan bantuan teknis minor gratis selama 3 bulan pertama setelah website online."
+                }
+            },
+            "belongs": {
+                "faq_category_id": "pricing"
+            }
+        }
+    ],
+    "clients": [
+        {
+            "attributes": {
+                "name": "TripLinq",
+                "website_url": null,
+                "icon_name": "MapPinned",
+                "font_class": "font-display font-semibold tracking-widest uppercase",
+                "is_featured": true,
+                "is_active": true,
+                "sort_order": 1
+            }
+        },
+        {
+            "attributes": {
+                "name": "Tea Sense",
+                "website_url": null,
+                "icon_name": "Coffee",
+                "font_class": "font-display italic font-medium tracking-tight",
+                "is_featured": false,
+                "is_active": true,
+                "sort_order": 2
+            }
+        },
+        {
+            "attributes": {
+                "name": "Quik Shine",
+                "website_url": null,
+                "icon_name": "Zap",
+                "font_class": "font-display font-black italic uppercase tracking-tight",
+                "is_featured": false,
+                "is_active": true,
+                "sort_order": 3
+            }
+        },
+        {
+            "attributes": {
+                "name": "HoodVerse",
+                "website_url": null,
+                "icon_name": "Ghost",
+                "font_class": "font-display font-extrabold tracking-tight",
+                "is_featured": false,
+                "is_active": true,
+                "sort_order": 4
+            }
+        },
+        {
+            "attributes": {
+                "name": "Nakalang Electronics",
+                "website_url": null,
+                "icon_name": "Activity",
+                "font_class": "font-display font-bold tracking-tight",
+                "is_featured": false,
+                "is_active": true,
+                "sort_order": 5
+            }
+        }
+    ],
+    "navigation_menus": [
+        {
+            "attributes": {
+                "location": "header",
+                "url": null,
+                "anchor": "#home",
+                "target": "_self",
+                "is_active": true,
+                "sort_order": 1
+            },
+            "translations": {
+                "en": {
+                    "label": "Home"
+                },
+                "id": {
+                    "label": "Home"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "location": "footer",
+                "url": null,
+                "anchor": "#about",
+                "target": "_self",
+                "is_active": true,
+                "sort_order": 1
+            },
+            "translations": {
+                "en": {
+                    "label": "About"
+                },
+                "id": {
+                    "label": "About"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "location": "header",
+                "url": null,
+                "anchor": "#about",
+                "target": "_self",
+                "is_active": true,
+                "sort_order": 2
+            },
+            "translations": {
+                "en": {
+                    "label": "About"
+                },
+                "id": {
+                    "label": "About"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "location": "footer",
+                "url": null,
+                "anchor": "#services",
+                "target": "_self",
+                "is_active": true,
+                "sort_order": 2
+            },
+            "translations": {
+                "en": {
+                    "label": "Services"
+                },
+                "id": {
+                    "label": "Layanan"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "location": "header",
+                "url": null,
+                "anchor": "#services",
+                "target": "_self",
+                "is_active": true,
+                "sort_order": 3
+            },
+            "translations": {
+                "en": {
+                    "label": "Services"
+                },
+                "id": {
+                    "label": "Layanan"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "location": "footer",
+                "url": null,
+                "anchor": "#portfolio",
+                "target": "_self",
+                "is_active": true,
+                "sort_order": 3
+            },
+            "translations": {
+                "en": {
+                    "label": "Portfolio"
+                },
+                "id": {
+                    "label": "Portfolio"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "location": "header",
+                "url": null,
+                "anchor": "#portfolio",
+                "target": "_self",
+                "is_active": true,
+                "sort_order": 4
+            },
+            "translations": {
+                "en": {
+                    "label": "Portfolio"
+                },
+                "id": {
+                    "label": "Portfolio"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "location": "footer",
+                "url": null,
+                "anchor": "#process",
+                "target": "_self",
+                "is_active": true,
+                "sort_order": 4
+            },
+            "translations": {
+                "en": {
+                    "label": "Process"
+                },
+                "id": {
+                    "label": "Proses"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "location": "header",
+                "url": null,
+                "anchor": "#testimoni",
+                "target": "_self",
+                "is_active": true,
+                "sort_order": 5
+            },
+            "translations": {
+                "en": {
+                    "label": "Testimonials"
+                },
+                "id": {
+                    "label": "Testimoni"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "location": "footer",
+                "url": null,
+                "anchor": "#faq",
+                "target": "_self",
+                "is_active": true,
+                "sort_order": 5
+            },
+            "translations": {
+                "en": {
+                    "label": "FAQ"
+                },
+                "id": {
+                    "label": "FAQ"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "location": "header",
+                "url": null,
+                "anchor": "#faq",
+                "target": "_self",
+                "is_active": true,
+                "sort_order": 6
+            },
+            "translations": {
+                "en": {
+                    "label": "FAQ"
+                },
+                "id": {
+                    "label": "FAQ"
+                }
+            }
+        }
+    ],
+    "contact_channels": [
+        {
+            "attributes": {
+                "type": "whatsapp",
+                "value": "+62 857-2734-6620",
+                "url": "https://wa.me/6285727346620",
+                "icon_name": "MessageCircle",
+                "color_hex": "#25D366",
+                "is_active": true,
+                "sort_order": 1
+            },
+            "translations": {
+                "en": {
+                    "label": "WhatsApp"
+                },
+                "id": {
+                    "label": "WhatsApp"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "type": "email",
+                "value": "adiprimanto.98@gmail.com",
+                "url": "mailto:adiprimanto.98@gmail.com",
+                "icon_name": "Mail",
+                "color_hex": "#EF4444",
+                "is_active": true,
+                "sort_order": 2
+            },
+            "translations": {
+                "en": {
+                    "label": "Email"
+                },
+                "id": {
+                    "label": "Email"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "type": "instagram",
+                "value": "@adiprimanto",
+                "url": "https://www.instagram.com/adiprimanto/",
+                "icon_name": "Instagram",
+                "color_hex": "#E1306C",
+                "is_active": true,
+                "sort_order": 3
+            },
+            "translations": {
+                "en": {
+                    "label": "Instagram"
+                },
+                "id": {
+                    "label": "Instagram"
+                }
+            }
+        }
+    ],
+    "social_links": [
+        {
+            "attributes": {
+                "platform": "LinkedIn",
+                "url": "https://www.linkedin.com/in/adi-primanto/",
+                "icon_name": "Linkedin",
+                "color_hex": "#0A66C2",
+                "is_active": true,
+                "sort_order": 1
+            }
+        },
+        {
+            "attributes": {
+                "platform": "Instagram",
+                "url": "https://www.instagram.com/adiprimanto",
+                "icon_name": "Instagram",
+                "color_hex": "#E1306C",
+                "is_active": true,
+                "sort_order": 2
+            }
+        },
+        {
+            "attributes": {
+                "platform": "TikTok",
+                "url": "https://www.tiktok.com/@adi_primanto?lang=id-ID",
+                "icon_name": "Music2",
+                "color_hex": "#000000",
+                "is_active": true,
+                "sort_order": 3
+            }
+        },
+        {
+            "attributes": {
+                "platform": "GitHub",
+                "url": "https://github.com/adiprimanto",
+                "icon_name": "Github",
+                "color_hex": "#181717",
+                "is_active": true,
+                "sort_order": 4
+            }
+        }
+    ],
+    "seo_settings": [
+        {
+            "attributes": {
+                "page_key": "home",
+                "robots_directive": "index,follow",
+                "structured_data": {
+                    "@context": "https://schema.org",
+                    "@graph": [
+                        {
+                            "@type": "Person",
+                            "@id": "https://adiprimanto.com/#person",
+                            "name": "Adi Primanto",
+                            "url": "https://adiprimanto.com",
+                            "image": "https://adiprimanto.com/adi.webp",
+                            "jobTitle": "Software Engineer & Web Developer",
+                            "description": "Software Engineer dengan 5+ tahun pengalaman membangun website dan aplikasi mobile profesional untuk bisnis di Indonesia.",
+                            "address": {
+                                "@type": "PostalAddress",
+                                "addressLocality": "Yogyakarta",
+                                "addressCountry": "ID"
+                            },
+                            "sameAs": [
+                                "https://github.com/adiprimanto",
+                                "https://www.linkedin.com/in/adi-primanto/",
+                                "https://www.instagram.com/adiprimanto"
+                            ]
+                        },
+                        {
+                            "@type": "LocalBusiness",
+                            "@id": "https://adiprimanto.com/#business",
+                            "name": "Adi Primanto — Jasa Website & Aplikasi",
+                            "url": "https://adiprimanto.com",
+                            "image": "https://adiprimanto.com/adi.webp",
+                            "description": "Jasa pembuatan website profesional dan aplikasi mobile untuk bisnis dan UMKM di Indonesia.",
+                            "telephone": "+6285727346620",
+                            "address": {
+                                "@type": "PostalAddress",
+                                "addressLocality": "Yogyakarta",
+                                "addressRegion": "DI Yogyakarta",
+                                "addressCountry": "ID"
+                            },
+                            "geo": {
+                                "@type": "GeoCoordinates",
+                                "latitude": -7.7956,
+                                "longitude": 110.3695
+                            },
+                            "areaServed": {
+                                "@type": "Country",
+                                "name": "Indonesia"
+                            },
+                            "priceRange": "$$",
+                            "openingHours": "Mo-Fr 09:00-17:00"
+                        },
+                        {
+                            "@type": "WebSite",
+                            "@id": "https://adiprimanto.com/#website",
+                            "url": "https://adiprimanto.com",
+                            "name": "Adi Primanto",
+                            "description": "Portfolio & Jasa Web Development",
+                            "publisher": {
+                                "@id": "https://adiprimanto.com/#person"
+                            },
+                            "inLanguage": "id-ID"
+                        }
+                    ]
+                },
+                "is_active": true,
+                "sort_order": 1
+            },
+            "translations": {
+                "en": {
+                    "meta_title": "Adi Primanto — Website & Mobile App Development",
+                    "meta_description": "A Yogyakarta based Software Engineer helping local businesses and startups look professional with fast, SEO-ready and mobile-friendly websites.",
+                    "meta_keywords": "website service, web developer yogyakarta, landing page, company profile"
+                },
+                "id": {
+                    "meta_title": "Adi Primanto — Jasa Pembuatan Website & Mobile App",
+                    "meta_description": "Software Engineer di Yogyakarta yang membantu bisnis lokal dan startup tampil profesional lewat website cepat, SEO-ready, dan mobile-friendly.",
+                    "meta_keywords": "jasa website, web developer yogyakarta, landing page, company profile"
+                }
+            }
+        },
+        {
+            "attributes": {
+                "page_key": "portfolio",
+                "robots_directive": "index,follow",
+                "structured_data": null,
+                "is_active": true,
+                "sort_order": 2
+            },
+            "translations": {
+                "en": {
+                    "meta_title": "Portfolio — Adi Primanto",
+                    "meta_description": "A collection of websites, mobile apps and custom systems delivered for clients across different industries.",
+                    "meta_keywords": "web developer portfolio, website projects, case studies"
+                },
+                "id": {
+                    "meta_title": "Portfolio — Adi Primanto",
+                    "meta_description": "Kumpulan project website, aplikasi mobile, dan sistem custom yang telah dikerjakan untuk klien dari berbagai industri.",
+                    "meta_keywords": "portfolio web developer, project website, studi kasus"
+                }
+            }
+        }
+    ],
+    "settings": [
+        {
+            "attributes": {
+                "group": "general",
+                "key": "brand_name",
+                "value": "Adi Primanto",
+                "type": "string",
+                "is_public": true,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        },
+        {
+            "attributes": {
+                "group": "general",
+                "key": "brand_tagline",
+                "value": "Web & App Developer · Yogyakarta",
+                "type": "string",
+                "is_public": true,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        },
+        {
+            "attributes": {
+                "group": "general",
+                "key": "whatsapp_number",
+                "value": "6285727346620",
+                "type": "string",
+                "is_public": true,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        },
+        {
+            "attributes": {
+                "group": "general",
+                "key": "contact_email",
+                "value": "adiprimanto.98@gmail.com",
+                "type": "string",
+                "is_public": true,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        },
+        {
+            "attributes": {
+                "group": "general",
+                "key": "location",
+                "value": "Yogyakarta, Indonesia",
+                "type": "string",
+                "is_public": true,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        },
+        {
+            "attributes": {
+                "group": "general",
+                "key": "opening_hours",
+                "value": "Mo-Fr 09:00-17:00",
+                "type": "string",
+                "is_public": true,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        },
+        {
+            "attributes": {
+                "group": "general",
+                "key": "default_locale",
+                "value": "id",
+                "type": "string",
+                "is_public": true,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        },
+        {
+            "attributes": {
+                "group": "general",
+                "key": "default_theme",
+                "value": "dark",
+                "type": "string",
+                "is_public": true,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        },
+        {
+            "attributes": {
+                "group": "general",
+                "key": "cv_file_path",
+                "value": "/CV_New_ADI_PRIMANTO.pdf",
+                "type": "string",
+                "is_public": true,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        },
+        {
+            "attributes": {
+                "group": "general",
+                "key": "base_url",
+                "value": "https://adiprimanto.com",
+                "type": "string",
+                "is_public": true,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        },
+        {
+            "attributes": {
+                "group": "general",
+                "key": "logo_media_id",
+                "value": null,
+                "type": "media",
+                "is_public": true,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        },
+        {
+            "attributes": {
+                "group": "general",
+                "key": "favicon_media_id",
+                "value": null,
+                "type": "media",
+                "is_public": true,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        },
+        {
+            "attributes": {
+                "group": "appearance",
+                "key": "primary_color",
+                "value": "#ef4444",
+                "type": "string",
+                "is_public": true,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        },
+        {
+            "attributes": {
+                "group": "appearance",
+                "key": "is_language_switcher_enabled",
+                "value": true,
+                "type": "boolean",
+                "is_public": true,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        },
+        {
+            "attributes": {
+                "group": "appearance",
+                "key": "is_theme_switcher_enabled",
+                "value": true,
+                "type": "boolean",
+                "is_public": true,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        },
+        {
+            "attributes": {
+                "group": "integration",
+                "key": "is_contact_form_enabled",
+                "value": true,
+                "type": "boolean",
+                "is_public": false,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        },
+        {
+            "attributes": {
+                "group": "integration",
+                "key": "contact_notification_email",
+                "value": "adiprimanto.98@gmail.com",
+                "type": "string",
+                "is_public": false,
+                "is_translatable": 0,
+                "sort_order": 0
+            }
+        }
+    ]
+}

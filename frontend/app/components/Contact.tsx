@@ -462,7 +462,7 @@ const Contact = () => {
                 className="flex items-center justify-center gap-2.5 w-full transition-all duration-200"
                 style={{
                   padding: "15px 24px",
-                  background: "#25d366",
+                  background: "#0f7a53",
                   border: "none",
                   borderRadius: "8px",
                   color: "#fff",
@@ -476,13 +476,13 @@ const Contact = () => {
                   cursor: status.state === "sending" ? "wait" : "pointer",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#1ebe5a";
+                  e.currentTarget.style.background = "#0c6544";
                   e.currentTarget.style.transform = "translateY(-2px)";
                   e.currentTarget.style.boxShadow =
                     "0 8px 32px rgba(37, 211, 102, 0.4)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "#25d366";
+                  e.currentTarget.style.background = "#0f7a53";
                   e.currentTarget.style.transform = "translateY(0)";
                   e.currentTarget.style.boxShadow =
                     "0 4px 24px rgba(37, 211, 102, 0.25)";

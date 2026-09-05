@@ -122,12 +122,12 @@ const Footer = () => {
 
         {/* Nav */}
         <div className="flex flex-col gap-4">
-          <h4
+          <h3
             className="font-display font-bold text-[11px] tracking-[0.12em] uppercase"
             style={{ color: "var(--color-muted)" }}
           >
             {t.footer.navigation}
-          </h4>
+          </h3>
           <ul className="flex flex-col gap-2.5" data-testid="footer-nav-links">
             {navLinks.map((link) => (
               <li key={link.key}>
@@ -159,12 +159,12 @@ const Footer = () => {
 
         {/* Socials + CTA */}
         <div className="flex flex-col gap-4">
-          <h4
+          <h3
             className="font-display font-bold text-[11px] tracking-[0.12em] uppercase"
             style={{ color: "var(--color-muted)" }}
           >
             {t.footer.socialMedia}
-          </h4>
+          </h3>
           <ul className="flex flex-col gap-2.5" data-testid="footer-social-links">
             {socials.map((s) => (
               <li key={s.id}>
