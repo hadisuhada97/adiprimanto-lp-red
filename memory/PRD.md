@@ -925,3 +925,15 @@ Tiga defect dari `iteration_9.json` diperbaiki:
 **Hasil pengujian**: F5 48/48 (sebelumnya 46/48), F4 37/37, F4b+F3c 92/92 — semua lolos terisolasi, tanpa regresi. Catatan: menjalankan seluruh suite sekaligus memicu 429 (throttle login 5/menit) — jalankan per-file dengan `php artisan cache:clear` di antaranya.
 
 **Berikutnya (F6)**: cabut Supabase + sambungkan 13 komponen landing page Next.js ke API publik, API client, ISR + revalidate, metadata/JSON-LD dinamis, sitemap. Lalu F7 (migrasi & QA).
+
+---
+
+## Fase F6a — Portfolio ke API + cabut Supabase (SELESAI, 05 Sep 2026)
+
+- **Supabase dihapus total**: `app/lib/supabase.ts` dihapus, paket `@supabase/supabase-js` di-`yarn remove`, tidak ada lagi referensi `supabase` di `app/` (grep bersih). `getCategory()` string-substring dibuang.
+- **API client publik baru**: `app/lib/api/public.ts` (typed fetch, `next: { revalidate:3600, tags:['projects'] }`) → `fetchProjects()`, `fetchProjectCategories()`.
+- **`Portfolio.tsx` di-refactor**: data dari `GET /public/projects?per_page=100` & `/public/project-categories`, mengikuti `language` context (id/en, refetch saat ganti bahasa). Filter tabs dinamis dari kategori DB (relasi, bukan tebakan), tag dari `technologies[]`, cover dari `cover.url` dengan fallback huruf-awal ber-warna kategori bila Media Library kosong. `data-testid` ditambahkan di grid/filter/card/link.
+- **`next.config.ts`**: host media CMS di-derive dari `NEXT_PUBLIC_API_BASE_URL` untuk `next/image` (`/api/storage/**`); remotePattern Supabase dihapus.
+- **Verifikasi**: `yarn build` sukses, screenshot menampilkan 3 project + filter berfungsi (React → 1 kartu). Cover kosong menampilkan fallback (belum ada gambar di Media Library).
+
+**Berikutnya (F6 lanjutan)**: Contact.tsx → POST `/public/contact-messages` (+honeypot), 12 komponen sisa (Hero/About/Services/dst) baca API, `app/api/revalidate/route.ts`, metadata & JSON-LD dinamis dari `/public/seo`, sitemap/robots dari API.

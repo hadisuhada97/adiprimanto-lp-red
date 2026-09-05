@@ -3,77 +3,69 @@
 import Image from "next/image";
 import { ArrowUpRight, Github } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/app/lib/supabase";
+import {
+  fetchProjects,
+  fetchProjectCategories,
+  type ApiProject,
+  type PublicCategory,
+} from "@/app/lib/api/public";
 import { useLanguage } from "@/app/lib/language-context";
-
-type Project = {
-  id: number;
-  title: string;
-  description: string;
-  tools: string;
-  image_url: string;
-  demo: string;
-  github: string;
-};
-
-const CATEGORIES = [
-  "All",
-  "Next/Nuxt",
-  "React",
-  "Vue",
-  "PHP/Laravel",
-  "Other",
-] as const;
-type Category = (typeof CATEGORIES)[number];
-
-const getCategory = (tools = ""): Category => {
-  const s = tools.toLowerCase();
-  if (s.includes("nuxt") || s.includes("next")) return "Next/Nuxt";
-  if (s.includes("react")) return "React";
-  if (s.includes("vue")) return "Vue";
-  if (s.includes("laravel") || s.includes("php")) return "PHP/Laravel";
-  return "Other";
-};
 
 const INITIAL_COUNT = 9;
 const LOAD_STEP = 6;
+const ALL = "all";
 
 const Portfolio = () => {
-  const { t } = useLanguage();
-  const hasSupabase = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(hasSupabase);
-  const [active, setActive] = useState<Category>("All");
+  const { t, language } = useLanguage();
+  const [projects, setProjects] = useState<ApiProject[]>([]);
+  const [categories, setCategories] = useState<PublicCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [active, setActive] = useState<string>(ALL);
   const [visible, setVisible] = useState(INITIAL_COUNT);
 
   useEffect(() => {
-    if (!hasSupabase) return;
-    supabase
-      .from("projects")
-      .select("*")
-      .order("id", { ascending: false })
-      .then(({ data }) => {
-        setProjects(data ?? []);
+    let cancelled = false;
+    setLoading(true);
+    Promise.all([fetchProjects(language), fetchProjectCategories(language)])
+      .then(([projectList, categoryList]) => {
+        if (cancelled) return;
+        setProjects(projectList);
+        setCategories(categoryList);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setProjects([]);
+        setCategories([]);
         setLoading(false);
       });
-  }, [hasSupabase]);
+    return () => {
+      cancelled = true;
+    };
+  }, [language]);
 
   const filtered = useMemo(
     () =>
-      active === "All"
+      active === ALL
         ? projects
-        : projects.filter((p) => getCategory(p.tools) === active),
+        : projects.filter((p) => p.category?.slug === active),
     [projects, active]
   );
   const shown = filtered.slice(0, visible);
 
   useEffect(() => setVisible(INITIAL_COUNT), [active]);
 
-  const filterLabel = (f: Category) => {
-    if (f === "All") return t.portfolio.filterAll;
-    if (f === "Other") return t.portfolio.filterOther;
-    return f;
-  };
+  const tabs = useMemo(
+    () => [
+      { slug: ALL, name: t.portfolio.filterAll, count: projects.length },
+      ...categories.map((c) => ({
+        slug: c.slug,
+        name: c.name,
+        count: projects.filter((p) => p.category?.slug === c.slug).length,
+      })),
+    ],
+    [categories, projects, t.portfolio.filterAll]
+  );
 
   return (
     <section
@@ -100,6 +92,7 @@ const Portfolio = () => {
                 fontSize: "clamp(32px, 4vw, 52px)",
                 color: "var(--color-white)",
               }}
+              data-testid="portfolio-heading"
             >
               {t.portfolio.heading}
             </h2>
@@ -114,18 +107,15 @@ const Portfolio = () => {
 
         {/* Filter tabs */}
         {!loading && (
-          <div className="flex flex-wrap gap-2 mb-10">
-            {CATEGORIES.map((f) => {
-              const count =
-                f === "All"
-                  ? projects.length
-                  : projects.filter((p) => getCategory(p.tools) === f).length;
-              const isActive = active === f;
+          <div className="flex flex-wrap gap-2 mb-10" data-testid="portfolio-filters">
+            {tabs.map((f) => {
+              const isActive = active === f.slug;
               return (
                 <button
-                  key={f}
+                  key={f.slug}
                   type="button"
-                  onClick={() => setActive(f)}
+                  onClick={() => setActive(f.slug)}
+                  data-testid={`portfolio-filter-${f.slug}`}
                   className="inline-flex items-center gap-2 font-display font-semibold text-xs tracking-[0.02em] rounded-lg transition-all duration-300"
                   style={{
                     padding: "9px 18px",
@@ -141,7 +131,7 @@ const Portfolio = () => {
                       : "none",
                   }}
                 >
-                  {filterLabel(f)}
+                  {f.name}
                   <span
                     className="inline-flex items-center justify-center rounded-full font-bold"
                     style={{
@@ -154,7 +144,7 @@ const Portfolio = () => {
                         : "rgba(255,255,255,0.12)",
                     }}
                   >
-                    {count}
+                    {f.count}
                   </span>
                 </button>
               );
@@ -289,15 +279,17 @@ const Portfolio = () => {
               borderRadius: "16px",
               overflow: "hidden",
             }}
+            data-testid="portfolio-grid"
           >
             {shown.map((p) => {
-              const tags = p.tools.split(",").map((t) => t.trim());
-              const category = getCategory(p.tools);
+              const category = p.category?.name ?? t.portfolio.filterOther;
+              const coverUrl = p.cover?.url ?? null;
               return (
                 <div
                   key={p.id}
                   className="flex flex-col transition-all duration-300 group"
                   style={{ background: "var(--color-bg)" }}
+                  data-testid={`portfolio-card-${p.slug}`}
                   onMouseEnter={(e) =>
                     (e.currentTarget.style.background = "var(--color-bg-3)")
                   }
@@ -313,25 +305,47 @@ const Portfolio = () => {
                       background: "var(--color-surface)",
                     }}
                   >
-                    <Image
-                      src={p.image_url}
-                      alt={p.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover object-top group-hover:scale-[1.06] transition-transform duration-500"
-                      style={{ filter: "brightness(0.9)" }}
-                    />
+                    {coverUrl ? (
+                      <Image
+                        src={coverUrl}
+                        alt={p.cover?.alt_text || p.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover object-top group-hover:scale-[1.06] transition-transform duration-500"
+                        style={{ filter: "brightness(0.9)" }}
+                      />
+                    ) : (
+                      <div
+                        className="absolute inset-0 flex items-center justify-center"
+                        style={{
+                          background:
+                            "linear-gradient(135deg, var(--color-bg-3) 0%, var(--color-surface) 100%)",
+                        }}
+                      >
+                        <span
+                          className="font-display font-black tracking-[-0.02em] group-hover:scale-[1.06] transition-transform duration-500"
+                          style={{
+                            fontSize: "40px",
+                            color: p.category?.color_hex || "var(--color-primary-2)",
+                            opacity: 0.85,
+                          }}
+                        >
+                          {p.title.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
 
                     {/* Hover overlay: Code / Live links */}
                     <div
                       className="absolute inset-0 flex items-center justify-center gap-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                       style={{ zIndex: 3 }}
                     >
-                      {p.github && (
+                      {p.github_url && (
                         <a
-                          href={p.github}
+                          href={p.github_url}
                           target="_blank"
                           rel="noopener noreferrer"
+                          data-testid={`portfolio-github-${p.slug}`}
                           className="inline-flex items-center gap-1.5 font-display font-semibold text-xs rounded-lg transition-all duration-300"
                           style={{
                             padding: "10px 18px",
@@ -344,11 +358,12 @@ const Portfolio = () => {
                           <Github size={14} /> {t.portfolio.code}
                         </a>
                       )}
-                      {p.demo && (
+                      {p.demo_url && (
                         <a
-                          href={p.demo}
+                          href={p.demo_url}
                           target="_blank"
                           rel="noopener noreferrer"
+                          data-testid={`portfolio-demo-${p.slug}`}
                           className="inline-flex items-center gap-1.5 font-display font-semibold text-xs rounded-lg transition-all duration-300"
                           style={{
                             padding: "10px 18px",
@@ -400,9 +415,9 @@ const Portfolio = () => {
                       {p.description}
                     </p>
                     <div className="flex flex-wrap gap-1.5 mt-1">
-                      {tags.map((tag) => (
+                      {p.technologies.map((tech) => (
                         <span
-                          key={tag}
+                          key={tech.id}
                           className="font-code text-[10px] tracking-[0.04em] px-2.5 py-0.5 rounded-full"
                           style={{
                             background: "var(--color-primary-subtle)",
@@ -410,7 +425,7 @@ const Portfolio = () => {
                             color: "var(--color-primary-2)",
                           }}
                         >
-                          {tag}
+                          {tech.name}
                         </span>
                       ))}
                     </div>
@@ -428,6 +443,7 @@ const Portfolio = () => {
               type="button"
               onClick={() => setVisible((v) => v + LOAD_STEP)}
               className="btn-ghost-style"
+              data-testid="portfolio-load-more"
             >
               {t.portfolio.loadMore}
               <span
@@ -445,6 +461,7 @@ const Portfolio = () => {
           <div
             className="text-center"
             style={{ padding: "80px 0", color: "var(--color-muted)" }}
+            data-testid="portfolio-empty"
           >
             <p className="text-sm">{t.portfolio.empty}</p>
           </div>
