@@ -5,7 +5,7 @@ import subprocess
 import pytest
 import requests
 
-BASE_URL = "https://adiprimanto-cms-1.preview.emergentagent.com"
+BASE_URL = "https://cms-portfolio-3.preview.emergentagent.com"
 
 
 def _mysql(sql: str) -> str:
