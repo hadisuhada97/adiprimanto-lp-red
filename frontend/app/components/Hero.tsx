@@ -234,7 +234,7 @@ const Hero = () => {
               <br />
               <span
                 style={{
-                  WebkitTextStroke: "1.5px var(--color-stroke)",
+                  WebkitTextStroke: "2px var(--color-stroke)",
                   color: "transparent",
                   display: "inline-block",
                 }}

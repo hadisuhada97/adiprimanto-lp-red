@@ -20,7 +20,12 @@ class PublicContactMessageController extends BaseApiController
             ->value('value');
 
         if ($enabled === false || $enabled === '0' || $enabled === 0) {
-            return $this->respondError('The contact form is currently disabled.', 503);
+            return $this->respondError(
+                $request->formLocale() === 'id'
+                    ? 'Form kontak sedang tidak aktif.'
+                    : 'The contact form is currently disabled.',
+                503
+            );
         }
 
         $message = ContactMessage::query()->create([
@@ -44,7 +49,9 @@ class PublicContactMessageController extends BaseApiController
 
         return $this->respondCreated(
             ['id' => $message->id],
-            'Thank you! Your message has been sent.'
+            $request->formLocale() === 'id'
+                ? 'Terima kasih! Pesan Anda sudah terkirim.'
+                : 'Thank you! Your message has been sent.'
         );
     }
 }

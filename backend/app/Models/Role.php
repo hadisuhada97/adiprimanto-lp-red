@@ -31,6 +31,11 @@ class Role extends BaseModel
             ->withTimestamps();
     }
 
+    public function revalidationTags(): array
+    {
+        return [];
+    }
+
     public function syncPermissionSlugs(array $slugs): void
     {
         $ids = Permission::query()->whereIn('slug', $slugs)->pluck('id')->all();

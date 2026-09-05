@@ -1,11 +1,22 @@
 import { MetadataRoute } from "next";
+import { fetchSeoEntry, fetchSettings } from "./lib/api/seo";
 
-export default function robots(): MetadataRoute.Robots {
+const FALLBACK_BASE = "https://adiprimanto.com";
+
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const [settings, seo] = await Promise.all([
+    fetchSettings(),
+    fetchSeoEntry("home"),
+  ]);
+
+  const base = (settings?.general?.base_url || FALLBACK_BASE).replace(/\/$/, "");
+  const directive = (seo?.robots_directive ?? "index,follow").toLowerCase();
+  const disallowAll = directive.includes("noindex");
+
   return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-    },
-    sitemap: "https://adiprimanto.com/sitemap.xml",
+    rules: disallowAll
+      ? { userAgent: "*", disallow: "/" }
+      : { userAgent: "*", allow: "/", disallow: "/admin" },
+    sitemap: `${base}/sitemap.xml`,
   };
 }

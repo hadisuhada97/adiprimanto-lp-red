@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Cache;
 
 class Setting extends BaseModel
 {
+    public function revalidationTags(): array
+    {
+        return ['settings', 'landing'];
+    }
     use HasTranslations;
 
     protected string $translationModel = SettingTranslation::class;

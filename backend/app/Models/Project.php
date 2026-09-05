@@ -16,6 +16,11 @@ class Project extends BaseModel
 
     protected string $translationModel = ProjectTranslation::class;
 
+    public function revalidationTags(): array
+    {
+        return ['landing', 'projects'];
+    }
+
     protected function casts(): array
     {
         return array_merge(parent::casts(), [

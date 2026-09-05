@@ -29,7 +29,7 @@ because it contains `#`.
 ## Sign-in flow (two steps — an access token is never returned by step 1)
 
 ```bash
-BASE=https://cms-portfolio-3.preview.emergentagent.com
+BASE=https://cms-admin-4.preview.emergentagent.com
 
 # 1. credentials -> challenge_token
 curl -X POST $BASE/api/v1/auth/login -H "Content-Type: application/json" \

@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class NavigationMenu extends BaseModel
 {
+    public function revalidationTags(): array
+    {
+        return ['navigation', 'landing'];
+    }
     use HasSortOrder;
     use HasTranslations;
 

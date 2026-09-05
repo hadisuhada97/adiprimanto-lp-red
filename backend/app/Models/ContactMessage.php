@@ -8,6 +8,11 @@ class ContactMessage extends BaseModel
 {
     protected bool $blameable = false;
 
+    public function revalidationTags(): array
+    {
+        return [];
+    }
+
     protected function casts(): array
     {
         return array_merge(parent::casts(), [

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\Blameable;
 use App\Models\Concerns\LogsActivity;
+use App\Support\RevalidateFrontend;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -24,6 +25,29 @@ abstract class BaseModel extends Model
     protected $keyType = 'string';
 
     protected $guarded = ['id'];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        $revalidate = fn (self $model) => RevalidateFrontend::queue($model->revalidationTags());
+
+        static::saved($revalidate);
+        static::deleted($revalidate);
+        static::restored($revalidate);
+        static::forceDeleted($revalidate);
+    }
+
+    /**
+     * Next.js cache tags invalidated when this record changes.
+     * System models that never affect the public site override this with an empty array.
+     *
+     * @return array<int, string>
+     */
+    public function revalidationTags(): array
+    {
+        return ['landing'];
+    }
 
     protected function casts(): array
     {

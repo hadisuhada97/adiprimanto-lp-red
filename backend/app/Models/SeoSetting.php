@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SeoSetting extends BaseModel
 {
+    public function revalidationTags(): array
+    {
+        return ['seo'];
+    }
     use HasSortOrder;
     use HasTranslations;
 

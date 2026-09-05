@@ -1,59 +1,121 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Instagram, ArrowUpRight, Send } from "lucide-react";
+import { Mail, Instagram, ArrowUpRight, Send, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { BsWhatsapp } from "react-icons/bs";
 import { useLanguage } from "@/app/lib/language-context";
+import { useLanding } from "@/app/lib/landing-context";
+import { Icon } from "@/app/lib/icons";
+import { submitContactMessage } from "@/app/lib/api/public";
 
-const WA_NUMBER = "6285727346620";
+const FALLBACK_NUMBER = "6285727346620";
 
-const contactLinks = [
+const fallbackLinks = [
   {
-    icon: <BsWhatsapp size={17} />,
+    id: "whatsapp",
+    icon_name: null,
     label: "WhatsApp",
     value: "+62 857-2734-6620",
-    href: `https://wa.me/${WA_NUMBER}`,
-    color: "#25D366",
+    url: `https://wa.me/${FALLBACK_NUMBER}`,
+    color_hex: "#25D366",
   },
   {
-    icon: <Mail size={17} />,
+    id: "email",
+    icon_name: null,
     label: "Email",
     value: "adiprimanto.98@gmail.com",
-    href: "mailto:adiprimanto.98@gmail.com",
-    color: "var(--color-primary)",
+    url: "mailto:adiprimanto.98@gmail.com",
+    color_hex: "var(--color-primary)",
   },
   {
-    icon: <Instagram size={17} />,
+    id: "instagram",
+    icon_name: null,
     label: "Instagram",
     value: "@adiprimanto",
-    href: "https://www.instagram.com/adiprimanto/",
-    color: "#E1306C",
+    url: "https://www.instagram.com/adiprimanto/",
+    color_hex: "#E1306C",
   },
 ];
 
+const staticIcons: Record<string, React.ReactNode> = {
+  whatsapp: <BsWhatsapp size={17} />,
+  email: <Mail size={17} />,
+  instagram: <Instagram size={17} />,
+};
+
+type Status =
+  | { state: "idle" }
+  | { state: "sending" }
+  | { state: "sent"; message: string }
+  | { state: "failed"; message: string };
+
 const Contact = () => {
-  const { t } = useLanguage();
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const { t, language } = useLanguage();
+  const { data } = useLanding();
+  const [form, setForm] = useState({ name: "", email: "", message: "", website: "" });
   const [focused, setFocused] = useState<string | null>(null);
+  const [status, setStatus] = useState<Status>({ state: "idle" });
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+
+  const channels = data?.contact?.channels?.length
+    ? data.contact.channels.map((channel) => ({
+        id: channel.id,
+        icon_name: channel.icon_name,
+        label: channel.label,
+        value: channel.value,
+        url: channel.url ?? "#",
+        color_hex: channel.color_hex ?? "var(--color-primary)",
+        type: channel.type,
+      }))
+    : fallbackLinks.map((link) => ({ ...link, type: link.id }));
+
+  const waNumber = data?.settings?.general?.whatsapp_number ?? FALLBACK_NUMBER;
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (status.state === "sending") return;
+
+    setStatus({ state: "sending" });
+    setFieldErrors({});
+
+    const result = await submitContactMessage(
+      {
+        name: form.name,
+        email: form.email,
+        message: form.message,
+        website: form.website,
+      },
+      language,
+    );
+
+    if (!result.ok) {
+      setFieldErrors(result.errors ?? {});
+      setStatus({ state: "failed", message: result.message });
+      return;
+    }
+
+    setStatus({ state: "sent", message: result.message });
+    setForm({ name: "", email: "", message: "", website: "" });
+
     const text = `Halo, saya ${form.name} (${form.email}).\n\n${form.message}`;
     window.open(
-      `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`,
+      `https://wa.me/${waNumber}?text=${encodeURIComponent(text)}`,
       "_blank",
       "noopener,noreferrer",
     );
   };
 
+  const firstError = (field: string) => fieldErrors[field]?.[0];
+
   return (
     <section
       id="contact"
       className="section-padding"
+      data-testid="contact-section"
       style={{
         background: "var(--color-bg)",
         borderTop: "1px solid var(--color-border)",
@@ -95,17 +157,19 @@ const Contact = () => {
             {/* Contact link cards */}
             <div
               className="flex flex-col overflow-hidden"
+              data-testid="contact-channels"
               style={{
                 border: "1px solid var(--color-border)",
                 borderRadius: "14px",
               }}
             >
-              {contactLinks.map(({ icon, label, value, href, color }) => (
+              {channels.map(({ id, icon_name, label, value, url, color_hex, type }) => (
                 <a
-                  key={label}
-                  href={href}
+                  key={id}
+                  href={url}
                   target="_blank"
                   rel="noreferrer"
+                  data-testid={`contact-channel-${type}`}
                   className="group flex items-center gap-4 transition-all duration-200"
                   style={{
                     padding: "18px 20px",
@@ -127,10 +191,10 @@ const Contact = () => {
                     style={{
                       background: "var(--color-surface)",
                       border: "1px solid var(--color-border)",
-                      color,
+                      color: color_hex,
                     }}
                   >
-                    {icon}
+                    {staticIcons[type] ?? <Icon name={icon_name} size={17} />}
                   </div>
                   <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                     <span
@@ -189,9 +253,30 @@ const Contact = () => {
 
             <form
               onSubmit={handleSubmit}
+              data-testid="contact-form"
               className="flex flex-col gap-5"
               style={{ padding: "28px 24px" }}
             >
+              {/* Honeypot — invisible to humans, bots fill it in */}
+              <input
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                data-testid="contact-honeypot"
+                value={form.website}
+                onChange={handleChange}
+                style={{
+                  position: "absolute",
+                  width: "1px",
+                  height: "1px",
+                  opacity: 0,
+                  pointerEvents: "none",
+                  left: "-9999px",
+                }}
+              />
+
               <div className="flex flex-col gap-2">
                 <label
                   htmlFor="name"
@@ -211,6 +296,7 @@ const Contact = () => {
                   name="name"
                   placeholder={t.contact.namePlaceholder}
                   required
+                  data-testid="contact-name-input"
                   value={form.name}
                   onChange={handleChange}
                   onFocus={() => setFocused("name")}
@@ -228,6 +314,15 @@ const Contact = () => {
                         : "none",
                   }}
                 />
+                {firstError("name") && (
+                  <span
+                    className="font-code text-[11px]"
+                    data-testid="contact-name-error"
+                    style={{ color: "#f87171" }}
+                  >
+                    {firstError("name")}
+                  </span>
+                )}
               </div>
 
               <div className="flex flex-col gap-2">
@@ -249,6 +344,7 @@ const Contact = () => {
                   name="email"
                   placeholder={t.contact.emailPlaceholder}
                   required
+                  data-testid="contact-email-input"
                   value={form.email}
                   onChange={handleChange}
                   onFocus={() => setFocused("email")}
@@ -266,6 +362,15 @@ const Contact = () => {
                         : "none",
                   }}
                 />
+                {firstError("email") && (
+                  <span
+                    className="font-code text-[11px]"
+                    data-testid="contact-email-error"
+                    style={{ color: "#f87171" }}
+                  >
+                    {firstError("email")}
+                  </span>
+                )}
               </div>
 
               <div className="flex flex-col gap-2">
@@ -287,6 +392,7 @@ const Contact = () => {
                   rows={6}
                   placeholder={t.contact.messagePlaceholder}
                   required
+                  data-testid="contact-message-input"
                   value={form.message}
                   onChange={handleChange}
                   onFocus={() => setFocused("message")}
@@ -304,10 +410,55 @@ const Contact = () => {
                         : "none",
                   }}
                 />
+                {firstError("message") && (
+                  <span
+                    className="font-code text-[11px]"
+                    data-testid="contact-message-error"
+                    style={{ color: "#f87171" }}
+                  >
+                    {firstError("message")}
+                  </span>
+                )}
               </div>
+
+              {status.state === "sent" && (
+                <div
+                  className="flex items-center gap-2 font-code text-[12px]"
+                  data-testid="contact-success"
+                  style={{
+                    padding: "12px 14px",
+                    borderRadius: "8px",
+                    background: "rgba(37, 211, 102, 0.12)",
+                    border: "1px solid rgba(37, 211, 102, 0.35)",
+                    color: "#25d366",
+                  }}
+                >
+                  <CheckCircle2 size={14} />
+                  {status.message}
+                </div>
+              )}
+
+              {status.state === "failed" && (
+                <div
+                  className="flex items-center gap-2 font-code text-[12px]"
+                  data-testid="contact-error"
+                  style={{
+                    padding: "12px 14px",
+                    borderRadius: "8px",
+                    background: "rgba(248, 113, 113, 0.12)",
+                    border: "1px solid rgba(248, 113, 113, 0.35)",
+                    color: "#f87171",
+                  }}
+                >
+                  <AlertCircle size={14} />
+                  {status.message}
+                </div>
+              )}
 
               <button
                 type="submit"
+                disabled={status.state === "sending"}
+                data-testid="contact-submit-button"
                 className="flex items-center justify-center gap-2.5 w-full transition-all duration-200"
                 style={{
                   padding: "15px 24px",
@@ -321,6 +472,8 @@ const Contact = () => {
                   letterSpacing: "0.04em",
                   boxShadow: "0 4px 24px rgba(37, 211, 102, 0.25)",
                   marginTop: "4px",
+                  opacity: status.state === "sending" ? 0.7 : 1,
+                  cursor: status.state === "sending" ? "wait" : "pointer",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = "#1ebe5a";
@@ -335,7 +488,11 @@ const Contact = () => {
                     "0 4px 24px rgba(37, 211, 102, 0.25)";
                 }}
               >
-                <BsWhatsapp size={16} />
+                {status.state === "sending" ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <BsWhatsapp size={16} />
+                )}
                 {t.contact.submit}
                 <Send size={14} className="ml-auto opacity-70" />
               </button>

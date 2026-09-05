@@ -1,0 +1,71 @@
+{
+  "summary": "Phase F6 testing (contact form -> Inbox, honeypot, throttle, dynamic metadata/JSON-LD, sitemap/robots, revalidation webhook) plus admin & landing smoke regression. New pytest suite /app/backend/tests/pytest/test_phase_f6_contact_seo.py: 18/18 passing. Browser tests: landing renders all 9 sections, 3 CMS-driven contact channels, valid submit shows contact-success + resets fields + opens WhatsApp tab, 422 short-message renders inline contact-message-error + contact-error, honeypot off-screen, rate limit 429 after 5 req/min, admin login (non-2FA) + dashboard/inbox/settings-seo/portfolio-projects load with zero console errors, lead visible in Inbox with 'new' badge, dark/light theme and ID/EN switching both work. ONE HIGH bug found: automatic on-demand revalidation never invalidates the tags the server actually uses ('seo'/'settings'/'navigation'), so CMS SEO/metadata edits do not propagate to the landing HTML (verified 30+s / 8 fetches stale); the manual webhook POST works and refreshes correctly.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "PUT /api/v1/admin/seo-settings/{id} (App\\Support\\RevalidateFrontend + BaseModel::revalidationTags)",
+        "issue": "Auto revalidation tag mismatch. BaseModel/BaseTranslationModel queue only 'landing' (Project adds 'projects'). The Next.js server-side fetches that actually depend on tags are in app/lib/api/seo.ts and use tags 'seo', 'settings', 'navigation' (metadata, JSON-LD, sitemap.xml, robots.txt). 'landing'/'projects' are only used by CLIENT components (landing-context.tsx, Portfolio.tsx) where next.tags is a no-op. Result: after updating SEO meta_title via the admin API the public HTML <title> stayed stale for 30+s across 8 requests, while a manual POST /api/revalidate with tags=['seo'] refreshed it on the next request. SeoSetting/SeoSettingTranslation, Setting/SettingTranslation and NavigationMenu need revalidationTags() overrides ('seo', 'settings', 'navigation').",
+        "priority": "HIGH"
+      }
+    ],
+    "minor": [
+      {
+        "endpoint": "App\\Support\\RevalidateFrontend::flush()",
+        "issue": "Response status of the webhook POST is never inspected — a 401 (wrong secret) or 422 is silently swallowed; only transport exceptions log 'revalidation failed'. Add a ->failed() / status check with Log::warning so misconfiguration is detectable."
+      },
+      {
+        "endpoint": "POST /api/v1/public/contact-messages",
+        "issue": "Validation/success messages are returned in English only ('The message field must be at least 10 characters.', 'The given data was invalid.', 'Thank you! Your message has been sent.') and are rendered verbatim on the Indonesian landing page — locale (Accept-Language / ?locale=id) is not honoured for these messages."
+      },
+      {
+        "endpoint": "PUT /api/v1/admin/seo-settings/{id}",
+        "issue": "Flat translatable payload ({\"meta_title\": \"...\"}) returns 200 with no error while silently ignoring the field (only translations.{locale}.meta_title is accepted). Consider rejecting unknown top-level translatable keys with 422 to avoid silent no-op updates."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "CMS SEO edit -> landing metadata / JSON-LD / sitemap / robots",
+        "issue": "Change made in /admin/settings/seo is served by the API immediately but the rendered HTML keeps the old <title>/description until the 3600s ISR window, because the backend never revalidates tag 'seo' (see backend critical issue).",
+        "affected_selectors": ["head > title", "script[type='application/ld+json']"]
+      }
+    ],
+    "design_issues": [
+      {
+        "screen": "Landing hero (light theme)",
+        "issues": ["Outlined/stroked word 'ANDA' in the hero headline is near-invisible on the light background (very low contrast); the same treatment reads fine on dark."]
+      },
+      {
+        "screen": "Contact form (both themes)",
+        "issues": ["Server validation text shown in English while the rest of the UI is Indonesian — inconsistent copy (backend i18n issue)."]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/pytest/test_phase_f6_contact_seo.py",
+    "/app/test_reports/pytest/f6_results.xml"
+  ],
+  "action_items": [
+    "Add revalidationTags() overrides returning ['seo'] for SeoSetting/SeoSettingTranslation, ['settings'] for Setting/SettingTranslation and ['navigation'] for NavigationMenu/NavigationMenuTranslation (keep 'landing' where useful), so admin edits actually invalidate metadata/JSON-LD/sitemap/robots.",
+    "Log non-2xx responses from the revalidate webhook in RevalidateFrontend::flush().",
+    "Localise contact-form validation + success messages (return ID copy when locale=id) so the landing page does not mix languages.",
+    "Reject (422) flat translatable fields on PUT /admin/seo-settings instead of silently ignoring them.",
+    "Improve light-theme contrast of the stroked hero word ('ANDA')."
+  ],
+  "critical_code_review_comments": [
+    "Cache-tag contract between Laravel and Next.js is not documented/asserted anywhere: backend emits 'landing'/'projects', frontend server code consumes 'seo'/'settings'/'navigation'. Add a single shared tag list and a test that a content mutation invalidates the tag the consumer uses.",
+    "next: { tags: [...] } inside client components (landing-context.tsx, Portfolio.tsx, public.ts getJson) has no effect — those fetches run in the browser; either move them to server components or drop the misleading cache options.",
+    "layout.tsx calls fetchSeoEntry('home') twice per render (generateMetadata + RootLayout); dedupe via React cache() to halve API calls.",
+    "layout.tsx hardcodes BASE_URL 'https://adiprimanto.com' as fallback while base_url is a CMS setting — acceptable as fallback but should come from env."
+  ],
+  "updated_files": ["/app/backend/tests/pytest/test_phase_f6_contact_seo.py"],
+  "success_rate": {"backend": "100% (18/18 F6 pytest); 1 HIGH integration defect found outside pytest scope", "frontend": "93% (all UI flows pass; SEO revalidation propagation fails)"},
+  "seed_data_creation": "Created several TEST_QA / QA Browser contact leads through the public form; all were deleted afterwards via DELETE /api/v1/admin/contact-messages (only the pre-existing 'Uji Coba' lead remains). SEO home meta_title was temporarily changed to a probe value and restored to 'Adi Primanto — Jasa Pembuatan Website & Mobile App'; frontend cache was manually revalidated so the public HTML is correct again.",
+  "should_call_test_agent_after_fix": true,
+  "should_main_agent_self_test": false,
+  "test_credentials": "shell.test@adiprimanto.com / ShellTester#2026 (non-2FA Super Admin) works for both browser login and API login (returns data.access_token directly). /app/memory/test_credentials.md is outdated — it does not list the shell/editor non-2FA accounts and still shows the old preview host.",
+  "context_for_next_testing_agent": "Run the F6 suite alone and run 'php artisan cache:clear' before it, otherwise the contact-form throttle (5/min per IP) makes 5 tests fail with 429. Public SEO route is GET /api/v1/public/seo?page_key=home (not /public/seo/home). SEO translatable updates require {\"translations\":{\"id\":{\"meta_title\":...}}}. Next.js /api/revalidate is only reachable from inside the pod (http://localhost:3000). Next serves stale-while-revalidate, so after a revalidate you must fetch twice before the new HTML appears. Landing header controls use data-testids navbar-language-toggle / navbar-theme-toggle (they are not inside a <header> element).",
+  "rca_of_the_issue": "RCA of stale metadata: BaseModel::bootBaseModel queues RevalidateFrontend::queue($model->revalidationTags()); the default implementation returns ['landing'] and SeoSetting/Setting/NavigationMenu do not override it, while BaseTranslationModel hardcodes ['landing']. Next.js only tags server-side fetches in app/lib/api/seo.ts with 'seo'|'settings'|'navigation'. Therefore revalidateTag('landing') invalidates nothing that is server-rendered and the metadata/JSON-LD/sitemap/robots keep their 3600s ISR cache. Reproduction: PUT /api/v1/admin/seo-settings/{home-id} with translations.id.meta_title -> API reflects change instantly, but GET / keeps old <title> (8 fetches over 32s). Mitigation proven: POST http://localhost:3000/api/revalidate with {\"tags\":[\"seo\"]} then fetch twice -> new title served."
+}

@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Permission extends BaseModel
 {
+    public function revalidationTags(): array
+    {
+        return [];
+    }
     protected bool $blameable = false;
 
     protected bool $logsActivity = false;

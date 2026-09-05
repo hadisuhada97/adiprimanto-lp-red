@@ -30,7 +30,9 @@ class ApiExceptionRenderer
         return match (true) {
             $e instanceof AuthenticationFailedException => $e->render($request),
             $e instanceof ValidationException => ApiResponse::error(
-                'The given data was invalid.',
+                $request->query('locale') === 'id'
+                    ? 'Data yang dikirim tidak valid.'
+                    : 'The given data was invalid.',
                 422,
                 $e->errors()
             ),

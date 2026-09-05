@@ -46,8 +46,6 @@ async function getJson<T>(path: string, locale: string): Promise<T> {
   const sep = path.includes("?") ? "&" : "?";
   const res = await fetch(`${BASE}${path}${sep}locale=${locale}`, {
     headers: { Accept: "application/json" },
-    // Cache on the server; landing content is revalidated on demand.
-    next: { revalidate: 3600, tags: ["projects"] },
   });
   if (!res.ok) throw new Error(`Public API ${path} responded ${res.status}`);
   const json = await res.json();
@@ -61,3 +59,46 @@ export function fetchProjects(locale: string): Promise<ApiProject[]> {
 export function fetchProjectCategories(locale: string): Promise<PublicCategory[]> {
   return getJson<PublicCategory[]>("/public/project-categories", locale);
 }
+
+export type ContactMessagePayload = {
+  name: string;
+  email: string;
+  phone?: string;
+  subject?: string;
+  message: string;
+  website?: string; // honeypot — must stay empty
+};
+
+export type ContactMessageResult =
+  | { ok: true; message: string }
+  | { ok: false; message: string; errors?: Record<string, string[]> };
+
+export async function submitContactMessage(
+  payload: ContactMessagePayload,
+  locale = "id",
+): Promise<ContactMessageResult> {
+  if (!BASE) return { ok: false, message: "API is not configured." };
+
+  try {
+    const res = await fetch(`${BASE}/public/contact-messages?locale=${locale}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    });
+    const json = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return {
+        ok: false,
+        message: json?.message ?? `Request failed (${res.status}).`,
+        errors: json?.errors,
+      };
+    }
+
+    return { ok: true, message: json?.message ?? "Your message has been sent." };
+  } catch {
+    return { ok: false, message: "Network error. Please try again." };
+  }
+}
+

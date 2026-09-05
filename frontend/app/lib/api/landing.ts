@@ -206,7 +206,6 @@ export async function fetchLanding(locale: string): Promise<LandingData> {
   if (!BASE) throw new Error("NEXT_PUBLIC_API_BASE_URL is not configured");
   const res = await fetch(`${BASE}/public/landing?locale=${locale}`, {
     headers: { Accept: "application/json" },
-    next: { revalidate: 3600, tags: ["landing"] },
   });
   if (!res.ok) throw new Error(`Public landing API responded ${res.status}`);
   const json = await res.json();

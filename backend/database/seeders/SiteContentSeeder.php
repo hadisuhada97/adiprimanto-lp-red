@@ -337,5 +337,76 @@ class SiteContentSeeder extends Seeder
                 ],
             ]);
         }
+
+        $home = SeoSetting::query()->where('page_key', 'home')->first();
+
+        if ($home && blank($home->structured_data)) {
+            $home->forceFill(['structured_data' => $this->homeStructuredData()])->save();
+        }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function homeStructuredData(): array
+    {
+        $baseUrl = 'https://adiprimanto.com';
+
+        return [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                [
+                    '@type' => 'Person',
+                    '@id' => $baseUrl.'/#person',
+                    'name' => 'Adi Primanto',
+                    'url' => $baseUrl,
+                    'image' => $baseUrl.'/adi.webp',
+                    'jobTitle' => 'Software Engineer & Web Developer',
+                    'description' => 'Software Engineer dengan 5+ tahun pengalaman membangun website dan aplikasi mobile profesional untuk bisnis di Indonesia.',
+                    'address' => [
+                        '@type' => 'PostalAddress',
+                        'addressLocality' => 'Yogyakarta',
+                        'addressCountry' => 'ID',
+                    ],
+                    'sameAs' => [
+                        'https://github.com/adiprimanto',
+                        'https://www.linkedin.com/in/adi-primanto/',
+                        'https://www.instagram.com/adiprimanto',
+                    ],
+                ],
+                [
+                    '@type' => 'LocalBusiness',
+                    '@id' => $baseUrl.'/#business',
+                    'name' => 'Adi Primanto — Jasa Website & Aplikasi',
+                    'url' => $baseUrl,
+                    'image' => $baseUrl.'/adi.webp',
+                    'description' => 'Jasa pembuatan website profesional dan aplikasi mobile untuk bisnis dan UMKM di Indonesia.',
+                    'telephone' => '+6285727346620',
+                    'address' => [
+                        '@type' => 'PostalAddress',
+                        'addressLocality' => 'Yogyakarta',
+                        'addressRegion' => 'DI Yogyakarta',
+                        'addressCountry' => 'ID',
+                    ],
+                    'geo' => [
+                        '@type' => 'GeoCoordinates',
+                        'latitude' => -7.7956,
+                        'longitude' => 110.3695,
+                    ],
+                    'areaServed' => ['@type' => 'Country', 'name' => 'Indonesia'],
+                    'priceRange' => '$$',
+                    'openingHours' => 'Mo-Fr 09:00-17:00',
+                ],
+                [
+                    '@type' => 'WebSite',
+                    '@id' => $baseUrl.'/#website',
+                    'url' => $baseUrl,
+                    'name' => 'Adi Primanto',
+                    'description' => 'Portfolio & Jasa Web Development',
+                    'publisher' => ['@id' => $baseUrl.'/#person'],
+                    'inLanguage' => 'id-ID',
+                ],
+            ],
+        ];
     }
 }

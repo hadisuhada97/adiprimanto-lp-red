@@ -3,17 +3,80 @@ import "./globals.css";
 import { ThemeProvider } from "./lib/theme-context";
 import { LanguageProvider } from "./lib/language-context";
 import { LandingProvider } from "./lib/landing-context";
+import { fetchSeoEntry, fetchSettings } from "./lib/api/seo";
 
 const BASE_URL = "https://adiprimanto.com";
 
-export const metadata: Metadata = {
+const FALLBACK_TITLE =
+  "Adi Primanto — Jasa Website & Aplikasi Profesional Yogyakarta";
+const FALLBACK_DESCRIPTION =
+  "Jasa pembuatan website dan aplikasi mobile profesional di Yogyakarta. Spesialis Next.js, Vue.js, React Native, Laravel. 5+ tahun pengalaman, 20+ proyek selesai. Konsultasi gratis.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [seo, settings] = await Promise.all([
+    fetchSeoEntry("home"),
+    fetchSettings(),
+  ]);
+
+  const baseUrl = settings?.general?.base_url || BASE_URL;
+  const title = seo?.meta_title || FALLBACK_TITLE;
+  const description = seo?.meta_description || FALLBACK_DESCRIPTION;
+  const keywords = seo?.meta_keywords
+    ? seo.meta_keywords.split(",").map((keyword) => keyword.trim())
+    : staticMetadata.keywords;
+  const ogImage = seo?.og_image?.url ?? "/adi.webp";
+  const directive = (seo?.robots_directive ?? "index,follow").toLowerCase();
+  const index = !directive.includes("noindex");
+  const follow = !directive.includes("nofollow");
+  const brand = settings?.general?.brand_name || "Adi Primanto";
+
+  return {
+    ...staticMetadata,
+    metadataBase: new URL(baseUrl),
+    title: { default: title, template: `%s | ${brand}` },
+    description,
+    keywords,
+    authors: [{ name: brand, url: baseUrl }],
+    creator: brand,
+    publisher: brand,
+    alternates: { canonical: baseUrl },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      url: baseUrl,
+      siteName: brand,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
+      locale: settings?.general?.default_locale === "en" ? "en_US" : "id_ID",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+      creator: "@adiprimanto",
+    },
+    robots: {
+      index,
+      follow,
+      googleBot: {
+        index,
+        follow,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+  };
+}
+
+const staticMetadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: "Adi Primanto — Jasa Website & Aplikasi Profesional Yogyakarta",
+    default: FALLBACK_TITLE,
     template: "%s | Adi Primanto",
   },
-  description:
-    "Jasa pembuatan website dan aplikasi mobile profesional di Yogyakarta. Spesialis Next.js, Vue.js, React Native, Laravel. 5+ tahun pengalaman, 20+ proyek selesai. Konsultasi gratis.",
+  description: FALLBACK_DESCRIPTION,
+
   keywords: [
     "jasa website Yogyakarta",
     "jasa pembuatan website",
@@ -84,8 +147,8 @@ export const metadata: Metadata = {
   },
 };
 
-// JSON-LD is hardcoded static data — no XSS risk
-const jsonLd = JSON.stringify({
+// Fallback JSON-LD used when the CMS has no structured data for the home page.
+const fallbackJsonLd = JSON.stringify({
   "@context": "https://schema.org",
   "@graph": [
     {
@@ -196,11 +259,17 @@ const jsonLd = JSON.stringify({
   ],
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const seo = await fetchSeoEntry("home");
+  const jsonLd =
+    seo?.structured_data && Object.keys(seo.structured_data).length > 0
+      ? JSON.stringify(seo.structured_data)
+      : fallbackJsonLd;
+
   return (
     <html lang="id" suppressHydrationWarning>
       <head>
@@ -220,7 +289,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne+Mono&family=Inter:wght@300;400;500&display=swap"
           rel="stylesheet"
         />
-        {/* JSON-LD structured data — static hardcoded content, no XSS risk */}
+        {/* JSON-LD structured data — managed in the CMS (SEO Settings), server-serialised */}
         <script
           type="application/ld+json"
           // eslint-disable-next-line react/no-danger

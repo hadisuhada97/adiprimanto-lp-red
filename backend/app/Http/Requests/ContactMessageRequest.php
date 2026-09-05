@@ -19,6 +19,29 @@ class ContactMessageRequest extends BaseFormRequest
 
     public function messages(): array
     {
-        return ['website.max' => 'This submission looks automated.'];
+        if ($this->formLocale() !== 'id') {
+            return ['website.max' => 'This submission looks automated.'];
+        }
+
+        return [
+            'name.required' => 'Nama wajib diisi.',
+            'name.max' => 'Nama maksimal 120 karakter.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'message.required' => 'Pesan wajib diisi.',
+            'message.min' => 'Pesan minimal 10 karakter.',
+            'message.max' => 'Pesan maksimal 5000 karakter.',
+            'phone.max' => 'Nomor telepon maksimal 40 karakter.',
+            'subject.max' => 'Subjek maksimal 191 karakter.',
+            'website.max' => 'Pengiriman ini terdeteksi otomatis.',
+        ];
+    }
+
+    /** Locale used for the human-readable messages returned to the public form. */
+    public function formLocale(): string
+    {
+        $locale = (string) $this->query('locale', config('app.locale'));
+
+        return in_array($locale, ['id', 'en'], true) ? $locale : 'en';
     }
 }
