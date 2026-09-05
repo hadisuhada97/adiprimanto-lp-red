@@ -11,6 +11,7 @@ class UploadMediaRequest extends BaseFormRequest
         return [
             'file' => ['required', 'file', 'max:5120', 'mimes:jpg,jpeg,png,webp,gif,pdf'],
             'alt_text' => ['nullable', 'string', 'max:191'],
+            'folder_id' => ['nullable', 'uuid', 'exists:media_folders,id'],
         ];
     }
 

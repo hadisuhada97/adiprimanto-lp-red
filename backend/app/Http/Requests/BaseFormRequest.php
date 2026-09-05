@@ -2,24 +2,94 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\Validator;
+use App\Support\HtmlSanitizer;
+use Illuminate\Contracts\Validation\Validator as ValidatorContract;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
 
 /**
  * Every request payload in this application must extend this class.
- * Guarantees a consistent 422 response shape and trimmed input.
+ * Guarantees a consistent 422 response shape, sanitised rich text and a
+ * hard rejection of translatable fields sent outside `translations.{locale}`.
  */
 abstract class BaseFormRequest extends FormRequest
 {
+    /** Rich text fields sanitised (allowlist) before validation. */
+    protected array $richTextFields = [];
+
     public function authorize(): bool
     {
         return true;
     }
 
-    protected function failedValidation(Validator $validator): void
+    protected function failedValidation(ValidatorContract $validator): void
     {
         throw new ValidationException($validator);
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->sanitizeRichText();
+    }
+
+    protected function sanitizeRichText(): void
+    {
+        if ($this->richTextFields === []) {
+            return;
+        }
+
+        $input = $this->all();
+
+        foreach ($this->richTextFields as $field) {
+            if (is_string($input[$field] ?? null)) {
+                $input[$field] = HtmlSanitizer::clean($input[$field]);
+            }
+        }
+
+        foreach ((array) ($input['translations'] ?? []) as $locale => $attributes) {
+            foreach ($this->richTextFields as $field) {
+                if (is_array($attributes) && is_string($attributes[$field] ?? null)) {
+                    $input['translations'][$locale][$field] = HtmlSanitizer::clean($attributes[$field]);
+                }
+            }
+        }
+
+        $this->replace($input);
+    }
+
+    /**
+     * Adds a `prohibited` rule for every translatable field so a flat payload
+     * fails loudly instead of being silently dropped.
+     */
+    protected function getValidatorInstance(): ValidatorContract
+    {
+        $validator = parent::getValidatorInstance();
+        $rules = $this->container->call([$this, 'rules']);
+
+        $guard = [];
+        $messages = [];
+
+        foreach (array_keys($rules) as $key) {
+            if (! str_starts_with($key, 'translations.*.')) {
+                continue;
+            }
+
+            $field = substr($key, strlen('translations.*.'));
+
+            if (isset($rules[$field]) || isset($guard[$field])) {
+                continue;
+            }
+
+            $guard[$field] = ['prohibited'];
+            $messages["{$field}.prohibited"] = "Send {$field} inside translations.{locale} instead.";
+        }
+
+        if ($guard !== []) {
+            $validator->addRules($guard);
+            $validator->setCustomMessages($messages);
+        }
+
+        return $validator;
     }
 
     /** Friendlier names used inside validation messages. */

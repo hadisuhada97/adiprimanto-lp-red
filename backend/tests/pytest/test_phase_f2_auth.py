@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 import pytest
 import requests
 
-BASE_URL = "https://cms-admin-4.preview.emergentagent.com"
+BASE_URL = "https://content-hub-1887.preview.emergentagent.com"
 ADMIN_EMAIL = "admin@adiprimanto.com"
 ADMIN_PASSWORD = "AdiPrimanto#2026"
 EDITOR_EMAIL = "editor.test@adiprimanto.com"

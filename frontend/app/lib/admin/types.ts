@@ -8,6 +8,9 @@ export const LOCALES: { code: LocaleCode; label: string }[] = [
 export type MediaItem = {
   id: string;
   url: string;
+  webp_url?: string;
+  thumbnail_url?: string;
+  folder_id?: string | null;
   file_name: string;
   original_name: string;
   mime_type: string;
@@ -15,7 +18,38 @@ export type MediaItem = {
   width: number | null;
   height: number | null;
   alt_text: string | null;
+  caption?: string | null;
   created_at: string | null;
+};
+
+export type MediaFolder = {
+  id: string;
+  name: string;
+  slug: string;
+  parent_id: string | null;
+  media_count?: number;
+  created_at: string | null;
+};
+
+export type MediaUsage = {
+  total: number;
+  references: { module: string; label: string; count: number }[];
+};
+
+export type LocaleRecord = {
+  id: string;
+  code: string;
+  name: string;
+  native_name: string;
+  is_default: boolean;
+  is_active: boolean;
+  sort_order: number;
+  deleted_at: string | null;
+};
+
+export type TranslationCoverage = {
+  locales: string[];
+  modules: { module: string; total: number; translated: Record<string, number> }[];
 };
 
 export type Technology = {

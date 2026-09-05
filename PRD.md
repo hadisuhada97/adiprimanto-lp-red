@@ -715,3 +715,76 @@ user (`can()`):
 **Hasil pengujian**: 100% lolos — 26 rute admin disapu satu per satu, uji collapse + persistensi
 localStorage, drawer mobile 390×844, toggle dark/light tanpa kontras rusak, logout + route guard,
 regresi login 2FA, dan regresi landing page di kedua tema (`/app/test_reports/iteration_4.json`).
+
+### Fase F3c — Media Library & Modul Portofolio ✅ SELESAI (2026-06)
+
+Media Library (grid, upload multi-file, detail alt text, soft delete + restore + force delete,
+`MediaPicker` reusable) dan modul Portofolio penuh: Projects (form multi-locale + slug otomatis +
+technologies picker), Project Categories, Technologies. Diuji lewat `iteration_5.json`.
+
+### Fase F4 — 12 Modul Konten ✅ SELESAI (2026-06)
+
+Hero Section + Hero Metrics, About Section + About Stats, Skills & Skill Categories, Pain Points,
+Services + Service Stats, Process Steps, Testimonials, FAQ + FAQ Categories, Clients & Brands,
+Navigation Menu, Contact Channels, Social Links, SEO Settings, General Settings — semuanya dengan
+tab bahasa ID/EN, drag-free reorder (tombol naik/turun), toggle aktif, soft delete + restore.
+Komponen bersama: `CrudSection.tsx` (tabel + modal form + konfirmasi + reorder + trash view).
+Diuji lewat `iteration_6.json` dan `iteration_7.json`.
+
+### Fase F5 — Inbox, Activity Log, Users & Dashboard ✅ SELESAI (2026-06)
+
+Inbox pesan kontak (status baru/dibaca/dibalas/spam, catatan internal, notifikasi email ke admin),
+Activity Log (filter modul/aksi/user + rentang tanggal), Users (undang, role, aktif/nonaktif,
+reset 2FA), Roles & Permissions (matriks 128 permission), Dashboard statistik (kartu ringkasan,
+grafik lead 30 hari, aktivitas terbaru). Diuji lewat `iteration_8.json` dan `iteration_9.json`.
+
+### Fase F6 — Landing Page Sepenuhnya Dinamis ✅ SELESAI (2026-06)
+
+Supabase dicabut total. Seluruh 9 seksi landing (Hero, About, Skills, Pain Points, Services,
+Portfolio, Process, Testimonials, FAQ + Contact) kini dirender dari endpoint publik CMS melalui
+`landing-context.tsx`, dengan metadata + JSON-LD + `sitemap.xml` + `robots.txt` dinamis dan
+webhook revalidasi (`/api/revalidate`) yang dipicu perubahan konten di admin.
+Diuji lewat `iteration_10.json`.
+
+### Fase F7a — Trash, Localization, Media Lengkap & Keamanan ✅ SELESAI (2026-06)
+
+**Trash terpusat** (`/admin/trash`): satu halaman untuk 23 modul yang soft delete, dengan chip
+filter + hitungan per modul, restore, dan force delete (hanya untuk permission `*.force_delete`).
+Backend `TrashController` memeriksa permission per modul, jadi Editor tidak melihat tombol hapus
+permanen dan endpoint-nya membalas 403.
+
+**Modul Localization** (`/admin/settings/localization`): CRUD locale, set default (otomatis
+melepas default lama), toggle aktif (default tidak boleh dinonaktifkan), soft delete + restore +
+force delete (sekaligus membersihkan baris `*_translations` milik locale tersebut), dan tabel
+**Translation coverage** x/y per modul per locale.
+
+**Media Library lengkap**: tabel `media_folders` + sidebar folder (buat/ubah nama/hapus, folder
+berisi file tidak bisa dihapus → 409), pindah file antar folder, **konversi WebP + thumbnail 480px
+otomatis** via GD (`MediaService::generateVariants`, kolom `variants` JSON, `webp_url` +
+`thumbnail_url` di resource), dan **usage tracking** (`GET /admin/media/{id}/usage`) yang memblokir
+force delete dengan 409 bila file masih dipakai (baris soft-deleted tidak dihitung).
+
+**Keamanan (R-09 tertutup)**: sanitasi rich text server-side dengan HTMLPurifier allowlist
+(`HtmlSanitizer`, dipakai untuk `content` proyek, `answer` FAQ, `bio_paragraph_1..3` About) plus
+security headers di kedua sisi — middleware `SecurityHeaders` untuk API (CSP `default-src 'none'`,
+X-Frame-Options DENY, nosniff, HSTS) dan header + CSP di `next.config.ts` untuk Next.js.
+
+**Bug/temuan yang diperbaiki**: payload translatable yang dikirim flat (mis. `title` di root)
+sekarang gagal 422 dengan pesan jelas alih-alih diabaikan silent (guard generik di
+`BaseFormRequest`); `APP_LOCALE` dikembalikan ke `id`; halaman admin yang tidak diizinkan role
+menampilkan state **Access denied** alih-alih halaman kosong; kontras kata berstroke di hero tema
+terang diperbaiki.
+
+**Hasil pengujian**: 28/28 test case F7 baru lolos + 37/37 regresi F4
+(`/app/test_reports/iteration_11.json`, `backend/tests/pytest/test_phase_f7_trash_locale_media_security.py`).
+
+### Backlog tersisa (F7b)
+
+| Prioritas | Item |
+|---|---|
+| P1 | Galeri gambar per proyek (tabel `project_media` + pengurutan) belum ada — media baru terhubung sebagai cover saja |
+| P1 | Command `content:import-legacy` untuk migrasi konten legacy/Supabase |
+| P2 | Turnstile/captcha form kontak (ditunda atas pilihan user — saat ini honeypot + rate limit) |
+| P2 | CSP frontend masih memakai `'unsafe-inline' 'unsafe-eval'`; perlu CSP berbasis nonce (middleware + strict-dynamic) |
+| P2 | Backup DB harian + retensi, audit Lighthouse, dan E2E Playwright yang tersimpan di repo |
+| P3 | Middleware `Accept-Language` untuk rute admin agar `content` mengikuti locale permintaan |

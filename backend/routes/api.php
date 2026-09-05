@@ -12,6 +12,9 @@ use App\Http\Controllers\Api\V1\Admin\FaqController;
 use App\Http\Controllers\Api\V1\Admin\HeroMetricController;
 use App\Http\Controllers\Api\V1\Admin\HeroSectionController;
 use App\Http\Controllers\Api\V1\Admin\MediaController;
+use App\Http\Controllers\Api\V1\Admin\MediaFolderController;
+use App\Http\Controllers\Api\V1\Admin\LocaleController;
+use App\Http\Controllers\Api\V1\Admin\TrashController;
 use App\Http\Controllers\Api\V1\Admin\NavigationMenuController;
 use App\Http\Controllers\Api\V1\Admin\PainPointController;
 use App\Http\Controllers\Api\V1\Admin\ProcessStepController;
@@ -142,12 +145,25 @@ Route::prefix('v1')->group(function (): void {
         Route::delete('technologies/{technology}/force', [TechnologyController::class, 'forceDestroy'])
             ->middleware('permission:technologies.force_delete')->name('technologies.force-destroy');
 
+        Route::get('media/folders', [MediaFolderController::class, 'index'])
+            ->middleware('permission:media.view')->name('media.folders.index');
+        Route::post('media/folders', [MediaFolderController::class, 'store'])
+            ->middleware('permission:media.create')->name('media.folders.store');
+        Route::match(['put', 'patch'], 'media/folders/{id}', [MediaFolderController::class, 'update'])
+            ->middleware('permission:media.update')->name('media.folders.update');
+        Route::delete('media/folders/{id}', [MediaFolderController::class, 'destroy'])
+            ->middleware('permission:media.delete')->name('media.folders.destroy');
+
         Route::get('media', [MediaController::class, 'index'])
             ->middleware('permission:media.view')->name('media.index');
         Route::post('media', [MediaController::class, 'store'])
             ->middleware('permission:media.create')->name('media.store');
         Route::get('media/{medium}', [MediaController::class, 'show'])
             ->middleware('permission:media.view')->name('media.show');
+        Route::get('media/{medium}/usage', [MediaController::class, 'usage'])
+            ->middleware('permission:media.view')->name('media.usage');
+        Route::patch('media/{medium}/move', [MediaController::class, 'move'])
+            ->middleware('permission:media.update')->name('media.move');
         Route::match(['put', 'patch'], 'media/{medium}', [MediaController::class, 'update'])
             ->middleware('permission:media.update')->name('media.update');
         Route::delete('media/{medium}', [MediaController::class, 'destroy'])
@@ -368,5 +384,30 @@ Route::prefix('v1')->group(function (): void {
             ->middleware('permission:users.delete')->name('users.destroy');
         Route::post('users/{id}/restore', [UserController::class, 'restore'])
             ->middleware('permission:users.restore')->name('users.restore');
+
+        Route::get('locales/completeness', [LocaleController::class, 'completeness'])
+            ->middleware('permission:locales.view')->name('locales.completeness');
+        Route::get('locales', [LocaleController::class, 'index'])
+            ->middleware('permission:locales.view')->name('locales.index');
+        Route::post('locales', [LocaleController::class, 'store'])
+            ->middleware('permission:locales.create')->name('locales.store');
+        Route::post('locales/reorder', [LocaleController::class, 'reorder'])
+            ->middleware('permission:locales.update')->name('locales.reorder');
+        Route::match(['put', 'patch'], 'locales/{id}', [LocaleController::class, 'update'])
+            ->middleware('permission:locales.update')->name('locales.update');
+        Route::patch('locales/{id}/set-default', [LocaleController::class, 'setDefault'])
+            ->middleware('permission:locales.update')->name('locales.set-default');
+        Route::patch('locales/{id}/toggle-active', [LocaleController::class, 'toggleActive'])
+            ->middleware('permission:locales.update')->name('locales.toggle-active');
+        Route::delete('locales/{id}', [LocaleController::class, 'destroy'])
+            ->middleware('permission:locales.delete')->name('locales.destroy');
+        Route::post('locales/{id}/restore', [LocaleController::class, 'restore'])
+            ->middleware('permission:locales.restore')->name('locales.restore');
+        Route::delete('locales/{id}/force', [LocaleController::class, 'forceDestroy'])
+            ->middleware('permission:locales.force_delete')->name('locales.force-destroy');
+
+        Route::get('trash', [TrashController::class, 'index'])->name('trash.index');
+        Route::post('trash/{module}/{id}/restore', [TrashController::class, 'restore'])->name('trash.restore');
+        Route::delete('trash/{module}/{id}/force', [TrashController::class, 'forceDestroy'])->name('trash.force-destroy');
     });
 });

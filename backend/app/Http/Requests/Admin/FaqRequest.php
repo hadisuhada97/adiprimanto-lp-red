@@ -6,6 +6,8 @@ use App\Http\Requests\BaseFormRequest;
 
 class FaqRequest extends BaseFormRequest
 {
+    protected array $richTextFields = ['answer'];
+
     public function rules(): array
     {
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');

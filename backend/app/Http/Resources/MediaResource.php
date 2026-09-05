@@ -12,6 +12,9 @@ class MediaResource extends JsonResource
         return [
             'id' => $this->id,
             'url' => $this->url,
+            'webp_url' => $this->variantUrl('webp'),
+            'thumbnail_url' => $this->variantUrl('thumbnail'),
+            'folder_id' => $this->folder_id,
             'file_name' => $this->file_name,
             'original_name' => $this->original_name,
             'mime_type' => $this->mime_type,
@@ -19,6 +22,7 @@ class MediaResource extends JsonResource
             'width' => $this->width,
             'height' => $this->height,
             'alt_text' => $this->alt_text,
+            'caption' => $this->caption,
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

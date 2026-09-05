@@ -1,0 +1,74 @@
+{
+  "summary": "Phase F7 verification (centralised Trash, Localization/Locale module, full Media Library with folders + WebP/thumbnail variants + usage tracking, server-side HTMLPurifier sanitisation, flat-translatable 422 guard, security headers/CSP) plus landing + admin regression. New pytest suite /app/backend/tests/pytest/test_phase_f7_trash_locale_media_security.py: 28/28 passing. Browser (Playwright) verified: admin login (non-2FA), technology soft-delete -> /admin/trash chip 'Technologies' -> restore -> reappears in list; force-delete dialog + permanent removal; Editor sees NO force-delete buttons and API returns 403; localization page (make-default EN <-> ID, toggle active, default cannot be deactivated -> toast 'The default locale cannot be deactivated.', no delete button on default, create 'jv' -> soft delete -> Trash 'Locales' chip -> force delete, coverage table x/y per module incl. 0/n for new locale); media library (create folder, upload into folder, thumbnail rendered from *_thumb.webp naturalWidth=480, details modal saves alt/caption + folder move with success toast, 'Used by: Not used anywhere', folder rename with slug update, empty-folder delete, non-empty folder blocked 409); landing page renders all 9 sections in dark/light and ID/EN with ZERO console errors and ZERO CSP violations (Google Fonts + /api/storage images load), contact form stores lead visible in Inbox; /admin/dashboard, /admin/portfolio/projects, /admin/settings/seo, /admin/inbox, /admin/media, /admin/trash, /admin/settings/localization all load with zero console errors. Two pre-existing F4 tests now fail because backend .env has APP_LOCALE=en (admin 'content' block resolves EN instead of the CMS default locale id). All test data cleaned up and `php artisan db:seed --force` was run; Trash and media folders are empty again.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "GET /api/v1/admin/about, GET /api/v1/admin/hero (config APP_LOCALE)",
+        "issue": "/app/backend/.env sets APP_LOCALE=en, and HasTranslations::translate() falls back to app()->getLocale(), so the admin resources' resolved `content` block returns ENGLISH even though the CMS default locale is `id` (health reports default_locale=id, public endpoints correctly return ID). Reproduces failures in the pre-existing suite: test_phase_f4_hero_about.py::TestHeroSection::test_show_seeded_content and ::TestAboutSection::test_show_seeded_content (assert content.headline == translations.id.headline -> 'The Person' != 'Orang di Balik'). Fix by setting APP_LOCALE=id (requires `sudo supervisorctl restart backend`) or by resolving admin content through Locale::defaultCode() instead of the app locale. There is also no middleware that maps Accept-Language/?locale to app()->setLocale() for admin routes."
+      },
+      {
+        "endpoint": "App\\Services\\MediaService::usage() / DELETE /api/v1/admin/media/{id}/force",
+        "issue": "usage() uses raw DB::table() without a whereNull('deleted_at') filter, so SOFT-DELETED (trashed) records still count as references. Verified: set a media file as cover of a project, soft-deleted that project -> usage still reports Projects=1 and force delete returns 409 'still used by Projects', i.e. the file can never be purged while the referencing record sits in Trash. Decide intentional or filter out trashed rows."
+      },
+      {
+        "endpoint": "DELETE /api/v1/admin/locales/{id}/force",
+        "issue": "Force deleting a locale does not remove the *_translations rows written for that locale code (no FK to locales.code), leaving orphan translation rows after a locale is purged."
+      },
+      {
+        "endpoint": "App\\Support\\HtmlSanitizer",
+        "issue": "HTMLPurifier is configured with Cache.DefinitionImpl = null, which disables the definition cache and re-builds the HTML definition on the first purify of every PHP worker request cycle (measurable latency on rich-text saves). Prefer a writable Cache.SerializerPath instead."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Admin route guard (/admin/settings/localization with Editor role)",
+        "issue": "Editor (no locales.view permission) can navigate to the URL and gets an empty content area with two silent 403 XHRs in console — no 'access denied' state, no redirect. Same pattern likely applies to every permission-gated page reachable by URL.",
+        "selector": "/admin/settings/localization",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Landing hero (light theme)",
+        "issues": ["Still-open issue from iteration_10: the outlined/stroked headline word ('BUSINESS' in EN / 'ANDA' in ID) is nearly invisible on the light background — very low contrast."]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/pytest/test_phase_f7_trash_locale_media_security.py",
+    "/app/test_reports/pytest/f7_results.xml",
+    "/app/test_reports/pytest/f7_full_regression.xml"
+  ],
+  "action_items": [
+    "Set APP_LOCALE=id in /app/backend/.env (or resolve admin translated content via Locale::defaultCode()) so admin GET /admin/about & /admin/hero return the ID copy; then re-run tests/pytest/test_phase_f4_hero_about.py (2 failures).",
+    "Decide on MediaService::usage() counting soft-deleted references (currently blocks force delete forever while the referencing record is in Trash).",
+    "Add a permission-denied UI state (or redirect) for admin pages a role cannot view — Editor currently sees a blank page plus 403s on /admin/settings/localization.",
+    "Purge *_translations rows for a locale when it is force-deleted.",
+    "Improve light-theme contrast of the stroked hero word (still open from iteration_10)."
+  ],
+  "critical_code_review_comments": [
+    "next.config.ts CSP uses script-src 'unsafe-inline' 'unsafe-eval', which largely defeats CSP as an XSS control. Since the sanitiser is the other half of this hardening story, consider Next.js nonce-based CSP (middleware + strict-dynamic) at least for the /admin subtree.",
+    "BaseFormRequest::getValidatorInstance() invokes rules() a second time via container->call() (parent already built them) — for requests with DB-backed rules this doubles that work; cache the rules array in a property.",
+    "TrashController::index() always queries all 23 modules (each up to 200 rows + translations eager load) even when ?module= is set, because counts are needed; use SELECT COUNT(*) per module for the chips and only hydrate rows for the selected module.",
+    "Locale::defaultCode() uses Cache::rememberForever with invalidation only on saved/deleted events; LocaleController::clearOtherDefaults() uses a mass Query Builder update() which does NOT fire model events — the cache stays correct today only because the promoted locale is saved afterwards. Add an explicit Cache::forget in clearOtherDefaults.",
+    "app/admin/(panel)/media/page.tsx is 697 lines and mixes folder sidebar, uploader, grid, details modal and dialogs — split into components before it crosses the 700-line threshold."
+  ],
+  "updated_files": [
+    "/app/backend/tests/pytest/test_phase_f7_trash_locale_media_security.py",
+    "/app/backend/tests/pytest/test_phase_f1_foundation.py"
+  ],
+  "success_rate": {
+    "backend": "F7 suite 28/28 (100%); full regression 322 tests: 320 pass, 2 fail (both the APP_LOCALE=en issue). f1 32/32 after fixing a stale settings-count assertion (15 -> now 17 keys).",
+    "frontend": "100% of tested flows passed (trash restore/force-delete + editor gating, localization CRUD/default/toggle/coverage, media folders/upload/variants/details/usage, landing dark+light & ID+EN, contact -> inbox, 7 admin routes with zero console errors); 1 medium UX gap (no access-denied state for Editor)"
+  },
+  "seed_data_creation": "Temporary only, all removed: technology 'QA Trash Tech' (force deleted), locale 'jv' (force deleted), media folders 'QA Folder'/'TEST_*' (deleted), uploads qa_media.png/TEST_*.png/TEST_doc.pdf (force deleted, variant files removed from disk), contact lead 'QA F7 Tester' (force deleted). Project cover_media_id and rich-text fields were restored, then `php artisan db:seed --force` was run; /admin/trash and media folder list are empty and settings/locales are back to id(default)+en.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "shell.test@adiprimanto.com / ShellTester#2026 (non-2FA Super Admin) and editor.test@adiprimanto.com / EditorTest#2026 both work for UI and API login (POST /api/v1/auth/login returns data.access_token directly). /app/memory/test_credentials.md is still outdated: it lists only the 2FA accounts and an old preview host.",
+  "context_for_next_testing_agent": "Rate limits dominate test flakiness: login is 5/min per email+IP and admin API 120/min per user. The new F7 suite uses a RetrySession that backs off on 429; older suites do NOT, so run ONE phase file at a time with ~70s between runs, otherwise you see mass 429 'errors on setup' (43 such errors in the combined run were purely throttling, not defects). Useful facts: admin About is a singleton at /api/v1/admin/about (NOT /admin/about-sections/{id}); technologies require both name and slug (lowercase-hyphen only); translatable PATCH must send the COMPLETE translations.{locale} object (partial payloads 422 on required title/question); flat translatable keys now correctly 422 with 'Send {field} inside translations.{locale} instead.'; trash force-delete dialog testid is trash-force-delete-dialog with button 'Delete permanently'; media folder testids use the folder SLUG (e.g. media-folder-filter-qa-folder). Next.js revalidate webhook needs header x-revalidate-secret (not a body field) and is only reachable at http://localhost:3000/api/revalidate.",
+  "rca_of_the_issue": "APP_LOCALE=en in the reconstructed /app/backend/.env is the root cause of the 2 F4 failures: HasTranslations::translate() defaults to app()->getLocale(), there is no middleware mapping Accept-Language/?locale for admin routes, so admin resources build their `content` block from the EN translation while the CMS default locale (locales table / health endpoint) is id. Public endpoints are unaffected because they resolve through Locale::defaultCode(). Reproduce: GET /api/v1/admin/about -> content.headline 'The Person' while translations.id.headline is 'Orang di Balik'. Mitigation: APP_LOCALE=id + restart backend, or resolve admin content with Locale::defaultCode()."
+}

@@ -7,6 +7,8 @@ use Illuminate\Validation\Rule;
 
 class ProjectRequest extends BaseFormRequest
 {
+    protected array $richTextFields = ['content'];
+
     public function rules(): array
     {
         $projectId = $this->route('project');

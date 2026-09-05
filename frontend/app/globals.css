@@ -102,6 +102,8 @@
   --color-border: rgba(20, 20, 26, 0.09);
   --color-border-2: rgba(20, 20, 26, 0.15);
   --color-stroke: rgba(20, 20, 26, 0.95);
+  --hero-stroke-width: 3px;
+  --hero-stroke-fill: rgba(20, 20, 26, 0.1);
 }
 
 :root[data-theme="light"] ::selection {

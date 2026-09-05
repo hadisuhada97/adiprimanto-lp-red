@@ -1,8 +1,33 @@
 # Test Credentials — Adiprimanto CMS
 
-> Updated: 2026-06 (Phase F3c — Media Library & Portfolio modules)
+> Updated: 2026-06 (Phase F7a — Trash, Localization, Media Library, security headers)
+>
+> Preview base URL of the current pod:
+> `https://48e55004-a428-40e8-81e3-39a7fa80d283.preview.emergentagent.com`
+>
+> After a pod reset run `bash /app/scripts/bootstrap.sh`, then recreate the two non-2FA
+> test accounts below (they are not part of the seeders).
 
-## Admin Panel / API accounts
+## Non-2FA test accounts (preferred for UI/API automation)
+
+| Field | Super Admin (test) | Editor (test) |
+|---|---|---|
+| Email | `shell.test@adiprimanto.com` | `editor.test@adiprimanto.com` |
+| Password | `ShellTester#2026` | `EditorTest#2026` |
+| Role | Super Admin | Editor |
+| 2FA | Disabled — login returns the access token in one step | Disabled |
+
+Recreate them with:
+
+```bash
+cd /app/backend && php artisan tinker --execute="
+foreach ([['shell.test@adiprimanto.com','Shell Tester','ShellTester#2026','super-admin'],['editor.test@adiprimanto.com','Editor Tester','EditorTest#2026','editor']] as [\$email,\$name,\$pass,\$role]) {
+\$u = App\Models\User::withTrashed()->firstOrNew(['email' => \$email]);
+\$u->name = \$name; \$u->password = bcrypt(\$pass); \$u->is_active = true; \$u->is_two_factor_enabled = false; \$u->deleted_at = null; \$u->save();
+\$u->roles()->sync([App\Models\Role::where('slug',\$role)->value('id')]); }"
+```
+
+## Admin Panel / API accounts (seeded, 2FA on)
 
 | Field | Super Admin | Editor (test) |
 |---|---|---|
@@ -29,7 +54,7 @@ because it contains `#`.
 ## Sign-in flow (two steps — an access token is never returned by step 1)
 
 ```bash
-BASE=https://cms-admin-4.preview.emergentagent.com
+BASE=https://content-hub-1887.preview.emergentagent.com
 
 # 1. credentials -> challenge_token
 curl -X POST $BASE/api/v1/auth/login -H "Content-Type: application/json" \

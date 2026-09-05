@@ -141,7 +141,7 @@ export default function MediaPicker({
               <span className="block aspect-4/3 bg-admin-gray-100 dark:bg-admin-gray-800">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={item.url}
+                  src={item.thumbnail_url ?? item.url}
                   alt={item.alt_text ?? item.original_name}
                   className="h-full w-full object-cover"
                 />

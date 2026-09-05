@@ -137,10 +137,23 @@ export const ROUTE_TITLES: Record<string, { title: string; group: string; icon: 
     {} as Record<string, { title: string; group: string; icon: LucideIcon }>,
   );
 
-export const PHASE_BY_ROUTE: Record<string, string> = {
-  "/admin/settings/localization": "F4",
-  "/admin/trash": "F5",
-};
+export const PHASE_BY_ROUTE: Record<string, string> = {};
+
+/** Permission required to open each admin route, used by the shell guard. */
+export const ROUTE_PERMISSIONS: Record<string, string> = NAVIGATION.reduce(
+  (accumulator, group) => {
+    group.items.forEach((item) => {
+      if (item.permission) accumulator[item.href] = item.permission;
+
+      item.children?.forEach((child) => {
+        if (child.permission) accumulator[child.href] = child.permission;
+      });
+    });
+
+    return accumulator;
+  },
+  {} as Record<string, string>,
+);
 
 export const KNOWN_ADMIN_ROUTES = Object.keys(ROUTE_TITLES);
 

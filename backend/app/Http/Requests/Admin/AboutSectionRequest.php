@@ -6,6 +6,8 @@ use App\Http\Requests\BaseFormRequest;
 
 class AboutSectionRequest extends BaseFormRequest
 {
+    protected array $richTextFields = ['bio_paragraph_1', 'bio_paragraph_2', 'bio_paragraph_3'];
+
     public function rules(): array
     {
         return [

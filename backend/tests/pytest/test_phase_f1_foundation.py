@@ -5,7 +5,7 @@ import subprocess
 import pytest
 import requests
 
-BASE_URL = "https://cms-admin-4.preview.emergentagent.com"
+BASE_URL = "https://content-hub-1887.preview.emergentagent.com"
 
 
 def _mysql(sql: str) -> str:
@@ -96,7 +96,11 @@ class TestSeededData:
     def test_locales_and_settings(self):
         assert _mysql("SELECT COUNT(*) FROM locales;") == "2"
         assert _mysql("SELECT code FROM locales WHERE is_default=1;") == "id"
-        assert _mysql("SELECT COUNT(*) FROM settings;") == "15"
+        # Seeded settings grow as new modules land; assert the baseline keys exist
+        # instead of a brittle exact count (was 15, now 17 after F7).
+        assert int(_mysql("SELECT COUNT(*) FROM settings;")) >= 15
+        for key in ("base_url", "brand_name", "default_locale", "logo_media_id"):
+            assert _mysql(f"SELECT COUNT(*) FROM settings WHERE `key`='{key}';") == "1"
 
     def test_admin_user_seeded(self):
         row = _mysql(
