@@ -2,19 +2,27 @@
 
 import { BsWhatsapp } from 'react-icons/bs';
 import { useLanguage } from '@/app/lib/language-context';
+import { useLanding } from '@/app/lib/landing-context';
 
-const WA_URL = 'https://wa.me/6285727346620?text=Halo%20Adi%20Primanto,%20saya%20ingin%20membuat%20website%20untuk%20bisnis%20saya.';
+const FALLBACK_NUMBER = '6285727346620';
 
 const WhatsAppButton = () => {
   const { t } = useLanguage();
+  const { data } = useLanding();
+
+  const channel = data?.contact?.channels?.find((item) => item.type === 'whatsapp');
+  const number = (data?.settings?.general?.whatsapp_number ?? FALLBACK_NUMBER).replace(/\D/g, '');
+  const baseUrl = channel?.url ?? `https://wa.me/${number || FALLBACK_NUMBER}`;
+  const waUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}text=${encodeURIComponent(t.whatsapp.message)}`;
 
   return (
   <a
-    href={WA_URL}
+    href={waUrl}
     target="_blank"
     rel="noopener noreferrer"
     className="fixed bottom-6 right-6 z-50 group flex items-center gap-3"
     title="Chat WhatsApp"
+    data-testid="whatsapp-float-button"
   >
     {/* Tooltip */}
     <span

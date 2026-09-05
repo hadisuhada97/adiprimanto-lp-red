@@ -113,6 +113,54 @@ export type Client = {
   logo: ApiMedia | null;
 };
 
+export type NavItem = {
+  id: string;
+  location: string;
+  url: string | null;
+  anchor: string | null;
+  target: string | null;
+  label: string;
+  children?: NavItem[];
+};
+
+export type ContactChannel = {
+  id: string;
+  type: string;
+  value: string;
+  url: string | null;
+  icon_name: string | null;
+  color_hex: string | null;
+  label: string;
+};
+
+export type SocialLink = {
+  id: string;
+  platform: string;
+  url: string;
+  icon_name: string | null;
+  color_hex: string | null;
+};
+
+export type PublicSettings = {
+  general?: {
+    brand_name?: string | null;
+    brand_tagline?: string | null;
+    whatsapp_number?: string | null;
+    contact_email?: string | null;
+    location?: string | null;
+    base_url?: string | null;
+    logo_media_id?: string | null;
+    favicon_media_id?: string | null;
+    [key: string]: string | null | undefined;
+  };
+  appearance?: {
+    primary_color?: string | null;
+    is_language_switcher_enabled?: boolean | null;
+    is_theme_switcher_enabled?: boolean | null;
+    [key: string]: string | boolean | null | undefined;
+  };
+};
+
 export type LandingData = {
   hero: {
     hero:
@@ -145,7 +193,14 @@ export type LandingData = {
   pain_points: PainPoint[];
   process_steps: ProcessStep[];
   clients: Client[];
+  navigation: { header: NavItem[]; footer: NavItem[] };
+  contact: { channels: ContactChannel[]; social_links: SocialLink[] };
+  settings: PublicSettings;
 };
+
+export function navHref(item: NavItem): string {
+  return item.anchor ?? item.url ?? "#";
+}
 
 export async function fetchLanding(locale: string): Promise<LandingData> {
   if (!BASE) throw new Error("NEXT_PUBLIC_API_BASE_URL is not configured");

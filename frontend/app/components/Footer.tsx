@@ -1,24 +1,59 @@
 "use client";
 
-import { ArrowUp, Mail } from "lucide-react";
+import Image from "next/image";
+import { ArrowUp } from "lucide-react";
 import { useLanguage } from "@/app/lib/language-context";
+import { useLanding } from "@/app/lib/landing-context";
+import { navHref } from "@/app/lib/api/landing";
+import { Icon } from "@/app/lib/icons";
 
-const WA_URL =
-  "https://wa.me/6285727346620?text=Halo%20Adi%20Primanto,%20saya%20ingin%20membuat%20website%20untuk%20bisnis%20saya.";
-
-const socials = [
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/adi-primanto/" },
-  { label: "Instagram", href: "https://www.instagram.com/adiprimanto" },
-  { label: "TikTok", href: "https://www.tiktok.com/@adi_primanto?lang=id-ID" },
-  { label: "GitHub", href: "https://github.com/adiprimanto" },
+const FALLBACK_SOCIALS = [
+  { id: "linkedin", platform: "LinkedIn", url: "https://www.linkedin.com/in/adi-primanto/", icon_name: "Linkedin", color_hex: null },
+  { id: "instagram", platform: "Instagram", url: "https://www.instagram.com/adiprimanto", icon_name: "Instagram", color_hex: null },
+  { id: "tiktok", platform: "TikTok", url: "https://www.tiktok.com/@adi_primanto?lang=id-ID", icon_name: "Music2", color_hex: null },
+  { id: "github", platform: "GitHub", url: "https://github.com/adiprimanto", icon_name: "Github", color_hex: null },
 ];
 
 const Footer = () => {
   const { t } = useLanguage();
-  const navLinks = t.footer.navLinks;
+  const { data } = useLanding();
+
+  const general = data?.settings?.general;
+  const brandName = general?.brand_name ?? "Adi Primanto";
+  const tagline = general?.brand_tagline ?? t.footer.tagline;
+  const logoUrl = general?.logo_media_id ?? null;
+
+  const cmsFooterLinks = data?.navigation?.footer ?? [];
+  const navLinks =
+    cmsFooterLinks.length > 0
+      ? cmsFooterLinks.map((item) => ({
+          key: item.id,
+          label: item.label,
+          href: navHref(item),
+          target: item.target ?? "_self",
+        }))
+      : t.footer.navLinks.map((link) => ({
+          key: link.href,
+          label: link.label,
+          href: link.href,
+          target: "_self",
+        }));
+
+  const socials = data?.contact?.social_links?.length
+    ? data.contact.social_links
+    : FALLBACK_SOCIALS;
+
+  const channels = data?.contact?.channels ?? [];
+  const primaryChannel =
+    channels.find((channel) => channel.type === "email") ?? channels[0] ?? null;
+  const contactHref =
+    primaryChannel?.url ?? `mailto:${general?.contact_email ?? "adiprimanto.98@gmail.com"}`;
+  const contactLabel =
+    primaryChannel?.value ?? general?.contact_email ?? "adiprimanto.98@gmail.com";
 
   return (
   <footer
+    data-testid="footer"
     style={{
       background: "var(--color-bg-2)",
       position: "relative",
@@ -51,31 +86,38 @@ const Footer = () => {
             href="#home"
             className="inline-flex items-center gap-2 no-underline w-fit"
             style={{ textDecoration: "none" }}
+            data-testid="footer-brand"
           >
-            <div
-              className="w-2 h-2 rounded-full shrink-0"
-              style={{
-                background: "var(--color-primary)",
-                boxShadow: "0 0 10px var(--color-primary)",
-                animation: "pulse-dot 2s ease infinite",
-              }}
-            />
-            <span className="font-display font-black text-lg tracking-[0.06em] gradient-text">
-              ADI PRIMANTO
+            {logoUrl ? (
+              <Image
+                src={logoUrl}
+                alt={brandName}
+                width={28}
+                height={28}
+                className="w-7 h-7 rounded object-contain shrink-0"
+                unoptimized
+              />
+            ) : (
+              <div
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{
+                  background: "var(--color-primary)",
+                  boxShadow: "0 0 10px var(--color-primary)",
+                  animation: "pulse-dot 2s ease infinite",
+                }}
+              />
+            )}
+            <span className="font-display font-black text-lg tracking-[0.06em] uppercase gradient-text">
+              {brandName}
             </span>
           </a>
           <span
             className="font-code text-[11px] tracking-widest uppercase"
             style={{ color: "var(--color-primary)" }}
+            data-testid="footer-tagline"
           >
-            {t.footer.tagline}
+            {tagline}
           </span>
-          {/* <p
-            className="text-sm font-light leading-[1.7] mt-1 max-w-xs"
-            style={{ color: "var(--color-muted)" }}
-          >
-            Website yang bekerja untuk bisnis Anda — bukan sekadar tampil bagus.
-          </p> */}
         </div>
 
         {/* Nav */}
@@ -86,11 +128,13 @@ const Footer = () => {
           >
             {t.footer.navigation}
           </h4>
-          <ul className="flex flex-col gap-2.5">
+          <ul className="flex flex-col gap-2.5" data-testid="footer-nav-links">
             {navLinks.map((link) => (
-              <li key={link.label}>
+              <li key={link.key}>
                 <a
                   href={link.href}
+                  target={link.target === "_blank" ? "_blank" : undefined}
+                  rel={link.target === "_blank" ? "noopener noreferrer" : undefined}
                   className="group flex items-center gap-2 text-sm font-light transition-all duration-200"
                   style={{
                     color: "var(--color-muted)",
@@ -104,6 +148,7 @@ const Footer = () => {
                     e.currentTarget.style.color = "var(--color-muted)";
                     e.currentTarget.style.paddingLeft = "0";
                   }}
+                  data-testid={`footer-nav-link-${link.href.replace("#", "")}`}
                 >
                   {link.label}
                 </a>
@@ -120,14 +165,14 @@ const Footer = () => {
           >
             {t.footer.socialMedia}
           </h4>
-          <ul className="flex flex-col gap-2.5">
+          <ul className="flex flex-col gap-2.5" data-testid="footer-social-links">
             {socials.map((s) => (
-              <li key={s.label}>
+              <li key={s.id}>
                 <a
-                  href={s.href}
+                  href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-light transition-all duration-200 block w-fit"
+                  className="flex items-center gap-2 text-sm font-light transition-all duration-200 w-fit"
                   style={{
                     color: "var(--color-muted)",
                     textDecoration: "none",
@@ -140,16 +185,18 @@ const Footer = () => {
                     e.currentTarget.style.color = "var(--color-muted)";
                     e.currentTarget.style.transform = "translateX(0)";
                   }}
+                  data-testid={`footer-social-${s.platform.toLowerCase()}`}
                 >
-                  {s.label}
+                  <Icon name={s.icon_name} size={14} />
+                  {s.platform}
                 </a>
               </li>
             ))}
           </ul>
 
-          {/* Email CTA */}
+          {/* Contact CTA */}
           <a
-            href={WA_URL}
+            href={contactHref}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 mt-2 font-code text-[11px] tracking-[0.04em] transition-all duration-200 w-fit"
@@ -176,9 +223,10 @@ const Footer = () => {
               e.currentTarget.style.transform = "translateY(0)";
               e.currentTarget.style.boxShadow = "none";
             }}
+            data-testid="footer-contact-cta"
           >
-            <Mail size={13} />
-            adiprimanto.98@gmail.com
+            <Icon name={primaryChannel?.icon_name ?? "Mail"} size={13} />
+            {contactLabel}
           </a>
         </div>
       </div>
@@ -193,6 +241,7 @@ const Footer = () => {
         <p
           className="text-xs font-light"
           style={{ color: "var(--color-muted)" }}
+          data-testid="footer-copyright"
         >
           <span
             style={{
@@ -202,7 +251,7 @@ const Footer = () => {
           >
             ©
           </span>{" "}
-          {new Date().getFullYear()} Adi Primanto. {t.footer.rights}
+          {new Date().getFullYear()} {brandName}. {t.footer.rights}
         </p>
         <a
           href="#home"
@@ -229,6 +278,7 @@ const Footer = () => {
             e.currentTarget.style.transform = "translateY(0)";
             e.currentTarget.style.boxShadow = "none";
           }}
+          data-testid="footer-back-to-top"
         >
           <ArrowUp size={16} />
         </a>

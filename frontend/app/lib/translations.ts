@@ -244,6 +244,7 @@ export const translations = {
     },
     whatsapp: {
       tooltip: "Ada pertanyaan? Chat saya!",
+      message: "Halo, saya ingin membuat website untuk bisnis saya.",
     },
     skipToContent: "Lewati ke konten utama",
   },
@@ -490,6 +491,7 @@ export const translations = {
     },
     whatsapp: {
       tooltip: "Got questions? Chat with me!",
+      message: "Hello, I would like to build a website for my business.",
     },
     skipToContent: "Skip to main content",
   },

@@ -130,31 +130,14 @@ class PublicContentController extends BaseApiController
     {
         app()->setLocale($this->resolveLocale($request));
 
-        $items = NavigationMenu::query()
-            ->active()
-            ->whereNull('parent_id')
-            ->with(['translations', 'children' => fn ($query) => $query->active()->with('translations')->ordered()])
-            ->ordered()
-            ->get();
-
-        return $this->respondSuccess([
-            'header' => NavigationMenuResource::collection($items->where('location', 'header')->values()),
-            'footer' => NavigationMenuResource::collection($items->where('location', 'footer')->values()),
-        ], 'Navigation retrieved successfully.');
+        return $this->respondSuccess($this->navigationPayload(), 'Navigation retrieved successfully.');
     }
 
     public function contact(Request $request): JsonResponse
     {
         app()->setLocale($this->resolveLocale($request));
 
-        return $this->respondSuccess([
-            'channels' => ContactChannelResource::collection(
-                ContactChannel::query()->active()->with('translations')->ordered()->get()
-            ),
-            'social_links' => SocialLinkResource::collection(
-                SocialLink::query()->active()->ordered()->get()
-            ),
-        ], 'Contact information retrieved successfully.');
+        return $this->respondSuccess($this->contactPayload(), 'Contact information retrieved successfully.');
     }
 
     public function seo(Request $request): JsonResponse
@@ -224,6 +207,38 @@ class PublicContentController extends BaseApiController
 
     public function settings(Request $request): JsonResponse
     {
+        return $this->respondSuccess($this->settingsPayload(), 'Settings retrieved successfully.');
+    }
+
+    protected function navigationPayload(): array
+    {
+        $items = NavigationMenu::query()
+            ->active()
+            ->whereNull('parent_id')
+            ->with(['translations', 'children' => fn ($query) => $query->active()->with('translations')->ordered()])
+            ->ordered()
+            ->get();
+
+        return [
+            'header' => NavigationMenuResource::collection($items->where('location', 'header')->values()),
+            'footer' => NavigationMenuResource::collection($items->where('location', 'footer')->values()),
+        ];
+    }
+
+    protected function contactPayload(): array
+    {
+        return [
+            'channels' => ContactChannelResource::collection(
+                ContactChannel::query()->active()->with('translations')->ordered()->get()
+            ),
+            'social_links' => SocialLinkResource::collection(
+                SocialLink::query()->active()->ordered()->get()
+            ),
+        ];
+    }
+
+    protected function settingsPayload(): mixed
+    {
         $settings = Setting::query()->where('is_public', true)->get();
 
         $mediaUrls = Media::query()
@@ -231,15 +246,13 @@ class PublicContentController extends BaseApiController
             ->get()
             ->mapWithKeys(fn (Media $medium) => [$medium->id => $medium->url]);
 
-        $values = $settings->groupBy('group')->map(
+        return $settings->groupBy('group')->map(
             fn ($group) => $group->mapWithKeys(fn (Setting $setting) => [
                 $setting->key => $setting->type === 'media'
                     ? ($mediaUrls[$setting->value] ?? null)
                     : $setting->value,
             ])
         );
-
-        return $this->respondSuccess($values, 'Settings retrieved successfully.');
     }
 
     public function landing(Request $request): JsonResponse
@@ -294,6 +307,9 @@ class PublicContentController extends BaseApiController
             'clients' => ClientResource::collection(
                 Client::query()->active()->with(['translations', 'logo'])->ordered()->get()
             ),
+            'navigation' => $this->navigationPayload(),
+            'contact' => $this->contactPayload(),
+            'settings' => $this->settingsPayload(),
         ], 'Landing content retrieved successfully.');
     }
 
